@@ -11,6 +11,7 @@ SECTIONS = [
     ("tacview_frame_*.png", "us02_aerial_combat_anim.gif", 6),
     ("floor_frame_*.png", "us04_holofloor_walk_anim.gif", 5),
     ("swarm_frame_*.png", "us06_swarm_flanking_anim.gif", 5),
+    ("trial_frame_*.png", "us08_trial_arena_anim.gif", 5),
 ]
 
 def make_optimized_gif(pattern, out_name, fps=5):

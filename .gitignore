@@ -17,5 +17,10 @@ builds/
 .DS_Store
 Thumbs.db
 *.tmp
-*.bak
-*.android_bak
+# Temporary capture and studio working files
+temp_frames/
+__pycache__/
+*.pyc
+.studio/
+artifacts/
+databases/

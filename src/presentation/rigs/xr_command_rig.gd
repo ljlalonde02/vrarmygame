@@ -176,15 +176,16 @@ func _build_vr_hand_and_wrist_visuals() -> void:
 	_wrist_label_3d.modulate = TacticalTheme.COL_NATO_BLUE
 	_wrist_tablet_root.add_child(_wrist_label_3d)
 
-	# 4. Interactive Virtual Smartwatch Buttons (Floor Mode, AI Posture, Time Compression, SSBN, Alpha Strike)
-	_create_wrist_button("btn_floor", "FLOOR\nOFF", -0.096, -0.046, TacticalTheme.COL_CONTOUR_EMERALD)
-	_create_wrist_button("btn_posture", "AI POST\nAUTO", -0.048, -0.046, TacticalTheme.COL_NATO_BLUE)
-	_create_wrist_button("btn_time", "TIME\n1x", 0.0, -0.046, TacticalTheme.COL_UNMANNED_GOLD)
-	_create_wrist_button("btn_ssbn", "SSBN\nOFF", 0.048, -0.046, TacticalTheme.COL_FLIR_GREEN)
-	_create_wrist_button("btn_strike", "ALPHA\nSTRIKE", 0.096, -0.046, TacticalTheme.COL_OPFOR_RED)
+	# 4. Interactive Virtual Smartwatch Buttons (Floor Mode, AI Posture, Time Compression, SSBN, Alpha Strike, Unit Tactical Trial)
+	_create_wrist_button("btn_floor", "FLOOR\nOFF", -0.100, -0.046, TacticalTheme.COL_CONTOUR_EMERALD)
+	_create_wrist_button("btn_posture", "AI POST\nAUTO", -0.060, -0.046, TacticalTheme.COL_NATO_BLUE)
+	_create_wrist_button("btn_time", "TIME\n1x", -0.020, -0.046, TacticalTheme.COL_UNMANNED_GOLD)
+	_create_wrist_button("btn_ssbn", "SSBN\nOFF", 0.020, -0.046, TacticalTheme.COL_FLIR_GREEN)
+	_create_wrist_button("btn_strike", "ALPHA\nSTRIKE", 0.060, -0.046, TacticalTheme.COL_OPFOR_RED)
+	_create_wrist_button("btn_trial", "TRIAL\nARENA", 0.100, -0.046, TacticalTheme.COL_NATO_BLUE)
 
 
-func _create_wrist_button(id: String, label_text: String, local_x: float, local_y: float, col: Color) -> void:
+func _create_wrist_button(id: String, label_text: String, local_x: float, local_y: float, col: Color, half_w: float = 0.018, half_h: float = 0.012) -> void:
 	var btn_node := Node3D.new()
 	btn_node.name = "WristBtn_" + id
 	btn_node.position = Vector3(local_x, local_y, 0.006)
@@ -192,7 +193,7 @@ func _create_wrist_button(id: String, label_text: String, local_x: float, local_
 
 	var bg_mi := MeshInstance3D.new()
 	var b_box := BoxMesh.new()
-	b_box.size = Vector3(0.044, 0.024, 0.006)
+	b_box.size = Vector3(half_w * 2.0, half_h * 2.0, 0.006)
 	var b_mat := StandardMaterial3D.new()
 	b_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	b_mat.albedo_color = Color(col.r * 0.25, col.g * 0.25, col.b * 0.25, 0.9)
@@ -201,7 +202,7 @@ func _create_wrist_button(id: String, label_text: String, local_x: float, local_
 
 	var border_mi := MeshInstance3D.new()
 	var border_box := BoxMesh.new()
-	border_box.size = Vector3(0.046, 0.026, 0.002)
+	border_box.size = Vector3(half_w * 2.0 + 0.002, half_h * 2.0 + 0.002, 0.002)
 	var border_mat := StandardMaterial3D.new()
 	border_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	border_mat.albedo_color = col
@@ -212,7 +213,7 @@ func _create_wrist_button(id: String, label_text: String, local_x: float, local_
 	var lbl := Label3D.new()
 	lbl.name = "Label"
 	lbl.text = label_text
-	lbl.font_size = 11
+	lbl.font_size = 9
 	lbl.pixel_size = 0.00035
 	lbl.position = Vector3(0.0, 0.0, 0.004)
 	lbl.modulate = col
@@ -225,8 +226,8 @@ func _create_wrist_button(id: String, label_text: String, local_x: float, local_
 		"col": col,
 		"center_x": local_x,
 		"center_y": local_y,
-		"half_w": 0.023,
-		"half_h": 0.013
+		"half_w": half_w,
+		"half_h": half_h
 	}
 
 
@@ -299,7 +300,28 @@ func actuate_wrist_button(btn_id: String) -> String:
 				var sel_uid: int = desktop_rig.selected_unit_id if desktop_rig != null else -1
 				tactile_console.actuate_control("alpha_strike", sel_uid)
 				return "ALPHA_STRIKE"
+		"btn_trial":
+			var trial_res := launch_selected_unit_trial()
+			return "TRIAL_LAUNCHED_" + String(trial_res.get("trial_title", "OK"))
 	return ""
+
+
+## Launches the dedicated tactical trial proving ground for the currently selected unit,
+## or defaults to the F-35A Lightning II trial if no unit is selected.
+func launch_selected_unit_trial() -> Dictionary:
+	var slug := ""
+	if desktop_rig != null and desktop_rig.selected_unit_id >= 0 and sim_server != null:
+		var uid: int = desktop_rig.selected_unit_id
+		var st: WorldState = sim_server.world_state
+		if uid >= 0 and uid < st.unit_count and st.unit_active[uid] == 1:
+			var pid: int = st.unit_platform_id[uid]
+			var pdef: Dictionary = sim_server.sim_db_ref.get_platform(pid)
+			slug = String(pdef.get("slug", ""))
+	if slug.is_empty():
+		slug = "f_35a_lightning"
+	if sim_server != null and sim_server.has_method("load_unit_trial"):
+		return sim_server.load_unit_trial(slug)
+	return {}
 
 
 func _create_hand_gauntlet(node_name: String, accent_col: Color) -> Node3D:
@@ -833,3 +855,11 @@ func _update_wrist_c4isr_tablet() -> void:
 	if _wrist_buttons.has("btn_ssbn") and desktop_rig != null and desktop_rig.submarine_conn_ref != null:
 		var is_sub: bool = desktop_rig.submarine_conn_ref.is_sub_sim_active
 		_wrist_buttons["btn_ssbn"]["label"].text = "SSBN\nON" if is_sub else "SSBN\nOFF"
+	if _wrist_buttons.has("btn_trial"):
+		if sel_uid >= 0 and sel_uid < st.unit_count and st.unit_active[sel_uid] == 1:
+			var pid: int = st.unit_platform_id[sel_uid]
+			var pdef: Dictionary = sim_server.sim_db_ref.get_platform(pid)
+			var s_name := String(pdef.get("short_name", pdef.get("slug", "TRIAL")))
+			_wrist_buttons["btn_trial"]["label"].text = "TRIAL\n" + s_name.substr(0, 5).to_upper()
+		else:
+			_wrist_buttons["btn_trial"]["label"].text = "TRIAL\nARENA"

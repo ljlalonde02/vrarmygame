@@ -25,6 +25,7 @@ const UnderseaWarfareSystemScript := preload("res://src/sim_core/systems/underse
 const HomefrontEconomySystemScript := preload("res://src/sim_core/systems/homefront_economy_system.gd")
 const NuclearSubmarineSystemScript := preload("res://src/sim_core/systems/nuclear_submarine_system.gd")
 const SwarmIntelligenceSystemScript := preload("res://src/sim_core/systems/swarm_intelligence_system.gd")
+const UnitTacticalTrialsSystemScript := preload("res://src/sim_core/systems/unit_tactical_trials_system.gd")
 const ReplayRecorderScript := preload("res://src/sim_core/replay_recorder.gd")
 
 const BASE_TICK_DT := 0.10 # 10 Hz simulation tick (100 ms)
@@ -158,6 +159,18 @@ func load_scenario(scenario_slug: String = "op_pacific_shield_2028") -> void:
 
 	if signal_bus_ref != null:
 		signal_bus_ref.scenario_loaded.emit(scenario_slug, String(sc_info.get("display_name", scenario_slug)))
+
+
+## Sets up and boots an isolated Tactical Proving Trial for any of the 67 military platforms.
+func load_unit_trial(platform_slug: String) -> Dictionary:
+	_resolve_autoloads()
+	var res: Dictionary = UnitTacticalTrialsSystemScript.setup_trial_scenario(self, platform_slug)
+	_update_fow_global_texture()
+	snapshot_buffer.publish_snapshot(world_state)
+	snapshot_buffer.publish_snapshot(world_state)
+	if signal_bus_ref != null:
+		signal_bus_ref.scenario_loaded.emit("trial_" + platform_slug, String(res.get("trial_title", platform_slug)))
+	return res
 
 
 ## Seeds 688+ active units organized into Brigades (2) -> Battalions (1) -> Companies/Flights/Swarms/Robot Dogs (0)

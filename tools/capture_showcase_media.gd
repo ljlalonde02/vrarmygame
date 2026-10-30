@@ -8,6 +8,9 @@ var bunker: CommandBunker = null
 var cam: Camera3D = null
 
 func _init() -> void:
+	DirAccess.make_dir_recursive_absolute(TEMP_DIR)
+	DirAccess.make_dir_recursive_absolute(MEDIA_DIR)
+	DirAccess.make_dir_recursive_absolute(ARTIFACT_DIR)
 	process_frame.connect(_run_capture_sequence, CONNECT_ONE_SHOT)
 
 
@@ -133,8 +136,39 @@ func _run_capture_sequence() -> void:
 		if frame_idx == 0:
 			_save_both(img, "us06_swarm_intelligence_theater.png")
 
+	# ------------------------------------------------------------------
+	# SHOT 7: User Story 7 — Bunker Main Menu Tab 9 (67 Épreuves Tactiques)
+	# ------------------------------------------------------------------
+	print(">> Capturing User Story 7: Bunker Main Menu Tab 9...")
+	if bunker.recon_dossier != null and bunker.recon_dossier.root_panel != null:
+		bunker.recon_dossier.root_panel.visible = false
+	bunker.main_menu.open_tactical_trials_tab("f_35a_lightning")
+	for w in range(4):
+		await process_frame
+	var img_tab9 := root.get_texture().get_image()
+	_save_both(img_tab9, "us07_tab9_tactical_trials_menu.png")
+	bunker.main_menu.set_menu_visible(false)
+
+	# ------------------------------------------------------------------
+	# SHOT 8: User Story 8 — Isolated Tactical Trial Proving Ground Arena
+	# ------------------------------------------------------------------
+	print(">> Capturing User Story 8: Tactical Proving Ground Arena...")
+	bunker.sim_server.load_unit_trial("f_35a_lightning")
+	cam.global_position = Vector3(0.0, 1.45, 1.10)
+	cam.look_at(Vector3(0.0, 0.88, 0.0), Vector3.UP)
+
+	for frame_idx in range(8):
+		bunker.sim_server.step_tick(0.10)
+		for w in range(2):
+			await process_frame
+		var img := root.get_texture().get_image()
+		var f_path := "%s/trial_frame_%02d.png" % [TEMP_DIR, frame_idx]
+		img.save_png(f_path)
+		if frame_idx == 0:
+			_save_both(img, "us08_tactical_trial_proving_ground.png")
+
 	print("==================================================================")
-	print("[SHOWCASE MEDIA CAPTURE] All 6 User Story Stills & Frame Sequences Saved Successfully!")
+	print("[SHOWCASE MEDIA CAPTURE] All 8 User Story Stills & Frame Sequences Saved Successfully!")
 	print("==================================================================")
 	quit(0)
 

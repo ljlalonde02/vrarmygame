@@ -44,6 +44,21 @@ var _studio_channels_vb: VBoxContainer = null
 var _studio_anim_time: float = 0.0
 var _red_phone_rich_label: RichTextLabel = null
 
+const UnitTacticalTrialsSystemScript := preload("res://src/sim_core/systems/unit_tactical_trials_system.gd")
+
+var _trials_list_vb: VBoxContainer = null
+var _trials_title_label: RichTextLabel = null
+var _trials_threat_label: RichTextLabel = null
+var _trials_move_label: RichTextLabel = null
+var _trials_fight_label: RichTextLabel = null
+var _trials_defend_label: RichTextLabel = null
+var _trials_trick_label: RichTextLabel = null
+var _trials_swarm_label: RichTextLabel = null
+var _trials_all_label: RichTextLabel = null
+var _trials_launch_btn: Button = null
+var _selected_trial_slug: String = "f_35a_lightning"
+var _trials_filter_domain: String = "ALL"
+
 
 func _ready() -> void:
 	if _modal_root != null:
@@ -65,9 +80,11 @@ func setup(p_sim_db: Node, p_sim_server: Node, p_cmd_bus: Node, p_sig_bus: Node,
 	if signal_bus != null and not signal_bus.battle_concluded.is_connected(_on_battle_concluded):
 		signal_bus.battle_concluded.connect(_on_battle_concluded)
 	_populate_encyclopedia_entries()
+	_populate_trials_entries()
 	_refresh_campaign_view()
 	_refresh_manual_and_tutorial_view()
 	_refresh_tech_tree_and_budget_view()
+	_refresh_trials_view()
 
 
 func open_tech_tree_tab() -> void:
@@ -89,6 +106,16 @@ func open_red_phone_tab() -> void:
 	if _tab_container != null and _tab_container.get_tab_count() >= 8:
 		_tab_container.current_tab = 7
 	_refresh_red_phone_and_save_view()
+
+
+func open_tactical_trials_tab(select_slug: String = "") -> void:
+	set_menu_visible(true)
+	if _tab_container != null and _tab_container.get_tab_count() >= 9:
+		_tab_container.current_tab = 8
+	if not select_slug.is_empty():
+		_select_trial(select_slug)
+	else:
+		_refresh_trials_view()
 
 
 func set_menu_visible(vis: bool) -> void:
@@ -120,6 +147,7 @@ func set_menu_visible(vis: bool) -> void:
 		_refresh_tech_tree_and_budget_view()
 		_refresh_news_video_studio_view()
 		_refresh_red_phone_and_save_view()
+		_refresh_trials_view()
 
 
 func _build_menu_ui() -> void:
@@ -806,6 +834,136 @@ func _build_menu_ui() -> void:
 	)
 	p26_hb.add_child(btn_blackout)
 
+	# TAB 9: ÉPREUVES TACTIQUES (67 MISSIONS)
+	var trials_tab := VBoxContainer.new()
+	trials_tab.name = "9. ÉPREUVES TACTIQUES (67 MISSIONS)"
+	trials_tab.add_theme_constant_override("separation", 8)
+	_tab_container.add_child(trials_tab)
+
+	# Domain Filter Buttons
+	var filter_hb := HBoxContainer.new()
+	filter_hb.add_theme_constant_override("separation", 6)
+	trials_tab.add_child(filter_hb)
+
+	var filter_lbl := Label.new()
+	filter_lbl.text = "DOMAINE TACTIQUE :"
+	filter_lbl.add_theme_color_override("font_color", TacticalTheme.COL_UNMANNED_GOLD)
+	filter_hb.add_child(filter_lbl)
+
+	var btn_all := Button.new()
+	btn_all.text = "TOUT (67)"
+	btn_all.pressed.connect(func(): _set_trials_domain_filter("ALL"))
+	filter_hb.add_child(btn_all)
+
+	var btn_air := Button.new()
+	btn_air.text = "AIR (20)"
+	btn_air.add_theme_color_override("font_color", TacticalTheme.COL_NATO_BLUE)
+	btn_air.pressed.connect(func(): _set_trials_domain_filter("AIR"))
+	filter_hb.add_child(btn_air)
+
+	var btn_land := Button.new()
+	btn_land.text = "TERRE (28)"
+	btn_land.add_theme_color_override("font_color", TacticalTheme.COL_UNMANNED_GOLD)
+	btn_land.pressed.connect(func(): _set_trials_domain_filter("LAND"))
+	filter_hb.add_child(btn_land)
+
+	var btn_sea := Button.new()
+	btn_sea.text = "MER / SSBN (19)"
+	btn_sea.add_theme_color_override("font_color", TacticalTheme.COL_FLIR_GREEN)
+	btn_sea.pressed.connect(func(): _set_trials_domain_filter("SEA"))
+	filter_hb.add_child(btn_sea)
+
+	# Main Split Container: Left Scroll List, Right Detail Panel
+	var main_split := HBoxContainer.new()
+	main_split.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	main_split.add_theme_constant_override("separation", 10)
+	trials_tab.add_child(main_split)
+
+	# Left: Scrollable List of Platforms
+	var list_scroll := ScrollContainer.new()
+	list_scroll.custom_minimum_size = Vector2(360.0, 420.0)
+	list_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	main_split.add_child(list_scroll)
+
+	_trials_list_vb = VBoxContainer.new()
+	_trials_list_vb.name = "TrialsListVBox"
+	_trials_list_vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list_scroll.add_child(_trials_list_vb)
+
+	# Right: Detail Panel
+	var right_panel := VBoxContainer.new()
+	right_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_panel.add_theme_constant_override("separation", 6)
+	main_split.add_child(right_panel)
+
+	# Title & Domain badge
+	_trials_title_label = RichTextLabel.new()
+	_trials_title_label.bbcode_enabled = true
+	_trials_title_label.fit_content = true
+	_trials_title_label.custom_minimum_size = Vector2(0.0, 32.0)
+	right_panel.add_child(_trials_title_label)
+
+	# Nemesis Threat & Wingman Partner
+	_trials_threat_label = RichTextLabel.new()
+	_trials_threat_label.bbcode_enabled = true
+	_trials_threat_label.fit_content = true
+	_trials_threat_label.custom_minimum_size = Vector2(0.0, 44.0)
+	right_panel.add_child(_trials_threat_label)
+
+	# Dynamic Detail Tabs (Sub-TabContainer)
+	var detail_tabs := TabContainer.new()
+	detail_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_panel.add_child(detail_tabs)
+
+	_trials_all_label = RichTextLabel.new()
+	_trials_all_label.name = "VUE D'ENSEMBLE"
+	_trials_all_label.bbcode_enabled = true
+	_trials_all_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	detail_tabs.add_child(_trials_all_label)
+
+	_trials_move_label = RichTextLabel.new()
+	_trials_move_label.name = "Comportement & Déplacement"
+	_trials_move_label.bbcode_enabled = true
+	_trials_move_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	detail_tabs.add_child(_trials_move_label)
+
+	_trials_fight_label = RichTextLabel.new()
+	_trials_fight_label.name = "Attaque & Doctrine"
+	_trials_fight_label.bbcode_enabled = true
+	_trials_fight_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	detail_tabs.add_child(_trials_fight_label)
+
+	_trials_defend_label = RichTextLabel.new()
+	_trials_defend_label.name = "Défense & Contre-mesures"
+	_trials_defend_label.bbcode_enabled = true
+	_trials_defend_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	detail_tabs.add_child(_trials_defend_label)
+
+	_trials_trick_label = RichTextLabel.new()
+	_trials_trick_label.name = "Atout Technologique"
+	_trials_trick_label.bbcode_enabled = true
+	_trials_trick_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	detail_tabs.add_child(_trials_trick_label)
+
+	_trials_swarm_label = RichTextLabel.new()
+	_trials_swarm_label.name = "Intégration Alliée & Essaim"
+	_trials_swarm_label.bbcode_enabled = true
+	_trials_swarm_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	detail_tabs.add_child(_trials_swarm_label)
+
+	# Prominent Tactical Launch Button
+	_trials_launch_btn = Button.new()
+	_trials_launch_btn.text = "[LANCER L'ÉPREUVE TACTIQUE DANS L'ARÈNE]"
+	_trials_launch_btn.custom_minimum_size = Vector2(0.0, 44.0)
+	_trials_launch_btn.add_theme_color_override("font_color", TacticalTheme.COL_FLIR_GREEN)
+	_trials_launch_btn.pressed.connect(func():
+		if sim_server != null and sim_server.has_method("load_unit_trial"):
+			sim_server.load_unit_trial(_selected_trial_slug)
+			set_menu_visible(false)
+	)
+	right_panel.add_child(_trials_launch_btn)
+
 
 func _on_replay_slider_changed(val: float) -> void:
 	if sim_server == null:
@@ -1243,3 +1401,108 @@ func _refresh_red_phone_and_save_view() -> void:
 		]
 		+ "%s" % ws.latest_homefront_status
 	)
+
+
+func _populate_trials_entries() -> void:
+	if _trials_list_vb == null:
+		return
+	for c in _trials_list_vb.get_children():
+		_trials_list_vb.remove_child(c)
+		c.queue_free()
+
+	var data: Dictionary = UnitTacticalTrialsSystemScript.TRIALS_DATA
+	var sorted_slugs := data.keys()
+	sorted_slugs.sort()
+
+	for slug_raw in sorted_slugs:
+		var slug: String = String(slug_raw)
+		var trial: Dictionary = data[slug]
+		var dom: String = String(trial.get("domain", "LAND"))
+
+		# Domain filter check: "ALL", "AIR", "LAND", "SEA"
+		if _trials_filter_domain != "ALL" and dom != _trials_filter_domain:
+			continue
+
+		var btn := Button.new()
+		var badge := "[%s]" % dom
+		var clean_title := String(trial.get("title", slug)).split(":")[0].strip_edges()
+		btn.text = "%s %s" % [badge, clean_title]
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+
+		match dom:
+			"AIR":
+				btn.add_theme_color_override("font_color", TacticalTheme.COL_NATO_BLUE)
+			"SEA":
+				btn.add_theme_color_override("font_color", TacticalTheme.COL_FLIR_GREEN)
+			"LAND":
+				btn.add_theme_color_override("font_color", TacticalTheme.COL_UNMANNED_GOLD)
+
+		var captured_slug := slug
+		btn.pressed.connect(func(): _select_trial(captured_slug))
+		_trials_list_vb.add_child(btn)
+
+	if not data.has(_selected_trial_slug) and not sorted_slugs.is_empty():
+		_selected_trial_slug = String(sorted_slugs[0])
+	_select_trial(_selected_trial_slug)
+
+
+func _select_trial(slug: String) -> void:
+	_selected_trial_slug = slug
+	var trial: Dictionary = UnitTacticalTrialsSystemScript.get_trial_info(slug)
+	var title: String = String(trial.get("title", slug.capitalize()))
+	var dom: String = String(trial.get("domain", "LAND"))
+	var opp: String = String(trial.get("opposing_threat", "Unknown Threat"))
+	var opp_cat: String = String(trial.get("enemy_category", "Ennemi de théâtre"))
+	var partner: String = String(trial.get("friendly_partner", "Unknown Partner"))
+	var move_act: String = String(trial.get("move_act", ""))
+	var fight: String = String(trial.get("fight", ""))
+	var defend: String = String(trial.get("defend", ""))
+	var trick: String = String(trial.get("special_trick", ""))
+	var swarm: String = String(trial.get("friendly_integration", ""))
+
+	var col_hex := "#00e5ff" if dom == "AIR" else ("#00ff66" if dom == "SEA" else "#ffd940")
+
+	if _trials_title_label != null:
+		_trials_title_label.text = "[b][color=%s][%s][/color][/b] [b][color=#ffffff]%s[/color][/b]" % [col_hex, dom, title]
+
+	if _trials_threat_label != null:
+		_trials_threat_label.text = (
+			"[b][color=#ff4444]OPPOSING NEMESIS THREAT:[/color][/b] [color=#ffbbbb]%s[/color] [i](%s)[/i]\n" % [opp.replace("_", " ").to_upper(), opp_cat] +
+			"[b][color=#00ccff]WINGMAN / ALLIED PARTNER:[/color][/b] [color=#bbffff]%s[/color]" % [partner.replace("_", " ").to_upper()]
+		)
+
+	if _trials_move_label != null:
+		_trials_move_label.text = "[b][color=#ffd940]COMPORTEMENT & DÉPLACEMENT (Mach / Knots / Profil) :[/color][/b]\n\n%s" % move_act
+	if _trials_fight_label != null:
+		_trials_fight_label.text = "[b][color=#ff4444]ATTAQUE & DOCTRINE D'ENGAGEMENT (BVR, Top Attack, Salves) :[/color][/b]\n\n%s" % fight
+	if _trials_defend_label != null:
+		_trials_defend_label.text = "[b][color=#00ff66]DÉFENSE & CONTRE-MESURES (APS, DIRCM, Furtivité) :[/color][/b]\n\n%s" % defend
+	if _trials_trick_label != null:
+		_trials_trick_label.text = "[b][color=#ff66ff]ATOUT TECHNOLOGIQUE (\"SPECIAL TRICK\") :[/color][/b]\n\n%s" % trick
+	if _trials_swarm_label != null:
+		_trials_swarm_label.text = "[b][color=#00e5ff]INTÉGRATION ALLIÉE & INTELLIGENCE EN ESSAIM (MADL, CEC) :[/color][/b]\n\n%s" % swarm
+
+	if _trials_all_label != null:
+		_trials_all_label.text = (
+			"[b][color=#ffd940]1. COMPORTEMENT & DÉPLACEMENT :[/color][/b]\n%s\n\n" % move_act +
+			"[b][color=#ff4444]2. ATTAQUE & DOCTRINE :[/color][/b]\n%s\n\n" % fight +
+			"[b][color=#00ff66]3. DÉFENSE & CONTRE-MESURES :[/color][/b]\n%s\n\n" % defend +
+			"[b][color=#ff66ff]4. ATOUT TECHNOLOGIQUE (\"SPECIAL TRICK\") :[/color][/b]\n%s\n\n" % trick +
+			"[b][color=#00e5ff]5. INTÉGRATION ALLIÉE & ESSAIM :[/color][/b]\n%s" % swarm
+		)
+
+	if _trials_launch_btn != null:
+		_trials_launch_btn.text = "⚔ [LANCER L'ÉPREUVE TACTIQUE DANS L'ARÈNE : %s]" % slug.replace("_", " ").to_upper()
+
+
+func _set_trials_domain_filter(domain: String) -> void:
+	_trials_filter_domain = domain
+	_populate_trials_entries()
+
+
+func _refresh_trials_view() -> void:
+	if _trials_list_vb != null and _trials_list_vb.get_child_count() == 0:
+		_populate_trials_entries()
+	else:
+		_select_trial(_selected_trial_slug)
+
