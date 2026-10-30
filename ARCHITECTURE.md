@@ -757,3 +757,40 @@ To simulate **5,000+ active units by default** (scaling up to `8,192` units and 
      - **Mission 6 (`m06_blind_the_heavens` — Oct 28, 2028, `DEFCON 2`, Korean DMZ & 3D Orbital Globe, Video: `asat_orbital_warfare`):** Introduces the 3D Planetary Orbital Globe (`0.22x` zoom), realistic Keplerian LEO/MEO satellites (`550 km` at `7.59 km/s`), Direct-Ascent ASAT Kills (`[7]`), Cyber CNO (`[8]`), and 300 km Exoatmospheric HEMP Blackouts.
      - **Mission 7 (`m07_citadel_under_siege` — Oct 30, 2028, `DEFCON 2`, 5,600m Himalayan LAC, Video: `bunker_under_attack`):** Introduces Physical HQ Command Bunker Siege/Breach Defense, MOPP-4 CBRN Protection (`[0]`), and E-4B Nightwatch / Alternate Citadel HQ Relocation (`[R]`).
      - **Mission 8 (`m08_twilight_of_the_triad` — Nov 1, 2028, `DEFCON 1`, Global Strategic Climax, Video: `thermonuclear_detonation`):** Introduces Project Thor Mach-24 Orbital Kinetic Tungsten Rods (`8.232 km/s` from `550 km` LEO), `DEFCON 1` Strategic Thermonuclear Detonations (`[N]`), and Live Runtime AI Gemini 2.5 Flash TV Broadcasts (`[J]`).
+
+
+---
+
+## 23. Meta Quest 3 VR Enhancements, Room-Scale Floor Mode, Virtual Smartwatch & Swarm Intelligence
+
+### 23.1 Room-Scale Holo-Floor Mode (`WarTable.toggle_floor_mode()`)
+- **Seamless Drop to Floor Level:** Lowers holographic sand table altitude from standard console height ($y = 0.85\text{ m}$) down to floor level ($y = 0.02\text{ m}$).
+- **De-cluttered Immersion:** Dynamically hides the physical pedestal column and table rim (`pedestal_mesh.visible = false`, `rim_mesh.visible = false`).
+- **Walk-in-Theater Freedom:** Broadens table boundary radius to $3.2\text{ m}$, allowing the player to physically walk right in the middle of naval straits, mountain ranges, and battle corridors on Meta Quest 3 with aircraft dogfighting overhead at eye level and warships gliding at their feet.
+
+### 23.2 Zero Physical Furniture Buttons: Virtual Smartwatch & C4ISR Wrist Tablet
+- **Enforced Ergonomic Cleanliness:** `tactile_console.visible = false` removes all physical buttons and levers from the bunker room.
+- **Diegetic Smartwatch Toolbar (`XRCommandRig` / `_wrist_tablet_root`):**
+  - **`[FLOOR: ON/OFF]`:** Toggles between sand table elevation and room-scale holo-floor.
+  - **`[AI POST: AUTO / BVR / PURSUIT / BREAK]`:** Cycles flight combat posture for selected or theater-wide aircraft.
+  - **`[TIME: 1x / 10x / 60x / 300x / PAUSE]`:** Adjusts time compression scale.
+  - **`[SSBN: ON/OFF]`:** Toggles 3D Submarine Conn room and periscope ocean feed.
+  - **`[ALPHA STRIKE]`:** Commits coordinated strike packages with guarded confirmation.
+- **Bi-directional Laser Interaction (`pick_wrist_button_by_ray`):** Allows instant pointing and trigger actuation from either the right or left hand laser pointer with green FLIR reticle hover and haptic feedback.
+
+### 23.3 Starting Command Post: Sous-Marin SSBN (`SubmarineConnController`)
+- **Immediate Subsurface Immersion:** Boots directly inside the 688(I) / Ohio SSBN ballistic missile submarine station with atmospheric red battle lantern lighting, rotating periscope column, broadband sonar waterfall display, and depth control levers.
+- **Independent 3D Ocean Simulation:** High-fidelity periscope viewport (`periscope_ocean.gdshader`) with rolling Gerstner ocean waves and 3D surface combatants on the horizon.
+
+### 23.4 Aerial Combat Postures & Tacview Visualization
+- **100% Autonomous Air War by Default:** Flights conduct BVR sweeps, weapon release, and defense autonomously.
+- **3 Player Overrides (`CMD_SET_TACTICAL_POSTURE`):**
+  1. **BVR Stand-off (`TACTICAL_POSTURE_BVR_STANDOFF`):** Maintain $80\text{ km}$ maximum standoff, crank radar beam $50^\circ$ after firing long-range AAMs (AIM-120D, PL-15, Meteor).
+  2. **Aggressive Pursuit (`TACTICAL_POSTURE_AGGRESSIVE_PURSUIT`):** High-G lead pursuit, close the merge, ACM within visual range (WVR) dogfight circles.
+  3. **Defensive Break (`TACTICAL_POSTURE_DEFENSIVE_BREAK`):** Nap-of-the-earth (NOE) dive to $150\text{ m}$ AGL, dispense countermeasures (chaff/flares), egress threat vector.
+
+### 23.5 Multi-Domain Swarm Intelligence & Pack Autonomy Engine (`SwarmIntelligenceSystem`)
+- **Target Deconfliction:** Squadrons, tank platoons, and drone packs dynamically broadcast targeted enemy IDs to prevent over-allocation and wasted ammunition.
+- **Cooperative Multi-Axis Flanking:** Pincer maneuvers where lead aircraft/tanks fix enemy attention while wingmen flank at $45^\circ\text{–}90^\circ$ azimuth.
+- **Bait-and-Hook Active Illuminators:** Unmanned attritable drones (XQ-58A Valkyrie) emit active radar while stealth 5th-gen fighters (F-35A) remain radar-silent and deliver lethal silent strikes.
+- **Platform Nuances (Forces et Faiblesses):** Exhaustive catalog of strengths, vulnerabilities, and swarm roles across 5th-gen fighters, robot dogs (Vision 60 Q-UGV), heavy MBTs, guided missile destroyers, nuclear submarines, and naval USVs.

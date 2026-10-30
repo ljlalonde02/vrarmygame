@@ -231,6 +231,8 @@ func initialize_bunker(p_sim_db: Node = null, p_cmd_bus: Node = null, p_sig_bus:
 	tactile_console.war_table_ref = war_table
 	tactile_console.desktop_rig_ref = desktop_rig
 	tactile_console.main_menu_ref = main_menu
+	# Zéro bouton physique dans la pièce: tout se commande via la montre/tablette virtuelle et les lasers
+	tactile_console.visible = false
 
 	if xr_rig.try_initialize_openxr():
 		desktop_rig.camera.current = false
@@ -246,6 +248,10 @@ func initialize_bunker(p_sim_db: Node = null, p_cmd_bus: Node = null, p_sig_bus:
 	# 11. Boot initial flagship scenario ("Operation Pacific Shield 2028" — 688 active units)
 	sim_server.load_scenario("op_pacific_shield_2028")
 	war_table.bind_sim_server(sim_server)
+
+	# Commencer dans le poste de commandement Sous-Marin SSBN (User requirement: "Sous-Marin SSBN")
+	if submarine_conn != null:
+		submarine_conn.set_sub_sim_active(true)
 
 	# Select a friendly F-35A or Bradley unit by default so the Wikipedia Recon Dossier is live immediately
 	for uid in range(sim_server.world_state.unit_count):

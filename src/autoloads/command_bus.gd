@@ -12,6 +12,7 @@ const CMD_SET_MASTER_IADS := "CMD_SET_MASTER_IADS"
 const CMD_SET_TIME_SCALE := "CMD_SET_TIME_SCALE"
 const CMD_SPAWN_SANDBOX_UNIT := "CMD_SPAWN_SANDBOX_UNIT"
 const CMD_UNIT_ABILITY := "CMD_UNIT_ABILITY"
+const CMD_SET_TACTICAL_POSTURE := "CMD_SET_TACTICAL_POSTURE"
 
 var _mutex: Mutex = Mutex.new()
 var _pending_commands: Array[Dictionary] = []
@@ -96,6 +97,13 @@ func enqueue_unit_ability(unit_ids: Array, ability_code: String, target_unit_id:
 		"ability_code": ability_code,
 		"target_unit_id": target_unit_id,
 		"target_pos_km": target_pos_km,
+	})
+
+
+func enqueue_set_tactical_posture(unit_ids: Array, posture: int) -> void:
+	push_command(CMD_SET_TACTICAL_POSTURE, {
+		"unit_ids": unit_ids,
+		"posture": posture,
 	})
 
 

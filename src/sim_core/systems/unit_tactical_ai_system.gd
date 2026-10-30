@@ -168,8 +168,52 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 				EchelonClusterSystemScript.deploy_unmanned_subunit(state, sim_db, uid, dir_to_en)
 				continue
 
-		# 5. Priority 4 Decision: Domain-Specific Tactical AI
+		# 5. Priority 4 Decision: Domain-Specific Tactical AI & Posture Influences
 		if dom_id == 1:
+			var posture: int = state.unit_tactical_posture[uid] if uid < state.unit_tactical_posture.size() else WorldState.TACTICAL_POSTURE_AUTO
+			
+			# Posture Override 1: BVR STAND-OFF (Keep outside threat WEZ, launch BVR, crank 50°)
+			if posture == WorldState.TACTICAL_POSTURE_BVR_STANDOFF and nearest_air_uid >= 0:
+				state.unit_ai_state[uid] = WorldState.AI_BVR_INTERCEPT
+				state.unit_desired_alt_m[uid] = 10200.0
+				state.unit_afterburner[uid] = 1
+				var air_tpos := u_pos[nearest_air_uid]
+				var d_en := sqrt(nearest_air_d_sq)
+				if d_en < 45.0:
+					# Crank maneuver: turn 50 degrees off-bore to bleed enemy closure rate while maintaining radar gimbal track
+					var to_en := Vector2(air_tpos.x - pos.x, air_tpos.z - pos.z).normalized()
+					var crank_vec := Vector2(-to_en.y, to_en.x) * 12.0
+					state.unit_target_pos[uid] = Vector3(pos.x + crank_vec.x, 10200.0, pos.z + crank_vec.y)
+				else:
+					state.unit_target_pos[uid] = Vector3(air_tpos.x, 10200.0, air_tpos.z)
+				state.unit_has_waypoint[uid] = 1
+				continue
+
+			# Posture Override 2: POURSUITE AGRESSIVE (Close-in high-G dogfight pursuit, guns & heat-seekers)
+			elif posture == WorldState.TACTICAL_POSTURE_AGGRESSIVE_PURSUIT and nearest_air_uid >= 0:
+				state.unit_ai_state[uid] = WorldState.AI_BVR_INTERCEPT
+				state.unit_afterburner[uid] = 1
+				var air_tpos := u_pos[nearest_air_uid]
+				state.unit_desired_alt_m[uid] = clampf(air_tpos.y, 2500.0, 11500.0)
+				state.unit_target_pos[uid] = air_tpos
+				state.unit_has_waypoint[uid] = 1
+				continue
+
+			# Posture Override 3: RUPTURE DÉFENSIVE (Evasive break turn, dive toward terrain deck, pop chaff/flares)
+			elif posture == WorldState.TACTICAL_POSTURE_DEFENSIVE_BREAK:
+				state.unit_ai_state[uid] = WorldState.AI_EVASIVE_DEFENSIVE
+				state.unit_afterburner[uid] = 1
+				state.unit_desired_alt_m[uid] = 350.0
+				var away_dir := Vector2(1.0, 0.0)
+				if nearest_air_uid >= 0:
+					var e_pos := u_pos[nearest_air_uid]
+					away_dir = Vector2(pos.x - e_pos.x, pos.z - e_pos.z).normalized()
+				var break_vec := Vector2(-away_dir.y, away_dir.x) * 14.0
+				state.unit_target_pos[uid] = Vector3(clampf(pos.x + break_vec.x, -245.0, 245.0), 350.0, clampf(pos.z + break_vec.y, -245.0, 245.0))
+				state.unit_has_waypoint[uid] = 1
+				continue
+
+			# Default: 100% Autonomous Tactical Doctrine
 			if nearest_sam_uid >= 0 and nearest_sam_d_sq < 4900.0 and (flg & flag_awacs_tanker) == 0:
 				state.unit_ai_state[uid] = WorldState.AI_SEAD_TERRAIN_MASK
 				state.unit_desired_alt_m[uid] = 350.0
@@ -214,7 +258,7 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 			state.unit_ai_state[uid] = WorldState.AI_PATROL_CAP
 
 
-static func get_ai_state_description(ai_state: int, threat_level: float, afterburner: int, desired_alt_m: float, domain: String) -> String:
+static func get_ai_state_description(ai_state: int, threat_level: float, afterburner: int, desired_alt_m: float, domain: String, posture: int = 0) -> String:
 	var state_str := "PATROL / CAP OVERWATCH"
 	match ai_state:
 		WorldState.AI_BVR_INTERCEPT:
@@ -230,6 +274,15 @@ static func get_ai_state_description(ai_state: int, threat_level: float, afterbu
 		WorldState.AI_RTB_RESUPPLY:
 			state_str = "BINGO FUEL / AMMO -> RTB RESUPPLY"
 	var spd_str := "AFTERBURNER / SPRINT" if afterburner == 1 else "CRUISE"
+	var post_str := ""
+	match posture:
+		WorldState.TACTICAL_POSTURE_BVR_STANDOFF:
+			post_str = " [BVR STAND-OFF]"
+		WorldState.TACTICAL_POSTURE_AGGRESSIVE_PURSUIT:
+			post_str = " [POURSUITE AGRESSIVE]"
+		WorldState.TACTICAL_POSTURE_DEFENSIVE_BREAK:
+			post_str = " [RUPTURE DÉFENSIVE]"
+
 	if domain == "AIR":
-		return "AI: %s | THREAT: %.0f%% | %s | ALT: %.0fm" % [state_str, threat_level * 100.0, spd_str, desired_alt_m]
-	return "AI: %s | THREAT: %.0f%% | MODE: %s" % [state_str, threat_level * 100.0, spd_str]
+		return "AI: %s%s | THREAT: %.0f%% | %s | ALT: %.0fm" % [state_str, post_str, threat_level * 100.0, spd_str, desired_alt_m]
+	return "AI: %s%s | THREAT: %.0f%% | MODE: %s" % [state_str, post_str, threat_level * 100.0, spd_str]

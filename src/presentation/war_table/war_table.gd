@@ -35,9 +35,31 @@ const GRAPHIC_STYLE_NAMES: Array[String] = [
 
 var terrain_mesh_instance: MeshInstance3D = null
 var terrain_material: ShaderMaterial = null
+var pedestal_mesh: MeshInstance3D = null
+var rim_mesh: MeshInstance3D = null
+var is_floor_mode: bool = false
 var _threat_domes_root: Node3D = null
 var _site_labels_root: Node3D = null
 var _planetary_globe_root: Node3D = null
+
+
+func set_floor_mode(enabled: bool) -> void:
+	is_floor_mode = enabled
+	if pedestal_mesh != null:
+		pedestal_mesh.visible = not enabled
+	if rim_mesh != null:
+		rim_mesh.visible = not enabled
+	if enabled:
+		position.y = 0.02
+		scale = Vector3(3.2, 3.2, 3.2)
+	else:
+		position.y = 0.85
+		scale = Vector3.ONE
+
+
+func toggle_floor_mode() -> bool:
+	set_floor_mode(not is_floor_mode)
+	return is_floor_mode
 
 
 func _ready() -> void:
@@ -75,6 +97,7 @@ func _build_table_geometry() -> void:
 	pedestal.mesh = ped_box
 	pedestal.position = Vector3(0.0, -0.44, 0.0)
 	add_child(pedestal)
+	pedestal_mesh = pedestal
 
 	# Dark Obsidian Well Floor + Thin Cyan Perimeter Bezel around the 1.8m x 1.8m Hologram Well
 	var rim := MeshInstance3D.new()
@@ -88,6 +111,7 @@ func _build_table_geometry() -> void:
 	rim.mesh = rim_box
 	rim.position = Vector3(0.0, -0.008, 0.0)
 	add_child(rim)
+	rim_mesh = rim
 
 	# 2. Displaced Topographic & Bathymetric Terrain Mesh (128x128 on PC, 64x64 on Mobile VR)
 	terrain_mesh_instance = MeshInstance3D.new()

@@ -24,6 +24,7 @@ const CombatEngineeringAirborneSystemScript := preload("res://src/sim_core/syste
 const UnderseaWarfareSystemScript := preload("res://src/sim_core/systems/undersea_warfare_system.gd")
 const HomefrontEconomySystemScript := preload("res://src/sim_core/systems/homefront_economy_system.gd")
 const NuclearSubmarineSystemScript := preload("res://src/sim_core/systems/nuclear_submarine_system.gd")
+const SwarmIntelligenceSystemScript := preload("res://src/sim_core/systems/swarm_intelligence_system.gd")
 const ReplayRecorderScript := preload("res://src/sim_core/replay_recorder.gd")
 
 const BASE_TICK_DT := 0.10 # 10 Hz simulation tick (100 ms)
@@ -466,6 +467,7 @@ func step_tick(dt: float = BASE_TICK_DT) -> void:
 		ElectronicWarfareSystem.step(world_state, sim_db_ref, spatial_grid)
 		SensorLoSSystem.step(world_state, sim_db_ref, spatial_grid, cs_kernel)
 	UnitTacticalAISystemScript.step(world_state, sim_db_ref, spatial_grid, dt)
+	SwarmIntelligenceSystemScript.step_swarm_intelligence(world_state, sim_db_ref, spatial_grid, dt)
 	if not is_mobile_vr or (world_state.tick_id % 3) == 1:
 		LogisticsSystemScript.step(world_state, sim_db_ref, spatial_grid, dt)
 		TerrainInfrastructureSystemScript.step(world_state, sim_db_ref, dt)
@@ -552,6 +554,24 @@ func _apply_command(cmd: Dictionary) -> void:
 						world_state.unit_radar_active[uid] = rad_act
 					if roe_val >= 0:
 						world_state.unit_roe[uid] = roe_val
+
+		"CMD_SET_TACTICAL_POSTURE":
+			var uids: Array = cmd.get("unit_ids", [])
+			var posture: int = int(cmd.get("posture", 0))
+			for u in uids:
+				var uid := int(u)
+				if uid >= 0 and uid < world_state.unit_count and world_state.unit_active[uid] == 1:
+					if uid < world_state.unit_tactical_posture.size():
+						world_state.unit_tactical_posture[uid] = posture
+					# Propagate to child echelons if battalion/brigade selected
+					if world_state.unit_echelon[uid] > WorldState.ECHELON_COMPANY:
+						for sub_id in range(world_state.unit_count):
+							if world_state.unit_active[sub_id] == 1:
+								var p1 := world_state.unit_parent_id[sub_id]
+								var p2 := world_state.unit_parent_id[p1] if (p1 >= 0 and p1 < world_state.unit_parent_id.size()) else -1
+								if p1 == uid or p2 == uid:
+									if sub_id < world_state.unit_tactical_posture.size():
+										world_state.unit_tactical_posture[sub_id] = posture
 
 		"CMD_QUEUE_STRIKE":
 			var raw_attackers: Array = cmd.get("attacker_ids", [])

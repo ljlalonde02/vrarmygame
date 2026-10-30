@@ -35,6 +35,15 @@ var _right_reticle: MeshInstance3D = null
 var _vr_selection_sphere: MeshInstance3D = null
 var _wrist_tablet_root: Node3D = null
 var _wrist_label_3d: Label3D = null
+var _wrist_buttons: Dictionary = {}
+var _current_tactical_posture_idx: int = 0
+const POSTURE_NAMES: Array[String] = ["AUTO", "BVR", "PURSUIT", "BREAK"]
+const POSTURE_VALUES: Array[int] = [
+	WorldState.TACTICAL_POSTURE_AUTO,
+	WorldState.TACTICAL_POSTURE_BVR_STANDOFF,
+	WorldState.TACTICAL_POSTURE_AGGRESSIVE_PURSUIT,
+	WorldState.TACTICAL_POSTURE_DEFENSIVE_BREAK
+]
 
 # Controller State Tracking
 var _two_hand_initial_dist: float = 0.0
@@ -161,11 +170,136 @@ func _build_vr_hand_and_wrist_visuals() -> void:
 	_wrist_label_3d = Label3D.new()
 	_wrist_label_3d.name = "WristTelemetryLabel3D"
 	_wrist_label_3d.text = "VR C4ISR WRIST DISPLAY // READY"
-	_wrist_label_3d.font_size = 15
-	_wrist_label_3d.pixel_size = 0.00042
-	_wrist_label_3d.position = Vector3(0.0, 0.0, 0.006)
+	_wrist_label_3d.font_size = 11
+	_wrist_label_3d.pixel_size = 0.00035
+	_wrist_label_3d.position = Vector3(0.0, 0.022, 0.006)
 	_wrist_label_3d.modulate = TacticalTheme.COL_NATO_BLUE
 	_wrist_tablet_root.add_child(_wrist_label_3d)
+
+	# 4. Interactive Virtual Smartwatch Buttons (Floor Mode, AI Posture, Time Compression, SSBN, Alpha Strike)
+	_create_wrist_button("btn_floor", "FLOOR\nOFF", -0.096, -0.046, TacticalTheme.COL_CONTOUR_EMERALD)
+	_create_wrist_button("btn_posture", "AI POST\nAUTO", -0.048, -0.046, TacticalTheme.COL_NATO_BLUE)
+	_create_wrist_button("btn_time", "TIME\n1x", 0.0, -0.046, TacticalTheme.COL_UNMANNED_GOLD)
+	_create_wrist_button("btn_ssbn", "SSBN\nOFF", 0.048, -0.046, TacticalTheme.COL_FLIR_GREEN)
+	_create_wrist_button("btn_strike", "ALPHA\nSTRIKE", 0.096, -0.046, TacticalTheme.COL_OPFOR_RED)
+
+
+func _create_wrist_button(id: String, label_text: String, local_x: float, local_y: float, col: Color) -> void:
+	var btn_node := Node3D.new()
+	btn_node.name = "WristBtn_" + id
+	btn_node.position = Vector3(local_x, local_y, 0.006)
+	_wrist_tablet_root.add_child(btn_node)
+
+	var bg_mi := MeshInstance3D.new()
+	var b_box := BoxMesh.new()
+	b_box.size = Vector3(0.044, 0.024, 0.006)
+	var b_mat := StandardMaterial3D.new()
+	b_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	b_mat.albedo_color = Color(col.r * 0.25, col.g * 0.25, col.b * 0.25, 0.9)
+	bg_mi.mesh = b_box
+	btn_node.add_child(bg_mi)
+
+	var border_mi := MeshInstance3D.new()
+	var border_box := BoxMesh.new()
+	border_box.size = Vector3(0.046, 0.026, 0.002)
+	var border_mat := StandardMaterial3D.new()
+	border_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	border_mat.albedo_color = col
+	border_mi.mesh = border_box
+	border_mi.position = Vector3(0.0, 0.0, -0.002)
+	btn_node.add_child(border_mi)
+
+	var lbl := Label3D.new()
+	lbl.name = "Label"
+	lbl.text = label_text
+	lbl.font_size = 11
+	lbl.pixel_size = 0.00035
+	lbl.position = Vector3(0.0, 0.0, 0.004)
+	lbl.modulate = col
+	btn_node.add_child(lbl)
+
+	_wrist_buttons[id] = {
+		"node": btn_node,
+		"label": lbl,
+		"bg": bg_mi,
+		"col": col,
+		"center_x": local_x,
+		"center_y": local_y,
+		"half_w": 0.023,
+		"half_h": 0.013
+	}
+
+
+func pick_wrist_button_by_ray(orig: Vector3, dir: Vector3) -> String:
+	if _wrist_tablet_root == null or not _wrist_tablet_root.is_inside_tree() or not _wrist_tablet_root.visible:
+		return ""
+	var tablet_trans: Transform3D = _wrist_tablet_root.global_transform
+	var normal: Vector3 = tablet_trans.basis.z.normalized()
+	var center: Vector3 = tablet_trans.origin
+	var d := normal.dot(dir)
+	if absf(d) < 0.0001:
+		return ""
+	var t := normal.dot(center - orig) / d
+	if t <= 0.0 or t > 3.0:
+		return ""
+	var hit_world: Vector3 = orig + dir * t
+	var inv_trans: Transform3D = tablet_trans.affine_inverse()
+	var local_hit: Vector3 = inv_trans * hit_world
+
+	for btn_id in _wrist_buttons:
+		var btn: Dictionary = _wrist_buttons[btn_id]
+		var dx := absf(local_hit.x - float(btn["center_x"]))
+		var dy := absf(local_hit.y - float(btn["center_y"]))
+		if dx <= float(btn["half_w"]) and dy <= float(btn["half_h"]):
+			return btn_id
+	return ""
+
+
+func actuate_wrist_button(btn_id: String) -> String:
+	match btn_id:
+		"btn_floor":
+			if war_table != null and war_table.has_method("toggle_floor_mode"):
+				var is_fl: bool = war_table.toggle_floor_mode()
+				if _wrist_buttons.has("btn_floor"):
+					_wrist_buttons["btn_floor"]["label"].text = "FLOOR\nON" if is_fl else "FLOOR\nOFF"
+				return "FLOOR_MODE_%s" % ("ON" if is_fl else "OFF")
+		"btn_posture":
+			_current_tactical_posture_idx = (_current_tactical_posture_idx + 1) % POSTURE_VALUES.size()
+			var posture: int = POSTURE_VALUES[_current_tactical_posture_idx]
+			var p_name: String = POSTURE_NAMES[_current_tactical_posture_idx]
+			if _wrist_buttons.has("btn_posture"):
+				_wrist_buttons["btn_posture"]["label"].text = "AI POST\n" + p_name
+			if command_bus != null:
+				var uids: Array[int] = []
+				if desktop_rig != null and not desktop_rig.selected_unit_ids.is_empty():
+					uids = desktop_rig.selected_unit_ids.duplicate()
+				elif sim_server != null:
+					var st: WorldState = sim_server.world_state
+					for u in range(st.unit_count):
+						if st.unit_active[u] == 1 and st.unit_faction[u] == WorldState.FACTION_BLUE:
+							var pdef: Dictionary = sim_server.sim_db_ref.get_platform(st.unit_platform_id[u])
+							if pdef.get("domain", "") == "AIR":
+								uids.append(u)
+				if not uids.is_empty():
+					command_bus.enqueue_set_tactical_posture(uids, posture)
+			return "POSTURE_" + p_name
+		"btn_time":
+			var new_scale := vr_cycle_time_scale()
+			if _wrist_buttons.has("btn_time"):
+				_wrist_buttons["btn_time"]["label"].text = "TIME\n%.0fx" % new_scale
+			return "TIME_%.0fX" % new_scale
+		"btn_ssbn":
+			if desktop_rig != null and desktop_rig.submarine_conn_ref != null:
+				var active: bool = desktop_rig.submarine_conn_ref.toggle_sub_sim_active()
+				if _wrist_buttons.has("btn_ssbn"):
+					_wrist_buttons["btn_ssbn"]["label"].text = "SSBN\nON" if active else "SSBN\nOFF"
+				return "SSBN_%s" % ("ON" if active else "OFF")
+		"btn_strike":
+			if tactile_console != null:
+				var sel_uid: int = desktop_rig.selected_unit_id if desktop_rig != null else -1
+				tactile_console.actuate_control("alpha_strike", sel_uid)
+				return "ALPHA_STRIKE"
+	return ""
 
 
 func _create_hand_gauntlet(node_name: String, accent_col: Color) -> Node3D:
@@ -316,8 +450,15 @@ func vr_laser_select_or_actuate(hand: String = "right", additive: bool = false) 
 	var orig: Vector3 = ray["origin"]
 	var dir: Vector3 = ray["dir"]
 
-	# 1. Check 3D TactileConsole physical switches & buttons
-	if tactile_console != null and tactile_console.has_method("pick_control_by_ray"):
+	# 0. Check Virtual Smartwatch / C4ISR Wrist Tablet Interactive Buttons
+	var hit_wrist_btn: String = pick_wrist_button_by_ray(orig, dir)
+	if not hit_wrist_btn.is_empty():
+		var res: String = actuate_wrist_button(hit_wrist_btn)
+		trigger_haptic_click(hand, 0.75, 0.05)
+		return {"type": "WRIST_BUTTON", "target": hit_wrist_btn, "result": res}
+
+	# 1. Check 3D TactileConsole physical switches & buttons (only if visible)
+	if tactile_console != null and tactile_console.visible and tactile_console.has_method("pick_control_by_ray"):
 		var hit_ctrl: String = tactile_console.pick_control_by_ray(orig, dir)
 		if not hit_ctrl.is_empty():
 			var sel_uid: int = desktop_rig.selected_unit_id if desktop_rig != null else -1
@@ -618,7 +759,11 @@ func _update_hand_laser_and_reticle(hand: String, beam_mi: MeshInstance3D, retic
 	var hit_pos := orig + dir * 1.45
 	var ret_col := TacticalTheme.COL_NATO_BLUE if hand == "left" else TacticalTheme.COL_UNMANNED_GOLD
 
-	if tactile_console != null and tactile_console.has_method("pick_control_by_ray"):
+	var hit_wrist := pick_wrist_button_by_ray(orig, dir)
+	if not hit_wrist.is_empty():
+		ret_col = TacticalTheme.COL_FLIR_GREEN
+
+	if tactile_console != null and tactile_console.visible and tactile_console.has_method("pick_control_by_ray"):
 		var cname: String = tactile_console.pick_control_by_ray(orig, dir)
 		if not cname.is_empty():
 			ret_col = TacticalTheme.COL_FLIR_GREEN
@@ -663,12 +808,28 @@ func _update_wrist_c4isr_tablet() -> void:
 
 	var b_pct := int(round((float(st.blue_ammo_remaining) / float(maxi(1, st.blue_ammo_initial_total))) * 100.0))
 	var r_pct := int(round((float(st.red_ammo_remaining) / float(maxi(1, st.red_ammo_initial_total))) * 100.0))
+	var floor_str := "FLOOR:ON" if (war_table != null and war_table.has_method("is_floor_mode") and war_table.is_floor_mode) else "FLOOR:OFF"
+	var posture_name: String = POSTURE_NAMES[_current_tactical_posture_idx]
+	var sub_str := "SSBN:ON" if (desktop_rig != null and desktop_rig.submarine_conn_ref != null and desktop_rig.submarine_conn_ref.is_sub_sim_active) else "SSBN:OFF"
+
 	var next_txt := (
-		"VR C4ISR WRIST // DEFCON %d // BUDGET: $%.0fM (+$%.0fM/m) // TECHS:%d/15\n" % [st.defcon_level, st.blue_budget_musd, st.blue_income_musd_per_min, st.blue_unlocked_techs.size()] +
+		"VR C4ISR WRIST // DEFCON %d // BUDGET: $%.0fM // TECHS:%d/15\n" % [st.defcon_level, st.blue_budget_musd, st.blue_unlocked_techs.size()] +
 		"%s | TIME: %.0fx\n" % [org_str, st.time_scale] +
 		"BLUE KIA:%d WIA:%d | AMMO:%d (%d%%) || RED KIA:%d AMMO:%d (%d%%)\n" % [st.blue_personnel_kia, st.blue_personnel_wia, st.blue_ammo_remaining, b_pct, st.red_personnel_kia, st.red_ammo_remaining, r_pct] +
-		"%s\n" % st.latest_world_news_headline.substr(0, 68) +
-		"[R-Trig:Select/Sphere | B:Move/Strike | A:Bn/Bde | X:Time]"
+		"POSTURE: %s | %s | %s\n" % [posture_name, floor_str, sub_str] +
+		"[R-Trig:Laser/WristBtn/Sphere | B:Move/Strike | A:Bn/Bde]"
 	)
 	if _wrist_label_3d.text != next_txt:
 		_wrist_label_3d.text = next_txt
+
+	# Sync smartwatch button states
+	if _wrist_buttons.has("btn_floor") and war_table != null:
+		var is_fl: bool = war_table.has_method("is_floor_mode") and war_table.is_floor_mode
+		_wrist_buttons["btn_floor"]["label"].text = "FLOOR\nON" if is_fl else "FLOOR\nOFF"
+	if _wrist_buttons.has("btn_posture"):
+		_wrist_buttons["btn_posture"]["label"].text = "AI POST\n" + posture_name
+	if _wrist_buttons.has("btn_time"):
+		_wrist_buttons["btn_time"]["label"].text = "TIME\n%.0fx" % st.time_scale
+	if _wrist_buttons.has("btn_ssbn") and desktop_rig != null and desktop_rig.submarine_conn_ref != null:
+		var is_sub: bool = desktop_rig.submarine_conn_ref.is_sub_sim_active
+		_wrist_buttons["btn_ssbn"]["label"].text = "SSBN\nON" if is_sub else "SSBN\nOFF"

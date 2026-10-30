@@ -28,9 +28,15 @@ const AI_UNMANNED_ASSAULT := 4
 const AI_SHOOT_AND_SCOOT := 5
 const AI_RTB_RESUPPLY := 6
 
+const TACTICAL_POSTURE_AUTO := 0
+const TACTICAL_POSTURE_BVR_STANDOFF := 1
+const TACTICAL_POSTURE_AGGRESSIVE_PURSUIT := 2
+const TACTICAL_POSTURE_DEFENSIVE_BREAK := 3
+
 # --- Unit SoA Pools (Coordinate convention: x = East/West km [-250..250], y = Altitude meters, z = North/South km [-250..250]) ---
 var unit_count: int = 0
 var unit_active: PackedByteArray = PackedByteArray()
+var unit_tactical_posture: PackedByteArray = PackedByteArray()
 var unit_pos: PackedVector3Array = PackedVector3Array()
 var unit_vel: PackedVector3Array = PackedVector3Array()
 var unit_target_pos: PackedVector3Array = PackedVector3Array()
@@ -502,6 +508,8 @@ func reset() -> void:
 	unit_count = 0
 	unit_active.resize(MAX_UNITS)
 	unit_active.fill(0)
+	unit_tactical_posture.resize(MAX_UNITS)
+	unit_tactical_posture.fill(TACTICAL_POSTURE_AUTO)
 	unit_pos.resize(MAX_UNITS)
 	unit_vel.resize(MAX_UNITS)
 	unit_target_pos.resize(MAX_UNITS)
@@ -1012,6 +1020,7 @@ func spawn_unit(faction: int, platform_id: int, pos_km: Vector3, echelon: int = 
 	var max_fuel: float = maxf(80.0, float(p_def.get("combat_radius_km", 250.0)) * 2.0)
 	var final_pos := Vector3(pos_km.x, spawn_alt_m, pos_km.z)
 	unit_active[uid] = 1
+	unit_tactical_posture[uid] = TACTICAL_POSTURE_AUTO
 	unit_pos[uid] = final_pos
 	unit_vel[uid] = Vector3.ZERO
 	unit_target_pos[uid] = final_pos
