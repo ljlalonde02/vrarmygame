@@ -457,8 +457,8 @@ func vr_laser_select_or_actuate(hand: String = "right", additive: bool = false) 
 		trigger_haptic_click(hand, 0.75, 0.05)
 		return {"type": "WRIST_BUTTON", "target": hit_wrist_btn, "result": res}
 
-	# 1. Check 3D TactileConsole physical switches & buttons (only if visible)
-	if tactile_console != null and tactile_console.visible and tactile_console.has_method("pick_control_by_ray"):
+	# 1. Check 3D TactileConsole physical switches & buttons
+	if tactile_console != null and tactile_console.has_method("pick_control_by_ray"):
 		var hit_ctrl: String = tactile_console.pick_control_by_ray(orig, dir)
 		if not hit_ctrl.is_empty():
 			var sel_uid: int = desktop_rig.selected_unit_id if desktop_rig != null else -1
@@ -763,7 +763,7 @@ func _update_hand_laser_and_reticle(hand: String, beam_mi: MeshInstance3D, retic
 	if not hit_wrist.is_empty():
 		ret_col = TacticalTheme.COL_FLIR_GREEN
 
-	if tactile_console != null and tactile_console.visible and tactile_console.has_method("pick_control_by_ray"):
+	if tactile_console != null and tactile_console.has_method("pick_control_by_ray"):
 		var cname: String = tactile_console.pick_control_by_ray(orig, dir)
 		if not cname.is_empty():
 			ret_col = TacticalTheme.COL_FLIR_GREEN
