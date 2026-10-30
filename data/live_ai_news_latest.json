@@ -1,0 +1,14 @@
+{
+  "status": "ok",
+  "timestamp": 1792956375.803732,
+  "event_trigger": "DIPLOMATIC_ALLIANCE_SUMMIT",
+  "video_slug": "diplomatic_alliance_summit",
+  "network": "GNN GLOBAL WAR DESK",
+  "defcon": 1,
+  "headline": "ALL DIPLOMATIC PATHS COLLAPSE: DEFCON 1 DECLARED AMID STRAIT THEATER BUILDUP",
+  "sub_chyron": "AI reports intense naval activity in Strait Theater; UNSC summit fails as DEFCON 1 is raised globally. Command Bunker warns of imminent escalation.",
+  "anchor_voice_script": "We are live with breaking news from the Command Bunker: Diplomatic efforts have catastrophically failed. DEFCON 1 has been declared worldwide amidst a rapidly escalating crisis in the Strait Theater.",
+  "correspondent": "AI War Correspondent, Command Bunker",
+  "veo_visual_prompt": "Cinematic shot of a naval fleet maneuvering under missile fire in a narrow strait, with fighter jets streaking across the sky.",
+  "ai_model": "gemini-2.5-flash-lite"
+}

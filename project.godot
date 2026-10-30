@@ -1,0 +1,60 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="VR & PC Holographic Wargame Simulator"
+config/description="2028 Theater-Scale Holographic Wargame Simulator (PC + Meta Quest 3 OpenXR)"
+run/main_scene="res://src/presentation/bunker/command_bunker.tscn"
+config/features=PackedStringArray("4.7", "C#", "Mobile")
+
+[autoload]
+
+SimDB="*res://src/autoloads/sim_db.gd"
+CommandBus="*res://src/autoloads/command_bus.gd"
+SignalBus="*res://src/autoloads/signal_bus.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[dotnet]
+
+project/assembly_name="VRArmyGame"
+
+[rendering]
+
+renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true
+anti_aliasing/quality/msaa_3d=1
+
+[shader_globals]
+
+fow_threat_map={
+"type": "sampler2D",
+"value": ""
+}
+terrain_infra_map={
+"type": "sampler2D",
+"value": ""
+}
+
+[xr]
+
+openxr/enabled=true
+openxr/reference_space=2
+openxr/foveation_level=3
+openxr/foveation_dynamic=true
+openxr/extensions/hand_tracking=true
+openxr/extensions/hand_interaction_profile=true
+shaders/enabled=true

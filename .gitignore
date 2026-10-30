@@ -1,0 +1,21 @@
+# Godot 4+ cache and generated mono builds
+.godot/
+.mono/
+data_*/
+
+# Android & Meta Quest generated Gradle build intermediates and APK outputs
+# (Keep local files on disk; exclude >100MB binaries from Git history)
+android/build/
+android/.gradle/
+builds/
+*.apk
+*.aab
+*.apks
+*.idsig
+
+# OS / Editor temporary files
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.android_bak

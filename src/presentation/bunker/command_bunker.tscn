@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ccommandbunker2028"]
+
+[ext_resource type="Script" path="res://src/presentation/bunker/command_bunker.gd" id="1_bunker"]
+
+[node name="CommandBunker" type="Node3D"]
+script = ExtResource("1_bunker")
