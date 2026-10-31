@@ -1,0 +1,10 @@
+{
+  "platform_slug": "c17_globemaster_iii",
+  "display_name": "C-17A Globemaster III Strategic Airlifter",
+  "prompts": {
+    "atk": "Cinematic 4K military footage, dynamic aerial chase tracking C-17A Globemaster III Strategic Airlifter (USA) flying at high speed. Fires primary weapon (autocannon) with intense rocket motor plume, contrails swirling in low-light dusk sky, photorealistic cockpit HUD reflection and heat shimmer.",
+    "def": "High-speed aerial combat sequence, C-17A Globemaster III Strategic Airlifter banks sharply in high-G defensive break maneuver, deploying a salvo of bright magnesium infrared flares and chaff cartridges against incoming threat, afterburners pulsing against cloud layer.",
+    "win": "Air superiority victory shot, camera pans past C-17A Globemaster III Strategic Airlifter as a distant hostile aircraft bursts into a massive fireball with debris disintegrating into the ocean below, pilot executes combat barrel roll over horizon.",
+    "loss": "Grim military reportage, C-17A Globemaster III Strategic Airlifter suffers critical missile impact on left wing, thick black smoke and orange flames streaming from fuselage as aircraft spins out of control towards terrain, emergency ejection sequence initiated."
+  }
+}

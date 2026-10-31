@@ -1,0 +1,10 @@
+{
+  "platform_slug": "m1a2_sepv3_platoon",
+  "display_name": "M1A2 SEPv3 Abrams Tank Platoon",
+  "prompts": {
+    "atk": "Cinematic 4K ground combat footage, close tracking of M1A2 SEPv3 Abrams Tank Platoon maneuvering across rugged terrain. Main weapon (autocannon) fires with massive concussive muzzle flash, shockwave kicking up dust cloud, spent brass shell ejecting, reactive armor plates gleaming.",
+    "def": "Slow-motion high-speed military camera, incoming anti-tank rocket approaching M1A2 SEPv3 Abrams Tank Platoon, Active Protection System (APS Trophy) radar detects projectile and fires explosive counter-measure mid-air, detonating threat 15 meters away with bright spark spray.",
+    "win": "Tactical battlefield success, camera advances alongside M1A2 SEPv3 Abrams Tank Platoon rolling victoriously through ruined urban perimeter, hostile bunker and armored vehicle burning with heavy secondary cook-off explosions in background.",
+    "loss": "Devastating combat loss, M1A2 SEPv3 Abrams Tank Platoon suffers catastrophic top-attack hull breach, ammo bustle blowout panels rupture with vertical geyser of fire and dense oily black smoke, crew scrambling into defensive treeline."
+  }
+}

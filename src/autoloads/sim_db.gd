@@ -593,13 +593,20 @@ func get_news_video_frame_textures(slug: String) -> Array[Texture2D]:
 	var total_f: int = maxi(1, int(clip.get("sheet_frames", cols * rows)))
 	var fw: float = float(sheet_tex.get_width()) / float(cols)
 	var fh: float = float(sheet_tex.get_height()) / float(rows)
+	var sheet_img: Image = sheet_tex.get_image()
 	for idx in range(total_f):
 		var col := idx % cols
 		var row := idx / cols
-		var atlas := AtlasTexture.new()
-		atlas.atlas = sheet_tex
-		atlas.region = Rect2(col * fw, row * fh, fw, fh)
-		frames.append(atlas)
+		if sheet_img != null and not sheet_img.is_empty():
+			var frame_rect := Rect2i(col * int(fw), row * int(fh), int(fw), int(fh))
+			var frame_img := sheet_img.get_region(frame_rect)
+			var frame_tex := ImageTexture.create_from_image(frame_img)
+			frames.append(frame_tex)
+		else:
+			var atlas := AtlasTexture.new()
+			atlas.atlas = sheet_tex
+			atlas.region = Rect2(col * fw, row * fh, fw, fh)
+			frames.append(atlas)
 	_news_frames_cache[slug] = frames
 	return frames
 

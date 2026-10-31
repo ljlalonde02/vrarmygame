@@ -202,6 +202,9 @@ var queued_strikes: Array[Dictionary] = []
 var active_beams: Array[Dictionary] = []       # {shooter_pos, target_pos, is_hpm_cone, faction, ttl}
 var recent_impacts: Array[Dictionary] = []     # {pos_km, radius_km, cost_musd, is_intercept, ttl}
 var sim_events_queue: Array[Dictionary] = []   # Drained on main thread to emit SignalBus signals safely
+var active_countermeasures: Array[Dictionary] = [] # Sprint 6: {unit_id, pos_km, vel_km_s, ttl_sec, max_ttl_sec, faction}
+var active_radar_tracks: Array[Dictionary] = []    # Sprint 6: {radar_uid, target_uid, radar_pos, target_pos, cone_deg, ttl_sec, faction}
+var active_nuke_effects: Array[Dictionary] = []    # Sprint 6: Multi-stage physical nuclear explosion simulation
 
 # --- Theater Heightmap RAM Grid (512x512 floats in meters) & Active Strategic Sites ---
 var active_theater_slug: String = "strait_theater"
@@ -678,6 +681,9 @@ func reset() -> void:
 	recent_impacts.clear()
 	sim_events_queue.clear()
 	active_sites.clear()
+	active_countermeasures.clear()
+	active_radar_tracks.clear()
+	active_nuke_effects.clear()
 
 	tick_id = 0
 	sim_time_sec = 0.0
@@ -923,8 +929,63 @@ func reset() -> void:
 	craters_inflicted_count = 0
 	collateral_incidents_count = 0
 
+	active_countermeasures.clear()
+	active_radar_tracks.clear()
+	active_nuke_effects.clear()
+
 	if heightmap_elev_m.is_empty():
 		load_heightmap(active_heightmap_path)
+
+
+## Spawns dynamic thermal countermeasure flares popping behind an aircraft.
+func spawn_countermeasure_flares(unit_id: int, pos: Vector3, heading_rad: float, faction: int, count: int = 4) -> void:
+	for i in range(count):
+		var ang := heading_rad + PI + randf_range(-0.55, 0.55)
+		var spd := randf_range(0.06, 0.16)
+		var vel := Vector3(cos(ang) * spd, randf_range(-0.04, -0.01), sin(ang) * spd)
+		active_countermeasures.append({
+			"unit_id": unit_id,
+			"pos_km": pos + Vector3(randf_range(-0.15, 0.15), randf_range(-0.03, 0.03), randf_range(-0.15, 0.15)),
+			"vel_km_s": vel,
+			"ttl_sec": randf_range(2.6, 4.2),
+			"max_ttl_sec": 4.2,
+			"faction": faction,
+		})
+
+
+## Triggers a realistic multi-stage thermonuclear detonation at ground zero.
+func trigger_thermonuclear_detonation(pos_km: Vector3, faction: int = 1, yield_kt: float = 350.0) -> Dictionary:
+	nuclear_detonations_count += 1
+	defcon_level = 1
+	global_escalation_score = 100.0
+	bunker_shock_tremor = 1.0 # Immediate maximum seismic bunker shake
+
+	var nuke_entry := {
+		"pos_km": pos_km,
+		"radius_km": 18.0,
+		"max_radius_km": 92.0,
+		"timer_sec": 30.0,
+		"max_ttl_sec": 30.0,
+		"type": "NUKE",
+		"faction": faction,
+		"yield_kt": yield_kt,
+		"flash_duration": 1.2,
+		"fireball_max_r_km": 14.0,
+		"shockwave_max_r_km": 68.0,
+		"mushroom_stem_h_km": 28.0,
+		"emp_wave_max_r_km": 140.0,
+	}
+	active_nuclear_fireballs.append(nuke_entry)
+	active_nuke_effects.append(nuke_entry)
+
+	sim_events_queue.append({
+		"type": "WMD_DETONATED",
+		"wmd_type": "THERMONUCLEAR",
+		"faction": faction,
+		"pos_km": pos_km,
+		"yield_kt": yield_kt
+	})
+	return nuke_entry
 
 
 func load_heightmap(res_path: String) -> void:

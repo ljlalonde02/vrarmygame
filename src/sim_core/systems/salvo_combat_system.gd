@@ -139,6 +139,19 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 		if float(state.recent_impacts[i]["ttl"]) <= 0.0:
 			state.recent_impacts.remove_at(i)
 
+	# Sprint 6: Age and simulate active countermeasure flares
+	for i in range(state.active_countermeasures.size() - 1, -1, -1):
+		state.active_countermeasures[i]["ttl_sec"] = float(state.active_countermeasures[i]["ttl_sec"]) - dt
+		state.active_countermeasures[i]["pos_km"] += state.active_countermeasures[i]["vel_km_s"] * dt
+		if float(state.active_countermeasures[i]["ttl_sec"]) <= 0.0:
+			state.active_countermeasures.remove_at(i)
+
+	# Sprint 6: Age and prune active radar illumination tracking cones
+	for i in range(state.active_radar_tracks.size() - 1, -1, -1):
+		state.active_radar_tracks[i]["ttl_sec"] = float(state.active_radar_tracks[i]["ttl_sec"]) - dt
+		if float(state.active_radar_tracks[i]["ttl_sec"]) <= 0.0:
+			state.active_radar_tracks.remove_at(i)
+
 	var u_active := state.unit_active
 	var u_ech := state.unit_echelon
 	var u_pid := state.unit_platform_id
@@ -318,6 +331,21 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 							"ttl": 1.8,
 						})
 
+					# Sprint 6: Ground Radar Tracking Illumination Cone onto approaching aircraft
+					var mask_req_radar := 1 if fac == WorldState.FACTION_BLUE else 2
+					var air_track_uid := grid.find_nearest_enemy_unit(state, enemy_fac, pos.x, pos.z, 70.0, mask_req_radar)
+					if air_track_uid >= 0:
+						var t_pos: Vector3 = state.unit_pos[air_track_uid]
+						state.active_radar_tracks.append({
+							"radar_uid": uid,
+							"target_uid": air_track_uid,
+							"radar_pos": pos,
+							"target_pos": t_pos,
+							"cone_deg": 16.0,
+							"ttl_sec": 0.85,
+							"faction": fac
+						})
+
 				# Close-range ground/air engagement if enemy detected within NEZ (unless Red Phone Ceasefire active!)
 				if u_cd[uid] <= 0.0 and u_roe[uid] == 2 and state.hotline_ceasefire_timer_sec <= 0.0:
 					var nez_km := minf(w_nez_km[w1_id], 35.0)
@@ -373,7 +401,9 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 		var z_km := lerpf(start_p.z, end_p.z, clamped_t)
 		var base_alt := lerpf(start_p.y, end_p.y, clamped_t)
 		var arc_boost := 4.0 * clamped_t * (1.0 - clamped_t) * maxf(0.0, m_apex_arr[mid] - maxf(start_p.y, end_p.y))
-		var cur_pos := Vector3(x_km, base_alt + arc_boost, z_km)
+		# Authentic Cold/Hot Vertical SAM Launch Profile: Rockets vertically out of canister before pitching over
+		var vert_boost := sin(clamped_t * (PI / 0.22)) * 1400.0 if (start_p.y <= 120.0 and clamped_t < 0.22) else 0.0
+		var cur_pos := Vector3(x_km, base_alt + arc_boost + vert_boost, z_km)
 		var prev_pos := m_pos_arr[mid]
 		m_vel_arr[mid] = Vector3(
 			(cur_pos.x - prev_pos.x) * inv_dt,

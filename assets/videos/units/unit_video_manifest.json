@@ -1,0 +1,42 @@
+{
+  "f_35a_lightning": {
+    "platform_slug": "f_35a_lightning",
+    "display_name": "F-35A Lightning II Flight",
+    "prompts": {
+      "atk": "Cinematic 4K military footage, dynamic aerial chase tracking F-35A Lightning II Flight (USA) flying at high speed. Fires primary weapon (autocannon) with intense rocket motor plume, contrails swirling in low-light dusk sky, photorealistic cockpit HUD reflection and heat shimmer.",
+      "def": "High-speed aerial combat sequence, F-35A Lightning II Flight banks sharply in high-G defensive break maneuver, deploying a salvo of bright magnesium infrared flares and chaff cartridges against incoming threat, afterburners pulsing against cloud layer.",
+      "win": "Air superiority victory shot, camera pans past F-35A Lightning II Flight as a distant hostile aircraft bursts into a massive fireball with debris disintegrating into the ocean below, pilot executes combat barrel roll over horizon.",
+      "loss": "Grim military reportage, F-35A Lightning II Flight suffers critical missile impact on left wing, thick black smoke and orange flames streaming from fuselage as aircraft spins out of control towards terrain, emergency ejection sequence initiated."
+    }
+  },
+  "m1a2_sepv3_platoon": {
+    "platform_slug": "m1a2_sepv3_platoon",
+    "display_name": "M1A2 SEPv3 Abrams Tank Platoon",
+    "prompts": {
+      "atk": "Cinematic 4K ground combat footage, close tracking of M1A2 SEPv3 Abrams Tank Platoon maneuvering across rugged terrain. Main weapon (autocannon) fires with massive concussive muzzle flash, shockwave kicking up dust cloud, spent brass shell ejecting, reactive armor plates gleaming.",
+      "def": "Slow-motion high-speed military camera, incoming anti-tank rocket approaching M1A2 SEPv3 Abrams Tank Platoon, Active Protection System (APS Trophy) radar detects projectile and fires explosive counter-measure mid-air, detonating threat 15 meters away with bright spark spray.",
+      "win": "Tactical battlefield success, camera advances alongside M1A2 SEPv3 Abrams Tank Platoon rolling victoriously through ruined urban perimeter, hostile bunker and armored vehicle burning with heavy secondary cook-off explosions in background.",
+      "loss": "Devastating combat loss, M1A2 SEPv3 Abrams Tank Platoon suffers catastrophic top-attack hull breach, ammo bustle blowout panels rupture with vertical geyser of fire and dense oily black smoke, crew scrambling into defensive treeline."
+    }
+  },
+  "c17_globemaster_iii": {
+    "platform_slug": "c17_globemaster_iii",
+    "display_name": "C-17A Globemaster III Strategic Airlifter",
+    "prompts": {
+      "atk": "Cinematic 4K military footage, dynamic aerial chase tracking C-17A Globemaster III Strategic Airlifter (USA) flying at high speed. Fires primary weapon (autocannon) with intense rocket motor plume, contrails swirling in low-light dusk sky, photorealistic cockpit HUD reflection and heat shimmer.",
+      "def": "High-speed aerial combat sequence, C-17A Globemaster III Strategic Airlifter banks sharply in high-G defensive break maneuver, deploying a salvo of bright magnesium infrared flares and chaff cartridges against incoming threat, afterburners pulsing against cloud layer.",
+      "win": "Air superiority victory shot, camera pans past C-17A Globemaster III Strategic Airlifter as a distant hostile aircraft bursts into a massive fireball with debris disintegrating into the ocean below, pilot executes combat barrel roll over horizon.",
+      "loss": "Grim military reportage, C-17A Globemaster III Strategic Airlifter suffers critical missile impact on left wing, thick black smoke and orange flames streaming from fuselage as aircraft spins out of control towards terrain, emergency ejection sequence initiated."
+    }
+  },
+  "vision_60_q_ugv": {
+    "platform_slug": "vision_60_q_ugv",
+    "display_name": "Ghost Robotics Vision 60 Robot Dog Pack",
+    "prompts": {
+      "atk": "Cinematic 4K ground combat footage, close tracking of Ghost Robotics Vision 60 Robot Dog Pack maneuvering across rugged terrain. Main weapon (autocannon) fires with massive concussive muzzle flash, shockwave kicking up dust cloud, spent brass shell ejecting, reactive armor plates gleaming.",
+      "def": "Slow-motion high-speed military camera, incoming anti-tank rocket approaching Ghost Robotics Vision 60 Robot Dog Pack, Active Protection System (APS Trophy) radar detects projectile and fires explosive counter-measure mid-air, detonating threat 15 meters away with bright spark spray.",
+      "win": "Tactical battlefield success, camera advances alongside Ghost Robotics Vision 60 Robot Dog Pack rolling victoriously through ruined urban perimeter, hostile bunker and armored vehicle burning with heavy secondary cook-off explosions in background.",
+      "loss": "Devastating combat loss, Ghost Robotics Vision 60 Robot Dog Pack suffers catastrophic top-attack hull breach, ammo bustle blowout panels rupture with vertical geyser of fire and dense oily black smoke, crew scrambling into defensive treeline."
+    }
+  }
+}

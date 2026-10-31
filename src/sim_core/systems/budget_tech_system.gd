@@ -559,12 +559,27 @@ static func execute_escalated_warfare_strike(state: WorldState, sim_db: Node, fa
 			_deduct_budget(state, faction, cost)
 			state.nuclear_detonations_count += 1
 			state.global_escalation_score = 100.0
+			state.bunker_shock_tremor = 1.0
 			state.inject_war_destruction(tpos.x, tpos.z, 85.0, 1.0)
 			_inject_hazard_plume_circle(state, tpos.x, tpos.z, 95.0, 1.0)
 			var cas_nuke := _apply_wmd_area_damage(state, sim_db, enemy_fac, tpos, 82.0, 0.96, false)
-			state.active_nuclear_fireballs.append({
-				"pos_km": tpos, "radius_km": 16.0, "max_radius_km": 88.0, "timer_sec": 28.0, "type": "NUKE", "faction": faction
-			})
+			var nuke_entry := {
+				"pos_km": tpos,
+				"radius_km": 18.0,
+				"max_radius_km": 92.0,
+				"timer_sec": 32.0,
+				"max_ttl_sec": 32.0,
+				"type": "NUKE",
+				"faction": faction,
+				"yield_kt": 350.0,
+				"flash_duration": 1.2,
+				"fireball_max_r_km": 16.0,
+				"shockwave_max_r_km": 72.0,
+				"mushroom_stem_h_km": 30.0,
+				"emp_wave_max_r_km": 150.0,
+			}
+			state.active_nuclear_fireballs.append(nuke_entry)
+			state.active_nuke_effects.append(nuke_entry)
 			state.recent_impacts.append({
 				"pos_km": tpos, "radius_km": 85.0, "cost_musd": 500.0, "is_intercept": false, "ttl": 8.0
 			})

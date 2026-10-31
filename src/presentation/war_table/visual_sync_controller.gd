@@ -38,6 +38,12 @@ var beams_immediate: ImmediateMesh = null
 var ribbons_mesh_instance: MeshInstance3D = null
 var ribbons_immediate: ImmediateMesh = null
 
+var _nuke_mesh_root: Node3D = null
+var _nuke_fireball_mi: MeshInstance3D = null
+var _nuke_stem_mi: MeshInstance3D = null
+var _nuke_cap_mi: MeshInstance3D = null
+var _nuke_shockwave_mi: MeshInstance3D = null
+
 var selected_unit_id: int = -1
 var selected_unit_ids: Array[int] = []
 var designated_target_uid: int = -1
@@ -522,6 +528,69 @@ func _setup_multimesh_layers() -> void:
 	beam_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	beams_mesh_instance.mesh = beams_immediate
 	beams_mesh_instance.material_override = beam_mat
+
+	# 10. ThermonuclearDetonationFX (3D Volumetric Mesh Explosion: Core, Stem, Toroidal Cap, Shockwave)
+	_setup_nuke_detonation_meshes()
+
+
+func _setup_nuke_detonation_meshes() -> void:
+	_nuke_mesh_root = Node3D.new()
+	_nuke_mesh_root.name = "ThermonuclearDetonationFX"
+	_nuke_mesh_root.visible = false
+	add_child(_nuke_mesh_root)
+
+	# 1. Incandescent Fireball Core (Sphere)
+	_nuke_fireball_mi = MeshInstance3D.new()
+	var fb_sphere := SphereMesh.new()
+	fb_sphere.radius = 0.08
+	fb_sphere.height = 0.16
+	var fb_mat := StandardMaterial3D.new()
+	fb_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	fb_mat.albedo_color = Color(1.0, 0.88, 0.35, 0.95)
+	fb_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_nuke_fireball_mi.mesh = fb_sphere
+	_nuke_fireball_mi.material_override = fb_mat
+	_nuke_mesh_root.add_child(_nuke_fireball_mi)
+
+	# 2. Convective Columnar Stem (Cylinder)
+	_nuke_stem_mi = MeshInstance3D.new()
+	var stem_cyl := CylinderMesh.new()
+	stem_cyl.top_radius = 0.045
+	stem_cyl.bottom_radius = 0.02
+	stem_cyl.height = 0.16
+	var stem_mat := StandardMaterial3D.new()
+	stem_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	stem_mat.albedo_color = Color(0.98, 0.45, 0.12, 0.90)
+	stem_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_nuke_stem_mi.mesh = stem_cyl
+	_nuke_stem_mi.material_override = stem_mat
+	_nuke_mesh_root.add_child(_nuke_stem_mi)
+
+	# 3. Toroidal Mushroom Cap (Torus)
+	_nuke_cap_mi = MeshInstance3D.new()
+	var cap_torus := TorusMesh.new()
+	cap_torus.inner_radius = 0.04
+	cap_torus.outer_radius = 0.13
+	var cap_mat := StandardMaterial3D.new()
+	cap_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	cap_mat.albedo_color = Color(0.88, 0.32, 0.10, 0.92)
+	cap_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_nuke_cap_mi.mesh = cap_torus
+	_nuke_cap_mi.material_override = cap_mat
+	_nuke_mesh_root.add_child(_nuke_cap_mi)
+
+	# 4. Supersonic Ground Blast Shockwave (Torus Ring)
+	_nuke_shockwave_mi = MeshInstance3D.new()
+	var shock_cyl := TorusMesh.new()
+	shock_cyl.inner_radius = 0.18
+	shock_cyl.outer_radius = 0.20
+	var shock_mat := StandardMaterial3D.new()
+	shock_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	shock_mat.albedo_color = Color(1.0, 0.72, 0.25, 0.75)
+	shock_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_nuke_shockwave_mi.mesh = shock_cyl
+	_nuke_shockwave_mi.material_override = shock_mat
+	_nuke_mesh_root.add_child(_nuke_shockwave_mi)
 
 
 func _setup_floating_photo_cards() -> void:
@@ -1369,49 +1438,188 @@ func sync_visuals() -> void:
 			beams_immediate.surface_add_vertex(imp_loc + Vector3(cos(a1) * ring_r, 0.0, sin(a1) * ring_r))
 		drew_any_line = true
 
-	# Draw 3D Thermonuclear Fireball Mushroom Clouds, HEMP EMP Hemispheres, Orbital Kinetic Rod Beams & CBRN Plumes
+	# Draw Sprint 6 Active Countermeasure Flares (blooming decoy stars behind aircraft)
+	if not is_globe_mode and sim_server != null:
+		for cm in sim_server.world_state.active_countermeasures:
+			var cm_loc: Vector3 = war_table.theater_km_to_table_local(cm.get("pos_km", Vector3.ZERO))
+			if absf(cm_loc.x) > 0.95 or absf(cm_loc.z) > 0.95:
+				continue
+			var ttl_c: float = float(cm.get("ttl_sec", 1.0))
+			var max_ttl_c: float = float(cm.get("max_ttl_sec", 4.0))
+			var flare_prog := clampf(ttl_c / max_ttl_c, 0.0, 1.0)
+			var flare_sz := 0.007 * flare_prog
+			beams_immediate.surface_set_color(Color(1.0, 0.94, 0.55, 0.95 * flare_prog))
+			# 4-point cross star
+			beams_immediate.surface_add_vertex(cm_loc + Vector3(-flare_sz, 0.0, 0.0))
+			beams_immediate.surface_add_vertex(cm_loc + Vector3(flare_sz, 0.0, 0.0))
+			beams_immediate.surface_add_vertex(cm_loc + Vector3(0.0, 0.0, -flare_sz))
+			beams_immediate.surface_add_vertex(cm_loc + Vector3(0.0, 0.0, flare_sz))
+			beams_immediate.surface_add_vertex(cm_loc + Vector3(0.0, -flare_sz * 0.7, 0.0))
+			beams_immediate.surface_add_vertex(cm_loc + Vector3(0.0, flare_sz * 0.7, 0.0))
+			# Trailing smoke/spark tail
+			var vel_cm: Vector3 = cm.get("vel_km_s", Vector3.ZERO)
+			var tail_loc: Vector3 = war_table.theater_km_to_table_local(cm.get("pos_km", Vector3.ZERO) - vel_cm * 0.12)
+			beams_immediate.surface_set_color(Color(0.85, 0.55, 0.22, 0.45 * flare_prog))
+			beams_immediate.surface_add_vertex(cm_loc)
+			beams_immediate.surface_add_vertex(tail_loc)
+			drew_any_line = true
+
+	# Draw Sprint 6 Ground Radar Tracking Illumination Scanning Cones (IADS)
+	if not is_globe_mode and sim_server != null:
+		for trk in sim_server.world_state.active_radar_tracks:
+			var r_loc: Vector3 = war_table.theater_km_to_table_local(trk.get("radar_pos", Vector3.ZERO)) + Vector3(0.0, 0.005, 0.0)
+			var t_loc: Vector3 = war_table.theater_km_to_table_local(trk.get("target_pos", Vector3.ZERO))
+			if absf(r_loc.x) > 0.95 or absf(r_loc.z) > 0.95 or absf(t_loc.x) > 0.95 or absf(t_loc.z) > 0.95:
+				continue
+			var fac_trk: int = int(trk.get("faction", 1))
+			var radar_col := Color(0.05, 0.92, 1.0, 0.85) if fac_trk == WorldState.FACTION_BLUE else Color(1.0, 0.35, 0.12, 0.85)
+			var radar_alpha := clampf(float(trk.get("ttl_sec", 0.5)) * 1.5, 0.25, 0.85)
+			beams_immediate.surface_set_color(Color(radar_col.r, radar_col.g, radar_col.b, radar_alpha))
+			beams_immediate.surface_add_vertex(r_loc)
+			beams_immediate.surface_add_vertex(t_loc)
+			var cone_spread := 0.022
+			var p_corners: Array[Vector3] = [
+				t_loc + Vector3(-cone_spread, 0.0, -cone_spread),
+				t_loc + Vector3(cone_spread, 0.0, -cone_spread),
+				t_loc + Vector3(cone_spread, 0.0, cone_spread),
+				t_loc + Vector3(-cone_spread, 0.0, cone_spread)
+			]
+			for ci in range(4):
+				beams_immediate.surface_add_vertex(r_loc)
+				beams_immediate.surface_add_vertex(p_corners[ci])
+				beams_immediate.surface_add_vertex(p_corners[ci])
+				beams_immediate.surface_add_vertex(p_corners[(ci + 1) % 4])
+			drew_any_line = true
+
+	# Draw Sprint 6 True Multi-Stage 3D Thermonuclear Detonation (Thermal Flash, Expanding Fireball, Ground Shockwave, Toroidal Mushroom Cloud, EMP Blackout)
+	var active_nuke_found := false
 	if not is_globe_mode and sim_server != null:
 		for fb in sim_server.world_state.active_nuclear_fireballs:
 			var fb_loc: Vector3 = war_table.theater_km_to_table_local(fb.get("pos_km", Vector3.ZERO))
-			if absf(fb_loc.x) > 0.92 or absf(fb_loc.z) > 0.92:
+			if absf(fb_loc.x) > 0.95 or absf(fb_loc.z) > 0.95:
 				continue
 			var fb_type := String(fb.get("type", "NUKE"))
-			var fb_ttl := float(fb.get("ttl_sec", 10.0))
-			var fb_max_ttl := maxf(1.0, float(fb.get("max_ttl_sec", 45.0)))
-			var fb_prog := clampf(1.0 - (fb_ttl / fb_max_ttl), 0.08, 1.0)
+			var fb_ttl := float(fb.get("ttl_sec", fb.get("timer_sec", 10.0)))
+			var fb_max_ttl := maxf(1.0, float(fb.get("max_ttl_sec", 32.0)))
+			var fb_prog := clampf(1.0 - (fb_ttl / fb_max_ttl), 0.02, 1.0)
 			var fb_r_km := float(fb.get("radius_km", 28.0))
-			var base_r_m := clampf((fb_r_km / WarTable.THEATER_SIZE_KM) * WarTable.TABLE_SIZE_M * zoom * (0.45 + fb_prog * 0.75), 0.025, 0.28)
-			var fb_col := Color(1.0, 0.55, 0.12, 0.92)
-			if fb_type == "HEMP":
-				fb_col = Color(0.35, 0.92, 1.0, 0.85)
-			elif fb_type == "CHEM":
-				fb_col = Color(0.55, 1.0, 0.18, 0.85)
-			elif fb_type == "ORBITAL":
-				fb_col = Color(1.0, 0.88, 0.32, 0.95)
-				# Draw orbital kinetic tungsten rod beam from upper dome to impact point
-				beams_immediate.surface_set_color(fb_col)
-				beams_immediate.surface_add_vertex(fb_loc + Vector3(0.0, 0.34, 0.0))
-				beams_immediate.surface_add_vertex(fb_loc + Vector3(0.0, 0.005, 0.0))
+			# Scale thermonuclear fireball & shockwave to dramatic tactical proportions (12cm to 45cm on table)
+			var base_r_m := clampf((fb_r_km / 90.0) * WarTable.TABLE_SIZE_M * (0.35 + fb_prog * 0.75), 0.14, 0.48)
 
-			# Draw expanding ground blast shockwave ring + rising 3D mushroom cap / dome
-			var dome_h := (0.08 + fb_prog * 0.11) if fb_type == "NUKE" else 0.045
-			var segs_fb := 16
-			beams_immediate.surface_set_color(fb_col)
-			for s in range(segs_fb):
-				var a0 := float(s) * TAU / float(segs_fb)
-				var a1 := float(s + 1) * TAU / float(segs_fb)
-				# Ground shockwave ring
-				beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(a0) * base_r_m, 0.006, sin(a0) * base_r_m))
-				beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(a1) * base_r_m, 0.006, sin(a1) * base_r_m))
-				# Elevated mushroom cloud cap ring
-				var cap_r := base_r_m * 0.72
-				beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(a0) * cap_r, dome_h, sin(a0) * cap_r))
-				beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(a1) * cap_r, dome_h, sin(a1) * cap_r))
-				if s % 2 == 0:
-					# Vertical mushroom stem ribs
-					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(a0) * base_r_m * 0.25, 0.006, sin(a0) * base_r_m * 0.25))
-					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(a0) * cap_r, dome_h, sin(a0) * cap_r))
+			if fb_type == "NUKE":
+				active_nuke_found = true
+				if _nuke_mesh_root != null:
+					_nuke_mesh_root.visible = true
+					_nuke_mesh_root.position = fb_loc
+					var stem_h := clampf(0.06 + fb_prog * 0.18, 0.06, 0.24)
+					var cap_r := clampf(0.06 + fb_prog * 0.14, 0.06, 0.20)
+					var shock_r := clampf(0.12 + fb_prog * 0.38, 0.12, 0.48)
+					var core_s := clampf(0.35 + (1.0 - fb_prog) * 0.30, 0.30, 0.65)
+
+					if _nuke_fireball_mi != null:
+						_nuke_fireball_mi.position = Vector3(0.0, 0.03 + stem_h * 0.30, 0.0)
+						_nuke_fireball_mi.scale = Vector3.ONE * core_s
+					if _nuke_stem_mi != null:
+						_nuke_stem_mi.position = Vector3(0.0, stem_h * 0.5, 0.0)
+						_nuke_stem_mi.scale = Vector3(1.1 + fb_prog * 0.4, stem_h / 0.16, 1.1 + fb_prog * 0.4)
+					if _nuke_cap_mi != null:
+						_nuke_cap_mi.position = Vector3(0.0, stem_h, 0.0)
+						_nuke_cap_mi.scale = Vector3(cap_r / 0.13, 0.85, cap_r / 0.13)
+					if _nuke_shockwave_mi != null:
+						_nuke_shockwave_mi.position = Vector3(0.0, 0.006, 0.0)
+						_nuke_shockwave_mi.scale = Vector3(shock_r / 0.20, 1.0, shock_r / 0.20)
+
+				# STAGE 1: Blinding Thermal Flash (Initial 1.5s / fb_prog < 0.12)
+				if fb_prog < 0.12:
+					var flash_alpha := (1.0 - (fb_prog / 0.12)) * 0.98
+					var flash_r := base_r_m * 2.2
+					beams_immediate.surface_set_color(Color(1.0, 1.0, 1.0, flash_alpha))
+					for fs in range(16):
+						var fa0 := float(fs) * TAU / 16.0
+						var fa1 := float(fs + 1) * TAU / 16.0
+						beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(fa0) * flash_r, 0.015, sin(fa0) * flash_r))
+						beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(fa1) * flash_r, 0.015, sin(fa1) * flash_r))
+						if fs % 4 == 0:
+							beams_immediate.surface_add_vertex(fb_loc + Vector3(0.0, 0.015, 0.0))
+							beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(fa0) * flash_r, 0.015, sin(fa0) * flash_r))
+
+				# STAGE 2: Expanding Incandescent Fireball Sphere (Hot Core Gradient)
+				var fb_core_r := base_r_m * (0.85 if fb_prog < 0.25 else clampf(1.0 - (fb_prog - 0.25) * 0.6, 0.35, 0.85))
+				var core_col := Color(1.0, 0.92, 0.45, 0.98) if fb_prog < 0.25 else Color(1.0, 0.42, 0.08, 0.90)
+				beams_immediate.surface_set_color(core_col)
+				for cs in range(16):
+					var ca0 := float(cs) * TAU / 16.0
+					var ca1 := float(cs + 1) * TAU / 16.0
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ca0) * fb_core_r, 0.025, sin(ca0) * fb_core_r))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ca1) * fb_core_r, 0.025, sin(ca1) * fb_core_r))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ca0) * fb_core_r, 0.025 + sin(ca0) * fb_core_r, 0.0))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ca1) * fb_core_r, 0.025 + sin(ca1) * fb_core_r, 0.0))
+
+				# STAGE 3: Supersonic Ground Blast Shockwave Ring with Trailing Dust Front
+				var shock_r := base_r_m * (1.1 + fb_prog * 1.8)
+				var dust_r := shock_r * 0.88
+				var shock_alpha := clampf((1.0 - fb_prog) * 0.95, 0.15, 0.95)
+				beams_immediate.surface_set_color(Color(1.0, 0.75, 0.30, shock_alpha))
+				for ss in range(24):
+					var sa0 := float(ss) * TAU / 24.0
+					var sa1 := float(ss + 1) * TAU / 24.0
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(sa0) * shock_r, 0.008, sin(sa0) * shock_r))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(sa1) * shock_r, 0.008, sin(sa1) * shock_r))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(sa0) * dust_r, 0.005, sin(sa0) * dust_r))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(sa1) * dust_r, 0.005, sin(sa1) * dust_r))
+
+				# STAGE 4: Convective Columnar Stem & Rising Toroidal Mushroom Cloud Cap
+				var stem_h := clampf(0.04 + fb_prog * 0.22, 0.04, 0.26)
+				var stem_r_bot := base_r_m * 0.28
+				var stem_r_top := base_r_m * 0.45
+				var cap_torus_r := base_r_m * (0.65 + fb_prog * 0.55)
+				var cap_inner_r := cap_torus_r * 0.62
+				var cap_crown_h := stem_h + 0.035
+				var cap_col := Color(1.0, 0.38, 0.05, 0.92) if fb_prog < 0.45 else Color(0.28, 0.22, 0.20, 0.88)
+				beams_immediate.surface_set_color(cap_col)
+				for ms in range(20):
+					var ma0 := float(ms) * TAU / 20.0
+					var ma1 := float(ms + 1) * TAU / 20.0
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ma0) * cap_torus_r, stem_h, sin(ma0) * cap_torus_r))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ma1) * cap_torus_r, stem_h, sin(ma1) * cap_torus_r))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ma0) * cap_inner_r, stem_h - 0.015, sin(ma0) * cap_inner_r))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ma1) * cap_inner_r, stem_h - 0.015, sin(ma1) * cap_inner_r))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ma0) * (cap_torus_r * 0.8), cap_crown_h, sin(ma0) * (cap_torus_r * 0.8)))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ma1) * (cap_torus_r * 0.8), cap_crown_h, sin(ma1) * (cap_torus_r * 0.8)))
+					if ms % 2 == 0:
+						beams_immediate.surface_set_color(Color(0.85, 0.40, 0.10, 0.80) if fb_prog < 0.4 else Color(0.25, 0.18, 0.16, 0.75))
+						beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ma0) * stem_r_bot, 0.005, sin(ma0) * stem_r_bot))
+						beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ma0) * stem_r_top, stem_h, sin(ma0) * stem_r_top))
+						beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ma0) * cap_inner_r, stem_h - 0.015, sin(ma0) * cap_inner_r))
+						beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ma0) * cap_torus_r, stem_h, sin(ma0) * cap_torus_r))
+
+				# STAGE 5: High-Altitude EMP Ionization Blackout Wave
+				var emp_r := base_r_m * (1.6 + fb_prog * 2.8)
+				var emp_alpha := clampf((1.0 - fb_prog * 0.8) * 0.75, 0.1, 0.75)
+				beams_immediate.surface_set_color(Color(0.25, 0.88, 1.0, emp_alpha))
+				for es in range(16):
+					var ea0 := float(es) * TAU / 16.0
+					var ea1 := float(es + 1) * TAU / 16.0
+					if es % 2 == 0:
+						beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ea0) * emp_r, 0.035, sin(ea0) * emp_r))
+						beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(ea1) * emp_r, 0.035, sin(ea1) * emp_r))
+
+			else:
+				var other_col := Color(0.35, 0.92, 1.0, 0.85) if fb_type == "HEMP" else (Color(0.55, 1.0, 0.18, 0.85) if fb_type == "CHEM" else Color(1.0, 0.88, 0.32, 0.95))
+				beams_immediate.surface_set_color(other_col)
+				if fb_type == "ORBITAL":
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(0.0, 0.34, 0.0))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(0.0, 0.005, 0.0))
+				for s in range(16):
+					var a0 := float(s) * TAU / 16.0
+					var a1 := float(s + 1) * TAU / 16.0
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(a0) * base_r_m, 0.006, sin(a0) * base_r_m))
+					beams_immediate.surface_add_vertex(fb_loc + Vector3(cos(a1) * base_r_m, 0.006, sin(a1) * base_r_m))
+
 			drew_any_line = true
+
+	if not active_nuke_found and _nuke_mesh_root != null:
+		_nuke_mesh_root.visible = false
 
 	# ====================================================================
 	# 6. SELECTED UNITS, BATTALION/BRIGADE HIERARCHY TETHERS & LIVE 3D WAYPOINT ORDER VECTORS

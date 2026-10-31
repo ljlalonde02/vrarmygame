@@ -69,6 +69,9 @@ var _news_wall_header_3d: Label3D = null
 var _news_wall_chyron_3d: Label3D = null
 var _news_wall_anim_time: float = 0.0
 var _beacon_spin_angle: float = 0.0
+var _last_nuke_count: int = 0
+var _thermal_flash_timer: float = 0.0
+var _initial_cam_pos: Vector3 = Vector3.ZERO
 
 var _initialized: bool = false
 
@@ -447,15 +450,26 @@ func update_bunker_defcon_and_integrity_atmosphere(delta: float) -> void:
 		target_key_col = Color(1.0, 0.78, 0.25)
 		target_amb_col = Color(0.10, 0.08, 0.03)
 		beacon_energy = 0.55 * pulse
-	elif dc == 4:
-		target_key_col = Color(0.38, 0.82, 1.0)
-		target_amb_col = Color(0.05, 0.10, 0.16)
-		beacon_energy = 0.0
+	# Sprint 6: Detect newly detonated thermonuclear weapons for immediate blinding flash & seismic shockwave
+	if st.nuclear_detonations_count > _last_nuke_count:
+		_last_nuke_count = st.nuclear_detonations_count
+		_thermal_flash_timer = 0.55
+		st.bunker_shock_tremor = 1.0
+
+	if _thermal_flash_timer > 0.0:
+		_thermal_flash_timer = maxf(0.0, _thermal_flash_timer - delta)
+		target_key_col = Color(1.0, 1.0, 1.0)
+		target_amb_col = Color(0.85, 0.88, 0.95)
+		beacon_energy = 3.2
+
+	# Smoothly decay seismic ground shock tremor
+	st.bunker_shock_tremor = maxf(0.0, st.bunker_shock_tremor - delta * 0.38)
 
 	if _key_light != null:
-		_key_light.light_color = _key_light.light_color.lerp(target_key_col, clampf(delta * 4.0, 0.0, 1.0))
-		var tremor_jitter := (randf() - 0.5) * st.bunker_shock_tremor * 0.65
-		_key_light.light_energy = clampf(1.55 + tremor_jitter, 0.4, 2.5)
+		_key_light.light_color = _key_light.light_color.lerp(target_key_col, clampf(delta * (12.0 if _thermal_flash_timer > 0.0 else 4.0), 0.0, 1.0))
+		var tremor_jitter := (randf() - 0.5) * st.bunker_shock_tremor * 0.85
+		var base_key_energy := 4.2 if _thermal_flash_timer > 0.0 else 1.55
+		_key_light.light_energy = clampf(base_key_energy + tremor_jitter, 0.4, 5.0)
 	if _env_ref != null:
 		_env_ref.ambient_light_color = _env_ref.ambient_light_color.lerp(target_amb_col, clampf(delta * 4.0, 0.0, 1.0))
 	if _beacon_left_light != null and _beacon_right_light != null:
@@ -494,10 +508,10 @@ func update_bunker_defcon_and_integrity_atmosphere(delta: float) -> void:
 			_bulkhead_officer_label_3d.text = o_txt
 
 	if _news_wall_screen_mat != null and sim_db != null and sim_db.has_method("get_news_video_frame_textures"):
-		_news_wall_anim_time += delta
+		_news_wall_anim_time += delta * 1.5
 		var frames: Array = sim_db.get_news_video_frame_textures(st.active_news_video_slug)
 		if not frames.is_empty():
-			var f_idx := int(_news_wall_anim_time * 6.0) % frames.size()
+			var f_idx := int(_news_wall_anim_time * 8.0) % frames.size()
 			_news_wall_screen_mat.albedo_texture = frames[f_idx]
 		if _news_wall_header_3d != null:
 			var h_txt := "● LIVE // %s [DEFCON %d]" % [st.active_news_video_network, dc]
@@ -507,6 +521,20 @@ func update_bunker_defcon_and_integrity_atmosphere(delta: float) -> void:
 			var c_txt := st.active_news_video_headline.substr(0, 68)
 			if _news_wall_chyron_3d.text != c_txt:
 				_news_wall_chyron_3d.text = c_txt
+
+	# Bunker Camera Seismic Shake from nearby impacts or thermonuclear detonations
+	if desktop_rig != null and desktop_rig.camera != null and st.bunker_shock_tremor > 0.005:
+		if _initial_cam_pos == Vector3.ZERO:
+			_initial_cam_pos = desktop_rig.camera.position
+		var shake_mag := st.bunker_shock_tremor * 0.035
+		desktop_rig.camera.position = _initial_cam_pos + Vector3(
+			randf_range(-shake_mag, shake_mag),
+			randf_range(-shake_mag, shake_mag),
+			randf_range(-shake_mag, shake_mag)
+		)
+	elif _initial_cam_pos != Vector3.ZERO and desktop_rig != null and desktop_rig.camera != null:
+		desktop_rig.camera.position = _initial_cam_pos
+		_initial_cam_pos = Vector3.ZERO
 
 
 func cleanup_bunker() -> void:

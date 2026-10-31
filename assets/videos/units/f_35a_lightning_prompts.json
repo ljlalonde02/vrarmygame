@@ -1,0 +1,10 @@
+{
+  "platform_slug": "f_35a_lightning",
+  "display_name": "F-35A Lightning II Flight",
+  "prompts": {
+    "atk": "Cinematic 4K military footage, dynamic aerial chase tracking F-35A Lightning II Flight (USA) flying at high speed. Fires primary weapon (autocannon) with intense rocket motor plume, contrails swirling in low-light dusk sky, photorealistic cockpit HUD reflection and heat shimmer.",
+    "def": "High-speed aerial combat sequence, F-35A Lightning II Flight banks sharply in high-G defensive break maneuver, deploying a salvo of bright magnesium infrared flares and chaff cartridges against incoming threat, afterburners pulsing against cloud layer.",
+    "win": "Air superiority victory shot, camera pans past F-35A Lightning II Flight as a distant hostile aircraft bursts into a massive fireball with debris disintegrating into the ocean below, pilot executes combat barrel roll over horizon.",
+    "loss": "Grim military reportage, F-35A Lightning II Flight suffers critical missile impact on left wing, thick black smoke and orange flames streaming from fuselage as aircraft spins out of control towards terrain, emergency ejection sequence initiated."
+  }
+}

@@ -174,6 +174,8 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 					clampf(pos.z + orth_2d.y * 8.0, -245.0, 245.0)
 				)
 				state.unit_has_waypoint[uid] = 1
+				if (tick + uid) % 6 == 0 and state.has_method("spawn_countermeasure_flares"):
+					state.spawn_countermeasure_flares(uid, pos, state.unit_heading_rad[uid], fac, 3)
 			elif dom_id == 0 and (flg & flag_sam) == 0:
 				state.unit_target_pos[uid] = Vector3(
 					clampf(pos.x + orth_2d.x * 1.8, -245.0, 245.0),
@@ -256,7 +258,11 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 				state.unit_desired_alt_m[uid] = 8800.0
 				state.unit_afterburner[uid] = 1
 				var air_tpos := u_pos[nearest_air_uid]
-				state.unit_target_pos[uid] = Vector3(air_tpos.x, 8800.0, air_tpos.z)
+				# Authentic Air Combat Lead Pursuit: Project target velocity vector into intercept rendezvous point
+				var my_spd: float = sim_db.plat_max_km_s[pid] if (pid < sim_db.plat_max_km_s.size() and sim_db.plat_max_km_s[pid] > 0.1) else 0.68
+				var lead_t := clampf(sqrt(nearest_air_d_sq) / maxf(0.5, my_spd), 0.5, 6.0)
+				var lead_pt := air_tpos + state.unit_vel[nearest_air_uid] * lead_t
+				state.unit_target_pos[uid] = Vector3(clampf(lead_pt.x, -245.0, 245.0), 8800.0, clampf(lead_pt.z, -245.0, 245.0))
 				state.unit_has_waypoint[uid] = 1
 				continue
 
@@ -342,6 +348,8 @@ static func trigger_rwr_warning(state: WorldState, sim_db: Node, target_uid: int
 			clampf(t_pos.z + orth_2d.y * 12.0, -245.0, 245.0)
 		)
 		state.unit_has_waypoint[target_uid] = 1
+		if state.has_method("spawn_countermeasure_flares"):
+			state.spawn_countermeasure_flares(target_uid, t_pos, state.unit_heading_rad[target_uid], state.unit_faction[target_uid], 5)
 		state.sim_events_queue.append({
 			"type": "COUNTERMEASURE_DEPLOYED",
 			"unit_id": target_uid,
