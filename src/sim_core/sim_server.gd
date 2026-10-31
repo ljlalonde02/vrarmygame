@@ -573,8 +573,16 @@ func scrub_replay_ratio(ratio: float) -> void:
 	replay_recorder.scrub_to_ratio(ratio, snapshot_buffer, world_state)
 
 
-func resume_live_from_replay() -> void:
-	replay_recorder.exit_scrub_mode()
+func dispatch_commander_command(cmd_type: String, unit_ids: Array, target_pos: Vector3 = Vector3.ZERO, extra: Dictionary = {}) -> void:
+	var cmd: Dictionary = extra.duplicate()
+	cmd["type"] = cmd_type
+	cmd["unit_ids"] = unit_ids
+	cmd["faction"] = WorldState.FACTION_BLUE
+	if cmd_type == "CMD_MOVE_WAYPOINTS":
+		cmd["waypoints_km"] = [target_pos]
+	elif cmd_type == "CMD_DEPLOY_UNMANNED_SUBUNIT":
+		cmd["target_pos"] = target_pos
+	_apply_command(cmd)
 
 
 func _apply_command(cmd: Dictionary) -> void:

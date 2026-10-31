@@ -69,7 +69,7 @@
 
 ---
 
-## Part III: 11-Nation Platforms, Aircraft Carriers, Robot Dogs & Unmanned Roster (67 Systems)
+## Part III: 11-Nation Platforms, Aircraft Carriers, Robot Dogs & Unmanned Roster (74 Systems)
 
 | Faction | Platform | Domain / Class | Speed (kts) | Radius (km) | RCS ($m^2$) | Autonomy | Cost ($M) | Photo Asset |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -126,7 +126,14 @@
 | `PAK` | **JF-17 Thunder Block III AESA Flight (PL-15)** | `AIR/FIGHTER` | 1030 | 900 | `0.5` | `MANNED` | **$140.00M** | `res://assets/wiki_images/platforms/jf_17_block3_flight.jpg` |
 | `PAK` | **Bayraktar Akinci Heavy Strike UCAV Wing** | `AIR/CCA_DRONE` | 210 | 2500 | `0.4` | `AUTONOMOUS_AI` | **$32.00M** | `res://assets/wiki_images/platforms/bayraktar_akinci_ucav.jpg` |
 | `USA` | **KC-46A Pegasus Aerial Refueling Tanker Orbit** | `AIR/TANKER` | 490 | 4500 | `55.0` | `MANNED` | **$210.00M** | `res://assets/wiki_images/platforms/kc_46_pegasus.jpg` |
+| `USA` | **C-17A Globemaster III Strategic Airlifter** | `AIR/LOGISTICS` | 450 | 4400 | `45.0` | `MANNED` | **$340.00M** | `res://assets/wiki_images/platforms/c17_globemaster_iii.jpg` |
+| `RUS` | **Il-76MD-90A Candid Strategic Transport** | `AIR/LOGISTICS` | 440 | 4000 | `50.0` | `MANNED` | **$160.00M** | `res://assets/wiki_images/platforms/il76_candid.jpg` |
 | `USA` | **Oshkosh M977 HEMTT Ammo & Drone Resupply Convoy** | `LAND/LOGISTICS` | 42 | 450 | `4.0` | `MANNED` | **$6.50M** | `res://assets/wiki_images/platforms/hemtt_supply_convoy.jpg` |
+| `RUS` | **KamAZ-6350 8x8 Tactical Fuel & Ammo Convoy** | `LAND/LOGISTICS` | 40 | 400 | `4.2` | `MANNED` | **$4.80M** | `res://assets/wiki_images/platforms/kamaz_resupply_truck.jpg` |
+| `USA` | **AH-64E Apache Guardian Attack Helicopter** | `AIR/HELICOPTER` | 165 | 480 | `2.5` | `MANNED` | **$38.00M** | `res://assets/wiki_images/platforms/ah_64e_apache_guardian.jpg` |
+| `RUS` | **Kamov Ka-52M Alligator Coaxial Attack Helicopter** | `AIR/HELICOPTER` | 170 | 460 | `2.8` | `MANNED` | **$32.00M** | `res://assets/wiki_images/platforms/ka_52_alligator.jpg` |
+| `USA` | **USS District of Columbia (SSBN-826) Nuclear Ballistic Submarine** | `SEA/SSBN` | 22 | 12000 | `0.001` | `MANNED` | **$3800.00M** | `res://assets/wiki_images/platforms/columbia_class_ssbn.jpg` |
+| `CHN` | **PLA Navy Type 094 Jin-Class Strategic Ballistic Submarine** | `SEA/SSBN` | 20 | 11000 | `0.002` | `MANNED` | **$1800.00M** | `res://assets/wiki_images/platforms/type_094_jin_ssbn.jpg` |
 | `UKR` | **T-84 Oplot-M Ukrainian Tank Platoon (Duplet ERA)** | `LAND/ARMOR` | 38 | 210 | `3.1` | `MANNED` | **$22.00M** | `res://assets/wiki_images/platforms/t_84_oplot_platoon.jpg` |
 | `UKR` | **BTR-4E Bucephalus Mechanized Infantry (with FPVs)** | `LAND/MECH_INF` | 44 | 260 | `2.5` | `MANNED` | **$12.00M** | `res://assets/wiki_images/platforms/btr_4_bucephalus_co.jpg` |
 | `UKR` | **RK-360MC Neptune Cruise & Vilkha-M Strike Battery** | `LAND/HYPERSONIC_TEL` | 36 | 280 | `4.0` | `MANNED` | **$65.00M** | `res://assets/wiki_images/platforms/neptune_rk360mc_battery.jpg` |

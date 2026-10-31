@@ -903,6 +903,42 @@ const TRIALS_DATA: Dictionary = {
 		"defend": "Emménagement dans le sanctuaire anti-sous-marin bastionné sous protection des destroyers Type 055.",
 		"special_trick": "Frappe Balistique en Plongée : Capacité de tir de missiles balistiques en séquence rapide depuis l'immersion sans faire surface.",
 		"friendly_integration": "Datalink acoustique et bouées relais avec les sous-marins d'escorte Type 093B formant écran de protection."
+	},
+	"c17_globemaster_iii": {
+		"title": "C-17A Globemaster III : Pont Aérien Stratégique & Parachutage de Combat",
+		"domain": "AIR",
+		"enemy_category": "Systèmes SAM Longue Portée & Chasseurs d'Interception (S-400 / Su-57)",
+		"opposing_threat": "s_400_triumf",
+		"friendly_partner": "f_35a_lightning",
+		"move_act": "Vol de transit stratégique à 420-450 kts à 11 000m, suivi d'une descente tactique rapide vers 350m pour largage.",
+		"fight": "Transport de 77 tonnes de fret lourd (char Abrams, VCI Bradley, ou 102 parachutistes équipés) projetable sur piste sommaire.",
+		"defend": "Système de contre-mesures infrarouges DIRCM à laser et éjecteurs de paillettes/chaff haute cadence.",
+		"special_trick": "Largage Parachute de Précision : Éjection par la rampe arrière de palettes de ravitaillement guidées par GPS directement sur le front.",
+		"friendly_integration": "Escorte rapprochée SEAD par patrouilles F-35A pour neutraliser les menaces sol-air sur le couloir de largage."
+	},
+	"il76_candid": {
+		"title": "Il-76MD-90A Candid : Transport Lourd & Projection Aéroportée Tout-Terrain",
+		"domain": "AIR",
+		"enemy_category": "Batteries Patriot PAC-3 & Chasseurs de Supériorité Aérienne (F-35A / F-16V)",
+		"opposing_threat": "mim_104f_patriot",
+		"friendly_partner": "su_57_felon",
+		"move_act": "Croisière à 410-440 kts sur réacteurs PS-90A-76, atterrissage et décollage sur pistes en terre non préparées.",
+		"fight": "Capacité d'emport de 60 tonnes (3 blindés aéroportés BMD-4M ou 126 parachutistes d'assaut).",
+		"defend": "Suite d'autoprotection President-S avec brouilleurs laser contre missiles thermiques portatifs MANPADS.",
+		"special_trick": "Déploiement Massif VDV : Largage en séquence de sections blindées complètes avec parachutes rétro-fusées freinées.",
+		"friendly_integration": "Couverture de zone assurée par Su-57 Felon et brouillage CEMA Krasukha-4 pour masquer la zone d'atterrissage."
+	},
+	"kamaz_resupply_truck": {
+		"title": "KamAZ-6350 8x8 : Convoi Logistique Tactique & Ravitaillement de Munitions",
+		"domain": "LAND",
+		"enemy_category": "Drones Kamikazes FPV & Équipes Antichar Embousquées (Javelin / FPV Swarm)",
+		"opposing_threat": "fpv_fiber_swarm",
+		"friendly_partner": "t_90m_platoon",
+		"move_act": "Progression en convoi tout-terrain 8x8 à 40 km/h sur pistes secondaires et zones défoncées.",
+		"fight": "Approvisionnement rapide en obus 125mm, missiles Kornet, carburant diesel et munitions pour l'échelon de tête.",
+		"defend": "Blindage cabine cablée, brouilleurs locaux anti-drones RP-377 et bâches de camouflage thermique.",
+		"special_trick": "Ravitaillement Express sous le Feu : Réapprovisionne les blindés de combat en moins de 90 secondes en bordure de tranchée.",
+		"friendly_integration": "Escorte directe assurée par pelotons T-90M et couverture aérienne par drones Lancet-3 en surveillance avancée."
 	}
 }
 

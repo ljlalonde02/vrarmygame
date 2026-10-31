@@ -276,7 +276,7 @@
       "display_name": "Sukhoi S-70 Okhotnik-B Stealth UCAV",
       "wiki_page_title": "Sukhoi S-70 Okhotnik-B",
       "wiki_url": "https://en.wikipedia.org/wiki/Sukhoi_S-70_Okhotnik-B",
-      "wiki_summary": "The Sukhoi S-70 Okhotnik-B, also referred to as Hunter-B, is a Russian stealth heavy unmanned combat aerial vehicle (UCAV) being developed by Sukhoi and Russian Aircraft Corporation MiG. Several prototypes underwent flight testing in 2019–2023 and, as of January 2024, it was projected that production could begin as early as the second half of 2024.",
+      "wiki_summary": "The Sukhoi S-70 Okhotnik-B, also referred to as Hunter-B, is a Russian stealth heavy unmanned combat aerial vehicle (UCAV) being developed by Sukhoi and Russian Aircraft Corporation MiG. Several prototypes underwent flight testing in 2019\u20132023 and, as of January 2024, it was projected that production could begin as early as the second half of 2024.",
       "image_res_path": "res://assets/wiki_images/platforms/s_70_okhotnik.jpg",
       "country_origin": "RUS",
       "service_year": 2027,
@@ -304,9 +304,9 @@
       "platform_id": 11,
       "slug": "bayraktar_kizilelma",
       "display_name": "Bayraktar Kizilelma Unmanned Fighter",
-      "wiki_page_title": "Baykar Bayraktar Kızılelma",
+      "wiki_page_title": "Baykar Bayraktar K\u0131z\u0131lelma",
       "wiki_url": "https://en.wikipedia.org/wiki/Bayraktar_K%C4%B1z%C4%B1lelma",
-      "wiki_summary": "The Bayraktar Kızılelma is a single-engine, stealth, carrier-capable, jet-powered, artificial intelligence capable multirole unmanned fighter aircraft, developed by Turkish defense company Baykar. It is also a loyal wingman drone. It is one of the two Turkish jet-powered stealth UCAV, along with the TAI Anka-3. The aircraft incorporates autonomous flight, take off, landing and taxi capability. It is equipped with an artificial intelligence (AI) enabled mission computer. Its structure is optimized for both short-runway and aircraft carrier operations. The aircraft is equipped with Aselsan made ",
+      "wiki_summary": "The Bayraktar K\u0131z\u0131lelma is a single-engine, stealth, carrier-capable, jet-powered, artificial intelligence capable multirole unmanned fighter aircraft, developed by Turkish defense company Baykar. It is also a loyal wingman drone. It is one of the two Turkish jet-powered stealth UCAV, along with the TAI Anka-3. The aircraft incorporates autonomous flight, take off, landing and taxi capability. It is equipped with an artificial intelligence (AI) enabled mission computer. Its structure is optimized for both short-runway and aircraft carrier operations. The aircraft is equipped with Aselsan made ",
       "image_res_path": "res://assets/wiki_images/platforms/bayraktar_kizilelma.jpg",
       "country_origin": "TUR",
       "service_year": 2026,
@@ -366,7 +366,7 @@
       "display_name": "Armed Quadruped Robot Dog Assault Pack",
       "wiki_page_title": "Quadruped robot",
       "wiki_url": "https://en.wikipedia.org/wiki/Quadruped_robot",
-      "wiki_summary": "Hangzhou Yunshenchu Technology Co., Ltd. (known as Deep Robotics; Chinese: 云深处科技; pinyin: Yúnshēnchù Kējì) is Chinese robotics company headquartered in Hangzhou, Zhejiang. \nThe company has gained attention from the media due to its development of quadruped robots particularly for industrial use.",
+      "wiki_summary": "Hangzhou Yunshenchu Technology Co., Ltd. (known as Deep Robotics; Chinese: \u4e91\u6df1\u5904\u79d1\u6280; pinyin: Y\u00fansh\u0113nch\u00f9 K\u0113j\u00ec) is Chinese robotics company headquartered in Hangzhou, Zhejiang. \nThe company has gained attention from the media due to its development of quadruped robots particularly for industrial use.",
       "image_res_path": "res://assets/wiki_images/platforms/unitree_b2w_armed.png",
       "country_origin": "CHN",
       "service_year": 2026,
@@ -636,7 +636,7 @@
       "display_name": "Epirus Leonidas HPM Microwave C-UAS Stryker",
       "wiki_page_title": "Stryker",
       "wiki_url": "https://en.wikipedia.org/wiki/Stryker",
-      "wiki_summary": "The Stryker is a family of eight-wheeled armored fighting vehicles derived from the Canadian LAV III, which in turn derived from the Swiss Mowag Piranha. Stryker vehicles are produced by General Dynamics Land Systems-Canada (GDLS-C) for the United States Army in a plant in London, Ontario. It has four-wheel drive (8×4) and can be switched to all-wheel drive (8×8).",
+      "wiki_summary": "The Stryker is a family of eight-wheeled armored fighting vehicles derived from the Canadian LAV III, which in turn derived from the Swiss Mowag Piranha. Stryker vehicles are produced by General Dynamics Land Systems-Canada (GDLS-C) for the United States Army in a plant in London, Ontario. It has four-wheel drive (8\u00d74) and can be switched to all-wheel drive (8\u00d78).",
       "image_res_path": "res://assets/wiki_images/platforms/epirus_leonidas_hpm.jpg",
       "country_origin": "USA",
       "service_year": 2026,
@@ -786,7 +786,7 @@
       "display_name": "M1A2 SEPv3 Abrams Tank Platoon",
       "wiki_page_title": "M1 Abrams",
       "wiki_url": "https://en.wikipedia.org/wiki/M1_Abrams",
-      "wiki_summary": "The M1 Abrams is a third-generation American main battle tank designed by Chrysler Defense and named for General Creighton Abrams. Conceived for modern armored ground warfare, it is one of the heaviest tanks in service at nearly 73.6 short tons. It introduced several modern technologies to the United States armored forces, including a multifuel turbine engine, sophisticated Chobham composite armor, a computer fire control system, separate ammunition storage in a blowout compartment, and NBC protection for crew safety. Initial models of the M1 were armed with a 105 mm M68 gun, while later varia",
+      "wiki_summary": "The M1 Abrams is a third-generation American main battle tank designed by Chrysler Defense and named for General Creighton Abrams. Conceived for modern armored ground warfare, it is one of the heaviest tanks in service at nearly 73.6 short tons. It introduced several modern technologies to the United States armored forces, including a multifuel turbine engine, sophisticated Chobham composite armor, a computer fire control system, separate ammunition storage in a blowout compartment, and NBC protection for crew safety. Initial models of the M1 were armed with a 105\u00a0mm M68 gun, while later varia",
       "image_res_path": "res://assets/wiki_images/platforms/m1a2_sepv3_platoon.jpg",
       "country_origin": "USA",
       "service_year": 2025,
@@ -966,7 +966,7 @@
       "display_name": "T-90M Proryv-3 Tank Platoon (with Robot Dogs)",
       "wiki_page_title": "T-90",
       "wiki_url": "https://en.wikipedia.org/wiki/T-90",
-      "wiki_summary": "The T-90 is a third-generation Russian main battle tank developed from, and designed to replace the T-72. It uses a 125 mm 2A46 smoothbore main gun, the 1A45T fire-control system, an upgraded engine, and gunner's thermal sight. Standard protective measures include a blend of steel and composite armour, smoke grenade dischargers, Kontakt-5 explosive reactive armour (ERA) and the Shtora infrared anti-tank guided missile (ATGM) jamming system.",
+      "wiki_summary": "The T-90 is a third-generation Russian main battle tank developed from, and designed to replace the T-72. It uses a 125\u00a0mm 2A46 smoothbore main gun, the 1A45T fire-control system, an upgraded engine, and gunner's thermal sight. Standard protective measures include a blend of steel and composite armour, smoke grenade dischargers, Kontakt-5 explosive reactive armour (ERA) and the Shtora infrared anti-tank guided missile (ATGM) jamming system.",
       "image_res_path": "res://assets/wiki_images/platforms/t_90m_platoon.jpg",
       "country_origin": "RUS",
       "service_year": 2025,
@@ -1026,7 +1026,7 @@
       "display_name": "USS Arleigh Burke Flight III Destroyer",
       "wiki_page_title": "Arleigh Burke-class destroyer",
       "wiki_url": "https://en.wikipedia.org/wiki/Arleigh_Burke-class_destroyer",
-      "wiki_summary": "The Arleigh Burke class of guided-missile destroyers (DDGs) is a United States Navy class of destroyers centered on the Aegis Combat System and the SPY-1D multifunction radar. The class was developed as a more affordable supplement to the Ticonderoga-class cruisers. As of April 2026, 75 ships are active, with 24 more planned to enter service, making it the most numerous class of warships in the U.S. Navy. The class is named after Arleigh Burke, an American destroyer admiral in World War II and later Chief of Naval Operations.",
+      "wiki_summary": "The Arleigh Burke class of guided-missile destroyers (DDGs) is a United States Navy class of destroyers centered on the Aegis Combat System and the SPY-1D multifunction radar. The class was developed as a more affordable supplement to the Ticonderoga-class cruisers. As of April\u00a02026, 75 ships are active, with 24 more planned to enter service, making it the most numerous class of warships in the U.S. Navy. The class is named after Arleigh Burke, an American destroyer admiral in World War II and later Chief of Naval Operations.",
       "image_res_path": "res://assets/wiki_images/platforms/ddg_51_arleigh_burke.jpg",
       "country_origin": "USA",
       "service_year": 2026,
@@ -1146,7 +1146,7 @@
       "display_name": "Boeing Orca Autonomous XLUUV Submarine",
       "wiki_page_title": "Orca (UUV)",
       "wiki_url": "https://en.wikipedia.org/wiki/Orca_%28UUV%29",
-      "wiki_summary": "An autonomous underwater vehicle (AUV) is a robot that travels underwater without requiring continuous input from an operator. AUVs constitute part of a larger group of undersea systems known as unmanned underwater vehicles, a classification that includes non-autonomous remotely operated underwater vehicles (ROVs) – controlled and powered from the surface by an operator/pilot via an umbilical or using remote control. In military applications an AUV is more often referred to as an unmanned undersea vehicle (UUV). Underwater gliders are a subclass of AUVs. Homing torpedoes can also be considered",
+      "wiki_summary": "An autonomous underwater vehicle (AUV) is a robot that travels underwater without requiring continuous input from an operator. AUVs constitute part of a larger group of undersea systems known as unmanned underwater vehicles, a classification that includes non-autonomous remotely operated underwater vehicles (ROVs) \u2013 controlled and powered from the surface by an operator/pilot via an umbilical or using remote control. In military applications an AUV is more often referred to as an unmanned undersea vehicle (UUV). Underwater gliders are a subclass of AUVs. Homing torpedoes can also be considered",
       "image_res_path": "res://assets/wiki_images/platforms/orca_xluuv.jpg",
       "country_origin": "USA",
       "service_year": 2027,
@@ -1176,7 +1176,7 @@
       "display_name": "USS Cheyenne SSN-688(I) / Virginia Nuclear Attack Submarine",
       "wiki_page_title": "Los Angeles-class submarine",
       "wiki_url": "https://en.wikipedia.org/wiki/Los_Angeles-class_submarine",
-      "wiki_summary": "The Los Angeles class of submarines are nuclear-powered fast-attack submarines (SSN) in service with the United States Navy. Also known as the 688 class after the hull number of lead vessel USS Los Angeles (SSN-688), 62 were built from 1972 to 1996, the latter 23 to an improved 688i standard. As of 2026, 23 of the Los Angeles class remain in commission with 4 of those inactive in reserve, and they account for almost half of the U.S. Navy's 50 fast-attack submarines.",
+      "wiki_summary": "The Los Angeles class of submarines are nuclear-powered fast-attack submarines (SSN) in service with the United States Navy. Also known as the 688 class after the hull number of lead vessel USS\u00a0Los Angeles\u00a0(SSN-688), 62 were built from 1972 to 1996, the latter 23 to an improved 688i standard. As of 2026, 23 of the Los Angeles class remain in commission with 4 of those inactive in reserve, and they account for almost half of the U.S. Navy's 50 fast-attack submarines.",
       "image_res_path": "res://assets/wiki_images/platforms/ssn_688i_los_angeles.jpg",
       "country_origin": "USA",
       "service_year": 2026,
@@ -1296,7 +1296,7 @@
       "display_name": "KAI KF-21 Boramae 4.5-Gen Fighter Flight",
       "wiki_page_title": "KAI KF-21 Boramae",
       "wiki_url": "https://en.wikipedia.org/wiki/KAI_KF-21_Boramae",
-      "wiki_summary": "The KAI KF-21 Boramae is a South Korean twin-engine fighter aircraft. The initial goal of the program was to develop an indigenous multirole fighter for the Republic of Korea Air Force (ROKAF). The airframe of Blocks I and II adopts semi-stealth technology with partially embedded external weapons and MUM-T capabilities, while full stealth, including internal weapons bays is planned for the Block III or KF-21EX variant. As South Korea's second domestic fighter jet development program following the FA-50 series, the KF-21 makes the nation the fourth in the world—joining the United States, China,",
+      "wiki_summary": "The KAI KF-21 Boramae is a South Korean twin-engine fighter aircraft. The initial goal of the program was to develop an indigenous multirole fighter for the Republic of Korea Air Force (ROKAF). The airframe of Blocks I and II adopts semi-stealth technology with partially embedded external weapons and MUM-T capabilities, while full stealth, including internal weapons bays is planned for the Block III or KF-21EX variant. As South Korea's second domestic fighter jet development program following the FA-50 series, the KF-21 makes the nation the fourth in the world\u2014joining the United States, China,",
       "image_res_path": "res://assets/wiki_images/platforms/kf_21_boramae.jpg",
       "country_origin": "KOR",
       "service_year": 2026,
@@ -1386,7 +1386,7 @@
       "display_name": "KN-25 600mm Super-Large MLRS Battery",
       "wiki_page_title": "KN-25",
       "wiki_url": "https://en.wikipedia.org/wiki/KN-25",
-      "wiki_summary": "The 600 mm multiple rocket launcher (Korean: 600㎜방사포), widely known outside North Korea by its United States designation KN-25, is a weapon system that is referred to by North Korean state media as multiple rocket launcher, and by South Korea and the United States as short-range ballistic missile.",
+      "wiki_summary": "The 600 mm multiple rocket launcher (Korean:\u00a0600\u339c\ubc29\uc0ac\ud3ec), widely known outside North Korea by its United States designation KN-25, is a weapon system that is referred to by North Korean state media as multiple rocket launcher, and by South Korea and the United States as short-range ballistic missile.",
       "image_res_path": "res://assets/wiki_images/platforms/kn_25_mlrs_battery.png",
       "country_origin": "PRK",
       "service_year": 2025,
@@ -1534,7 +1534,7 @@
       "platform_id": 52,
       "slug": "bayraktar_akinci_ucav",
       "display_name": "Bayraktar Akinci Heavy Strike UCAV Wing",
-      "wiki_page_title": "Baykar Bayraktar Akıncı",
+      "wiki_page_title": "Baykar Bayraktar Ak\u0131nc\u0131",
       "wiki_url": "https://en.wikipedia.org/wiki/Baykar_Bayraktar_Akinci",
       "wiki_summary": "Bayraktar Akinci is a multirole high-altitude long-endurance (HALE) unmanned combat aerial vehicle (UCAV) manufactured by Turkish defence company Baykar. The first three units entered service with the Turkish Armed Forces on 29 August 2021.",
       "image_res_path": "res://assets/wiki_images/platforms/bayraktar_akinci_ucav.jpg",
@@ -1592,11 +1592,71 @@
     },
     {
       "platform_id": 54,
+      "slug": "c17_globemaster_iii",
+      "display_name": "C-17A Globemaster III Strategic Airlifter",
+      "wiki_page_title": "Boeing C-17 Globemaster III",
+      "wiki_url": "https://en.wikipedia.org/wiki/Boeing_C-17_Globemaster_III",
+      "wiki_summary": "The McDonnell Douglas/Boeing C-17 Globemaster III is a large military transport aircraft developed for the United States Air Force (USAF) during the 1980s and the early 1990s by McDonnell Douglas. The C-17 carries forward the name of two previous piston-engined military cargo aircraft, the Douglas C-74 Globemaster and the Douglas C-124 Globemaster II.",
+      "image_res_path": "res://assets/wiki_images/platforms/c17_globemaster_iii.jpg",
+      "country_origin": "USA",
+      "service_year": 2026,
+      "domain": "AIR",
+      "unit_class": "LOGISTICS",
+      "nato_symbol_code": "AIR_CARGO",
+      "max_speed_knots": 450.0,
+      "cruise_speed_knots": 420.0,
+      "combat_radius_km": 4400.0,
+      "max_altitude_m": 13700.0,
+      "rcs_m2": 45.0,
+      "ir_signature": 1.5,
+      "armor_rating": 10.0,
+      "max_hp": 140.0,
+      "elements_per_token": 1,
+      "unit_cost_musd": 340.0,
+      "autonomy_level": "MANNED",
+      "can_climb_steep_slopes": 0,
+      "carrier_sub_platform_slug": "vision_60_q_ugv",
+      "carrier_sub_count": 4,
+      "directed_energy_kw": 0.0,
+      "de_aoe_cone_deg": 0.0
+    },
+    {
+      "platform_id": 55,
+      "slug": "il76_candid",
+      "display_name": "Il-76MD-90A Candid Strategic Transport",
+      "wiki_page_title": "Ilyushin Il-76",
+      "wiki_url": "https://en.wikipedia.org/wiki/Ilyushin_Il-76",
+      "wiki_summary": "The Ilyushin Il-76 is a multi-purpose, fixed-wing, four-engine turbofan strategic airlifter designed by the Soviet Union's Ilyushin design bureau as a commercial freighter in 1967, to replace the Antonov An-12. It was developed to deliver heavy machinery to remote and poorly served areas. Military versions of the Il-76 have been widely used in Europe, Asia and Africa, including use as an aerial refueling tanker and command center.",
+      "image_res_path": "res://assets/wiki_images/platforms/il76_candid.jpg",
+      "country_origin": "RUS",
+      "service_year": 2025,
+      "domain": "AIR",
+      "unit_class": "LOGISTICS",
+      "nato_symbol_code": "AIR_CARGO",
+      "max_speed_knots": 440.0,
+      "cruise_speed_knots": 410.0,
+      "combat_radius_km": 4000.0,
+      "max_altitude_m": 12500.0,
+      "rcs_m2": 50.0,
+      "ir_signature": 1.6,
+      "armor_rating": 10.0,
+      "max_hp": 135.0,
+      "elements_per_token": 1,
+      "unit_cost_musd": 160.0,
+      "autonomy_level": "MANNED",
+      "can_climb_steep_slopes": 0,
+      "carrier_sub_platform_slug": "lancet_3_team",
+      "carrier_sub_count": 2,
+      "directed_energy_kw": 0.0,
+      "de_aoe_cone_deg": 0.0
+    },
+    {
+      "platform_id": 56,
       "slug": "hemtt_supply_convoy",
       "display_name": "Oshkosh M977 HEMTT Ammo & Drone Resupply Convoy",
       "wiki_page_title": "Heavy Expanded Mobility Tactical Truck",
       "wiki_url": "https://en.wikipedia.org/wiki/Heavy_Expanded_Mobility_Tactical_Truck",
-      "wiki_summary": "The Heavy Expanded Mobility Tactical Truck (HEMTT) is an eight-wheel drive, diesel-powered, 10-short-ton (9,100 kg) tactical truck. The M977 HEMTT entered service in 1982 with the United States Army as a replacement for the M520 Goer, and has remained in production for the U.S. Army and other nations. By Q2 2021, around 35,800 HEMTTs in various configurations had been produced by Oshkosh Defense through new-build contracts and around 14,000 of them had been re-manufactured. Latest variants have the A4 suffix.",
+      "wiki_summary": "The Heavy Expanded Mobility Tactical Truck (HEMTT) is an eight-wheel drive, diesel-powered, 10-short-ton (9,100\u00a0kg) tactical truck. The M977 HEMTT entered service in 1982 with the United States Army as a replacement for the M520 Goer, and has remained in production for the U.S. Army and other nations. By Q2 2021, around 35,800 HEMTTs in various configurations had been produced by Oshkosh Defense through new-build contracts and around 14,000 of them had been re-manufactured. Latest variants have the A4 suffix.",
       "image_res_path": "res://assets/wiki_images/platforms/hemtt_supply_convoy.jpg",
       "country_origin": "USA",
       "service_year": 2026,
@@ -1621,7 +1681,157 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 55,
+      "platform_id": 57,
+      "slug": "kamaz_resupply_truck",
+      "display_name": "KamAZ-6350 8x8 Tactical Fuel & Ammo Convoy",
+      "wiki_page_title": "KamAZ-6350",
+      "wiki_url": "https://en.wikipedia.org/wiki/KamAZ-6350",
+      "wiki_summary": "The KamAZ-4350 (Russian: \u041a\u0430\u043c\u0410\u0417-4350), also known as \"Mustang\" (Russian: \u041c\u0443\u0441\u0442\u0430\u043d\u0433), is a four-wheel drive truck produced by Kamaz in Naberezhnye Chelny. The vehicle has been in production since 2003 and is also designed for military applications. With the KamAZ-43501, there is a version with a slightly lower payload.\nIn addition to the KamAZ-4350 with two axles, there are also the KamAZ-5350 with three and the KamAZ-6350 with four axles.",
+      "image_res_path": "res://assets/wiki_images/platforms/kamaz_resupply_truck.jpg",
+      "country_origin": "RUS",
+      "service_year": 2026,
+      "domain": "LAND",
+      "unit_class": "LOGISTICS",
+      "nato_symbol_code": "LAND_SUPPLY",
+      "max_speed_knots": 40.0,
+      "cruise_speed_knots": 28.0,
+      "combat_radius_km": 400.0,
+      "max_altitude_m": 3200.0,
+      "rcs_m2": 4.2,
+      "ir_signature": 0.85,
+      "armor_rating": 12.0,
+      "max_hp": 90.0,
+      "elements_per_token": 6,
+      "unit_cost_musd": 4.8,
+      "autonomy_level": "MANNED",
+      "can_climb_steep_slopes": 0,
+      "carrier_sub_platform_slug": "lancet_3_team",
+      "carrier_sub_count": 1,
+      "directed_energy_kw": 0.0,
+      "de_aoe_cone_deg": 0.0
+    },
+    {
+      "platform_id": 58,
+      "slug": "ah_64e_apache_guardian",
+      "display_name": "AH-64E Apache Guardian Attack Helicopter",
+      "wiki_page_title": "Boeing AH-64 Apache",
+      "wiki_url": "https://en.wikipedia.org/wiki/Boeing_AH-64_Apache",
+      "wiki_summary": "The Hughes/McDonnell Douglas/Boeing AH-64 Apache is an American twin-turboshaft attack helicopter with a tailwheel-type landing gear and a tandem cockpit for a crew of two. Nose-mounted sensors help acquire targets and provide night vision. It carries a 30\u00a0mm (1.18\u00a0in) M230 chain gun under its forward fuselage and four hardpoints on stub-wing pylons for armament and stores, typically AGM-114 Hellfire missiles and Hydra 70 rocket pods. Redundant systems help it survive combat damage.",
+      "image_res_path": "res://assets/wiki_images/platforms/ah_64e_apache_guardian.jpg",
+      "country_origin": "USA",
+      "service_year": 2026,
+      "domain": "AIR",
+      "unit_class": "HELICOPTER",
+      "nato_symbol_code": "AIR_HELI_ATTACK",
+      "max_speed_knots": 165.0,
+      "cruise_speed_knots": 140.0,
+      "combat_radius_km": 480.0,
+      "max_altitude_m": 6000.0,
+      "rcs_m2": 2.5,
+      "ir_signature": 0.75,
+      "armor_rating": 8.0,
+      "max_hp": 75.0,
+      "elements_per_token": 4,
+      "unit_cost_musd": 38.0,
+      "autonomy_level": "MANNED",
+      "can_climb_steep_slopes": 0,
+      "carrier_sub_platform_slug": "fpv_fiber_swarm",
+      "carrier_sub_count": 2,
+      "directed_energy_kw": 0.0,
+      "de_aoe_cone_deg": 0.0
+    },
+    {
+      "platform_id": 59,
+      "slug": "ka_52_alligator",
+      "display_name": "Kamov Ka-52M Alligator Coaxial Attack Helicopter",
+      "wiki_page_title": "Kamov Ka-50",
+      "wiki_url": "https://en.wikipedia.org/wiki/Kamov_Ka-50",
+      "wiki_summary": "The Kamov Ka-50 \"Black Shark\", NATO reporting name Hokum\u00a0A, is a Soviet/Russian single-seat attack helicopter with the distinctive coaxial rotor system of the Kamov design bureau. It was designed in the 1980s and adopted for service in the Russian army in 1995. The Ka-50 is manufactured by the Progress company in Arsenyev. It is used as a heavily armed scout helicopter and has a rescue ejection system, rare for helicopters.",
+      "image_res_path": "res://assets/wiki_images/platforms/ka_52_alligator.jpg",
+      "country_origin": "RUS",
+      "service_year": 2025,
+      "domain": "AIR",
+      "unit_class": "HELICOPTER",
+      "nato_symbol_code": "AIR_HELI_ATTACK",
+      "max_speed_knots": 170.0,
+      "cruise_speed_knots": 145.0,
+      "combat_radius_km": 460.0,
+      "max_altitude_m": 5500.0,
+      "rcs_m2": 2.8,
+      "ir_signature": 0.8,
+      "armor_rating": 8.0,
+      "max_hp": 78.0,
+      "elements_per_token": 4,
+      "unit_cost_musd": 32.0,
+      "autonomy_level": "MANNED",
+      "can_climb_steep_slopes": 0,
+      "carrier_sub_platform_slug": "lancet_3_team",
+      "carrier_sub_count": 2,
+      "directed_energy_kw": 0.0,
+      "de_aoe_cone_deg": 0.0
+    },
+    {
+      "platform_id": 60,
+      "slug": "columbia_class_ssbn",
+      "display_name": "USS District of Columbia (SSBN-826) Nuclear Ballistic Submarine",
+      "wiki_page_title": "Columbia-class submarine",
+      "wiki_url": "https://en.wikipedia.org/wiki/Columbia-class_submarine",
+      "wiki_summary": "The upcoming Columbia class are nuclear-powered ballistic missile submarines of the United States Navy, designed to replace the Ohio class. Construction of the first vessel began on 1 October 2020, and is scheduled to enter service in 2031.",
+      "image_res_path": "res://assets/wiki_images/platforms/columbia_class_ssbn.jpg",
+      "country_origin": "USA",
+      "service_year": 2028,
+      "domain": "SEA",
+      "unit_class": "SSBN",
+      "nato_symbol_code": "SEA_SSBN",
+      "max_speed_knots": 22.0,
+      "cruise_speed_knots": 18.0,
+      "combat_radius_km": 12000.0,
+      "max_altitude_m": 350.0,
+      "rcs_m2": 0.001,
+      "ir_signature": 0.02,
+      "armor_rating": 16.0,
+      "max_hp": 180.0,
+      "elements_per_token": 1,
+      "unit_cost_musd": 3800.0,
+      "autonomy_level": "MANNED",
+      "can_climb_steep_slopes": 0,
+      "carrier_sub_platform_slug": "orca_xluuv",
+      "carrier_sub_count": 1,
+      "directed_energy_kw": 0.0,
+      "de_aoe_cone_deg": 0.0
+    },
+    {
+      "platform_id": 61,
+      "slug": "type_094_jin_ssbn",
+      "display_name": "PLA Navy Type 094 Jin-Class Strategic Ballistic Submarine",
+      "wiki_page_title": "Type 094 submarine",
+      "wiki_url": "https://en.wikipedia.org/wiki/Type_094_submarine",
+      "wiki_summary": "The Type 094 is a class of nuclear-powered ballistic missile submarines developed by China for the People's Liberation Army Navy Submarine Force. The Type 094 succeeds the Type 092 submarine and precedes the Type 096 submarine, which is under development.",
+      "image_res_path": "res://assets/wiki_images/platforms/type_094_jin_ssbn.jpg",
+      "country_origin": "CHN",
+      "service_year": 2026,
+      "domain": "SEA",
+      "unit_class": "SSBN",
+      "nato_symbol_code": "SEA_SSBN",
+      "max_speed_knots": 20.0,
+      "cruise_speed_knots": 16.0,
+      "combat_radius_km": 11000.0,
+      "max_altitude_m": 300.0,
+      "rcs_m2": 0.002,
+      "ir_signature": 0.03,
+      "armor_rating": 12.0,
+      "max_hp": 160.0,
+      "elements_per_token": 1,
+      "unit_cost_musd": 1800.0,
+      "autonomy_level": "MANNED",
+      "can_climb_steep_slopes": 0,
+      "carrier_sub_platform_slug": "orca_xluuv",
+      "carrier_sub_count": 1,
+      "directed_energy_kw": 0.0,
+      "de_aoe_cone_deg": 0.0
+    },
+    {
+      "platform_id": 62,
       "slug": "t_84_oplot_platoon",
       "display_name": "T-84 Oplot-M Ukrainian Tank Platoon (Duplet ERA)",
       "wiki_page_title": "T-84",
@@ -1651,12 +1861,12 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 56,
+      "platform_id": 63,
       "slug": "btr_4_bucephalus_co",
       "display_name": "BTR-4E Bucephalus Mechanized Infantry (with FPVs)",
       "wiki_page_title": "BTR-4",
       "wiki_url": "https://en.wikipedia.org/wiki/BTR-4",
-      "wiki_summary": "The BTR-4 \"Bucephalus\" is an amphibious 8×8 wheeled infantry fighting vehicle (IFV) designed in Ukraine by the Kharkiv Morozov Machine Building Design Bureau.",
+      "wiki_summary": "The BTR-4 \"Bucephalus\" is an amphibious 8\u00d78 wheeled infantry fighting vehicle (IFV) designed in Ukraine by the Kharkiv Morozov Machine Building Design Bureau.",
       "image_res_path": "res://assets/wiki_images/platforms/btr_4_bucephalus_co.jpg",
       "country_origin": "UKR",
       "service_year": 2026,
@@ -1681,7 +1891,7 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 57,
+      "platform_id": 64,
       "slug": "neptune_rk360mc_battery",
       "display_name": "RK-360MC Neptune Cruise & Vilkha-M Strike Battery",
       "wiki_page_title": "R-360 Neptune",
@@ -1711,12 +1921,12 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 58,
+      "platform_id": 65,
       "slug": "bohdana_2s22_artillery",
       "display_name": "2S22 Bohdana 155mm Self-Propelled Artillery Battery",
       "wiki_page_title": "2S22 Bohdana",
       "wiki_url": "https://en.wikipedia.org/wiki/2S22_Bohdana",
-      "wiki_summary": "The 2S22 Bohdana is a 155 mm 52-caliber NATO standard, wheeled self-propelled howitzer developed in Ukraine. Its prototype is mounted on the chassis of the Ukrainian six-wheel-drive KrAZ-6322 truck. It has an armoured cabin and storage for 20 shells. The howitzer has an effective range of 42 km (26 mi) with conventional shells and 60 km (37 mi) with rocket-assisted projectiles according to the manufacturer manuals. It can fire several types of shells including the extended-range M982 Excalibur at a rate of five rounds per minute.",
+      "wiki_summary": "The 2S22 Bohdana is a 155 mm 52-caliber NATO standard, wheeled self-propelled howitzer developed in Ukraine. Its prototype is mounted on the chassis of the Ukrainian six-wheel-drive KrAZ-6322 truck. It has an armoured cabin and storage for 20 shells. The howitzer has an effective range of 42\u00a0km (26\u00a0mi) with conventional shells and 60\u00a0km (37\u00a0mi) with rocket-assisted projectiles according to the manufacturer manuals. It can fire several types of shells including the extended-range M982 Excalibur at a rate of five rounds per minute.",
       "image_res_path": "res://assets/wiki_images/platforms/bohdana_2s22_artillery.jpg",
       "country_origin": "UKR",
       "service_year": 2026,
@@ -1741,7 +1951,7 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 59,
+      "platform_id": 66,
       "slug": "palianytsia_drone_uk",
       "display_name": "Palianytsia Rocket-Drone & Liutyi Deep-Strike Wing",
       "wiki_page_title": "Palianytsia (missile)",
@@ -1771,7 +1981,7 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 60,
+      "platform_id": 67,
       "slug": "dn_xi_mexican_armor",
       "display_name": "SEDENA DN-XI & ERC-90 Lynx Armored Cavalry Squadron",
       "wiki_page_title": "Panhard ERC 90 Sagaie",
@@ -1801,12 +2011,12 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 61,
+      "platform_id": 68,
       "slug": "f_5f_tiger_mex_flight",
       "display_name": "FAM F-5E/F Tiger II & Texan II Tactical Strike Flight",
       "wiki_page_title": "Mexican Air Force",
       "wiki_url": "https://en.wikipedia.org/wiki/Mexican_Air_Force",
-      "wiki_summary": "The Mexican Air Force is the air service branch under the Mexican Army of the Mexican Armed Forces. It is overseen by the Secretariat of National Defense. The objective of the FAM is to defend the integrity, independence, and sovereignty of Mexico. Its auxiliary tasks include internal security, assisting with public works, and natural disaster management. As of 2024, its commander is Óscar René Rubio Sánchez.",
+      "wiki_summary": "The Mexican Air Force is the air service branch under the Mexican Army of the Mexican Armed Forces. It is overseen by the Secretariat of National Defense. The objective of the FAM is to defend the integrity, independence, and sovereignty of Mexico. Its auxiliary tasks include internal security, assisting with public works, and natural disaster management. As of 2024, its commander is \u00d3scar Ren\u00e9 Rubio S\u00e1nchez.",
       "image_res_path": "res://assets/wiki_images/platforms/f_5f_tiger_mex_flight.png",
       "country_origin": "MEX",
       "service_year": 2026,
@@ -1831,7 +2041,7 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 62,
+      "platform_id": 69,
       "slug": "pola_benito_juarez_frigate",
       "display_name": "ARM Benito Juarez / Reformador (POLA-101) Frigate",
       "wiki_page_title": "Reformador-class frigate",
@@ -1861,7 +2071,7 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 63,
+      "platform_id": 70,
       "slug": "cvn_78_gerald_r_ford",
       "display_name": "USS Gerald R. Ford (CVN-78) Supercarrier CSG",
       "wiki_page_title": "USS Gerald R. Ford",
@@ -1891,7 +2101,7 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 64,
+      "platform_id": 71,
       "slug": "cns_fujian_cv18",
       "display_name": "CNS Fujian (CV-18) EMALS Supercarrier CSG",
       "wiki_page_title": "Chinese aircraft carrier Fujian",
@@ -1921,7 +2131,7 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 65,
+      "platform_id": 72,
       "slug": "fs_charles_de_gaulle_r91",
       "display_name": "FS Charles de Gaulle (R91) Nuclear Carrier CSG",
       "wiki_page_title": "French aircraft carrier Charles de Gaulle",
@@ -1951,12 +2161,12 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 66,
+      "platform_id": 73,
       "slug": "ins_vikrant_r11",
       "display_name": "INS Vikrant (R11) Carrier Battle Group",
       "wiki_page_title": "INS Vikrant (2013)",
       "wiki_url": "https://en.wikipedia.org/wiki/INS_Vikrant_(2013)",
-      "wiki_summary": "INS Vikrant is an aircraft carrier in service with the Indian Navy. The carrier is India's fourth carrier and the first to be built domestically. It was constructed by the Cochin Shipyard Limited (CSL). The name Vikrant is a tribute to India's first aircraft carrier INS Vikrant (1961). Vikrant means \"courageous\" in Sanskrit. The motto of the ship, \"जयेम सम् युधिस्पृधः\" (Sanskrit), means \"I defeat those who dare to challenge me\" (English). It is currently one of two active aircraft carriers in the Indian Navy, the other being the flagship INS Vikramaditya.",
+      "wiki_summary": "INS Vikrant is an aircraft carrier in service with the Indian Navy. The carrier is India's fourth carrier and the first to be built domestically. It was constructed by the Cochin Shipyard Limited (CSL). The name Vikrant is a tribute to India's first aircraft carrier INS Vikrant (1961). Vikrant means \"courageous\" in Sanskrit. The motto of the ship, \"\u091c\u092f\u0947\u092e \u0938\u092e\u094d \u092f\u0941\u0927\u093f\u0938\u094d\u092a\u0943\u0927\u0903\" (Sanskrit), means \"I defeat those who dare to challenge me\" (English). It is currently one of two active aircraft carriers in the Indian Navy, the other being the flagship INS Vikramaditya.",
       "image_res_path": "res://assets/wiki_images/platforms/ins_vikrant_r11.jpg",
       "country_origin": "IND",
       "service_year": 2026,
@@ -1981,7 +2191,7 @@
       "de_aoe_cone_deg": 0.0
     },
     {
-      "platform_id": 67,
+      "platform_id": 74,
       "slug": "admiral_gorshkov_frigate",
       "display_name": "Admiral Gorshkov (Project 22350) Zircon Frigate",
       "wiki_page_title": "Admiral Gorshkov-class frigate",
@@ -2007,130 +2217,6 @@
       "can_climb_steep_slopes": 0,
       "carrier_sub_platform_slug": "sea_baby_usv",
       "carrier_sub_count": 2,
-      "directed_energy_kw": 0.0,
-      "de_aoe_cone_deg": 0.0
-    },
-    {
-      "platform_id": 68,
-      "slug": "ah_64e_apache_guardian",
-      "display_name": "AH-64E Apache Guardian Flight",
-      "wiki_page_title": "Boeing AH-64 Apache",
-      "wiki_url": "https://en.wikipedia.org/wiki/Boeing_AH-64_Apache",
-      "wiki_summary": "The Boeing AH-64 Apache is an American twin-turboshaft attack helicopter with tandem cockpit, armed with AGM-114 Hellfire missiles and 30mm M230 chain gun.",
-      "image_res_path": "res://assets/wiki_images/platforms/ah_64e_apache_guardian.png",
-      "country_origin": "USA",
-      "service_year": 2026,
-      "domain": "AIR",
-      "unit_class": "HELICOPTER",
-      "nato_symbol_code": "AIR_HELICOPTER",
-      "max_speed_knots": 165.0,
-      "cruise_speed_knots": 140.0,
-      "combat_radius_km": 480.0,
-      "max_altitude_m": 6000.0,
-      "operational_altitude_m": 120.0,
-      "rcs_m2": 3.5,
-      "ir_signature": 0.85,
-      "armor_rating": 15.0,
-      "max_hp": 120.0,
-      "elements_per_token": 4,
-      "unit_cost_musd": 38.0,
-      "autonomy_level": "MANNED",
-      "can_climb_steep_slopes": 0,
-      "carrier_sub_platform_slug": "",
-      "carrier_sub_count": 0,
-      "directed_energy_kw": 0.0,
-      "de_aoe_cone_deg": 0.0
-    },
-    {
-      "platform_id": 69,
-      "slug": "ka_52_alligator",
-      "display_name": "Ka-52 Alligator Attack Helicopter Flight",
-      "wiki_page_title": "Kamov Ka-50",
-      "wiki_url": "https://en.wikipedia.org/wiki/Kamov_Ka-50",
-      "wiki_summary": "The Kamov Ka-52 'Alligator' is a Russian attack helicopter featuring coaxial contra-rotating rotors, armed with 9K121 Vikhr ATGMs, 30mm 2A42 cannon, and Vitebsk DIRCM defense.",
-      "image_res_path": "res://assets/wiki_images/platforms/ka_52_alligator.png",
-      "country_origin": "RUS",
-      "service_year": 2026,
-      "domain": "AIR",
-      "unit_class": "HELICOPTER",
-      "nato_symbol_code": "AIR_HELICOPTER",
-      "max_speed_knots": 170.0,
-      "cruise_speed_knots": 145.0,
-      "combat_radius_km": 460.0,
-      "max_altitude_m": 5500.0,
-      "operational_altitude_m": 120.0,
-      "rcs_m2": 4.0,
-      "ir_signature": 0.9,
-      "armor_rating": 18.0,
-      "max_hp": 130.0,
-      "elements_per_token": 4,
-      "unit_cost_musd": 32.0,
-      "autonomy_level": "MANNED",
-      "can_climb_steep_slopes": 0,
-      "carrier_sub_platform_slug": "",
-      "carrier_sub_count": 0,
-      "directed_energy_kw": 0.0,
-      "de_aoe_cone_deg": 0.0
-    },
-    {
-      "platform_id": 70,
-      "slug": "columbia_class_ssbn",
-      "display_name": "Columbia-Class Ballistic Missile Submarine",
-      "wiki_page_title": "Columbia-class submarine",
-      "wiki_url": "https://en.wikipedia.org/wiki/Columbia-class_submarine",
-      "wiki_summary": "The Columbia-class submarine is an American nuclear-powered ballistic missile submarine (SSBN) with electric drive, anechoic sound-dampening coatings, Trident II D5 LE SLBMs, and Mk 48 ADCAP torpedoes.",
-      "image_res_path": "res://assets/wiki_images/platforms/columbia_class_ssbn.png",
-      "country_origin": "USA",
-      "service_year": 2028,
-      "domain": "SEA",
-      "unit_class": "SSBN",
-      "nato_symbol_code": "SEA_SUB_BALLISTIC",
-      "max_speed_knots": 22.0,
-      "cruise_speed_knots": 20.0,
-      "combat_radius_km": 18000.0,
-      "max_altitude_m": -180.0,
-      "operational_altitude_m": -180.0,
-      "rcs_m2": 0.01,
-      "ir_signature": 0.1,
-      "armor_rating": 35.0,
-      "max_hp": 600.0,
-      "elements_per_token": 1,
-      "unit_cost_musd": 3800.0,
-      "autonomy_level": "MANNED",
-      "can_climb_steep_slopes": 0,
-      "carrier_sub_platform_slug": "",
-      "carrier_sub_count": 0,
-      "directed_energy_kw": 0.0,
-      "de_aoe_cone_deg": 0.0
-    },
-    {
-      "platform_id": 71,
-      "slug": "type_094_jin_ssbn",
-      "display_name": "Type 094 Jin-Class Ballistic Submarine",
-      "wiki_page_title": "Type 094 submarine",
-      "wiki_url": "https://en.wikipedia.org/wiki/Type_094_submarine",
-      "wiki_summary": "The Type 094 (Jin-class) is a Chinese nuclear-powered ballistic missile submarine equipped with 12 JL-3 submarine-launched ballistic missiles and Yu-6 heavyweight torpedoes.",
-      "image_res_path": "res://assets/wiki_images/platforms/type_094_jin_ssbn.png",
-      "country_origin": "CHN",
-      "service_year": 2027,
-      "domain": "SEA",
-      "unit_class": "SSBN",
-      "nato_symbol_code": "SEA_SUB_BALLISTIC",
-      "max_speed_knots": 20.0,
-      "cruise_speed_knots": 18.0,
-      "combat_radius_km": 15000.0,
-      "max_altitude_m": -150.0,
-      "operational_altitude_m": -150.0,
-      "rcs_m2": 0.02,
-      "ir_signature": 0.1,
-      "armor_rating": 30.0,
-      "max_hp": 550.0,
-      "elements_per_token": 1,
-      "unit_cost_musd": 1800.0,
-      "autonomy_level": "MANNED",
-      "can_climb_steep_slopes": 0,
-      "carrier_sub_platform_slug": "",
-      "carrier_sub_count": 0,
       "directed_energy_kw": 0.0,
       "de_aoe_cone_deg": 0.0
     }
@@ -2304,7 +2390,7 @@
       "display_name": "MBDA Meteor Ramjet BVR AAM",
       "wiki_page_title": "Meteor (missile)",
       "wiki_url": "https://en.wikipedia.org/wiki/Meteor_(missile)",
-      "wiki_summary": "The Meteor is a European active radar guided beyond-visual-range air-to-air missile (BVRAAM) developed and manufactured by MBDA. It offers a multi-shot capability, and has the ability to engage highly maneuverable targets such as jet aircraft, and small targets such as UAVs and cruise missiles in a heavy electronic countermeasures (ECM) environment with a range in excess of 200 kilometres (110 nmi).",
+      "wiki_summary": "The Meteor is a European active radar guided beyond-visual-range air-to-air missile (BVRAAM) developed and manufactured by MBDA. It offers a multi-shot capability, and has the ability to engage highly maneuverable targets such as jet aircraft, and small targets such as UAVs and cruise missiles in a heavy electronic countermeasures (ECM) environment with a range in excess of 200 kilometres (110\u00a0nmi).",
       "image_res_path": "res://assets/wiki_images/weapons/mbda_meteor.jpg",
       "target_domain_mask": 17,
       "guidance_type": "ACTIVE_RADAR",
@@ -2364,7 +2450,7 @@
       "display_name": "AGM-158B JASSM-ER Stealth Cruise",
       "wiki_page_title": "AGM-158 JASSM",
       "wiki_url": "https://en.wikipedia.org/wiki/AGM-158_JASSM",
-      "wiki_summary": "The AGM-158 Joint Air-to-Surface Standoff Missile is a low detection standoff air-launched cruise missile developed by Lockheed Martin for the United States Armed Forces. It is a large, stealthy long-range weapon with a 1,000-pound (450 kg) armor piercing warhead. It completed testing and entered service with the U.S. Air Force in 2009, and has entered foreign service in Australia, Finland, and Poland as of 2014. An extended range version of the missile, the AGM-158B JASSM-ER, entered service in 2014 as well as an anti-ship derivative, the AGM-158C LRASM in 2018.",
+      "wiki_summary": "The AGM-158 Joint Air-to-Surface Standoff Missile is a low detection standoff air-launched cruise missile developed by Lockheed Martin for the United States Armed Forces. It is a large, stealthy long-range weapon with a 1,000-pound (450\u00a0kg) armor piercing warhead. It completed testing and entered service with the U.S. Air Force in 2009, and has entered foreign service in Australia, Finland, and Poland as of 2014. An extended range version of the missile, the AGM-158B JASSM-ER, entered service in 2014 as well as an anti-ship derivative, the AGM-158C LRASM in 2018.",
       "image_res_path": "res://assets/wiki_images/weapons/agm_158_jassm.jpg",
       "target_domain_mask": 6,
       "guidance_type": "GPS_INS",
@@ -2424,7 +2510,7 @@
       "display_name": "KN-25 600mm Super-Large Guided MLRS",
       "wiki_page_title": "KN-25",
       "wiki_url": "https://en.wikipedia.org/wiki/KN-25",
-      "wiki_summary": "The 600 mm multiple rocket launcher (Korean: 600㎜방사포), widely known outside North Korea by its United States designation KN-25, is a weapon system that is referred to by North Korean state media as multiple rocket launcher, and by South Korea and the United States as short-range ballistic missile.",
+      "wiki_summary": "The 600 mm multiple rocket launcher (Korean:\u00a0600\u339c\ubc29\uc0ac\ud3ec), widely known outside North Korea by its United States designation KN-25, is a weapon system that is referred to by North Korean state media as multiple rocket launcher, and by South Korea and the United States as short-range ballistic missile.",
       "image_res_path": "res://assets/wiki_images/weapons/kn_25_600mm_mlrs.png",
       "target_domain_mask": 2,
       "guidance_type": "GPS_INS",
@@ -2464,7 +2550,7 @@
       "display_name": "3M22 Zircon Scramjet Hypersonic",
       "wiki_page_title": "3M22 Zircon",
       "wiki_url": "https://en.wikipedia.org/wiki/3M22_Zircon",
-      "wiki_summary": "The 3M22 Zircon, also spelled Tsirkon, is a Russian nuclear-capable missile. Produced by NPO Mashinostroyeniya for the Russian Navy, the missile utilizes the 3S-14 launch platforms on frigates and submarines. The missile has a reported maximum top speed of Mach 9, which is disputed by analysts; its sustained flight speeds are significantly lower and it is described as slowing further before terminal impact. The weapon was first used during the Russo-Ukrainian war.",
+      "wiki_summary": "The 3M22 Zircon, also spelled Tsirkon, is a Russian nuclear-capable missile. Produced by NPO Mashinostroyeniya for the Russian Navy, the missile utilizes the 3S-14 launch platforms on frigates and submarines. The missile has a reported maximum top speed of Mach\u00a09, which is disputed by analysts; its sustained flight speeds are significantly lower and it is described as slowing further before terminal impact. The weapon was first used during the Russo-Ukrainian war.",
       "image_res_path": "res://assets/wiki_images/weapons/3m22_zircon.jpg",
       "target_domain_mask": 6,
       "guidance_type": "ACTIVE_RADAR",
@@ -2484,7 +2570,7 @@
       "display_name": "Kh-47M2 Kinzhal Air-Launched Ballistic",
       "wiki_page_title": "Kh-47M2 Kinzhal",
       "wiki_url": "https://en.wikipedia.org/wiki/Kh-47M2_Kinzhal",
-      "wiki_summary": "The Kh-47M2 Kinzhal is a Russian air-launched ballistic missile. It has an estimated range of 460–480 km (290–300 mi) and a reported top speed of Mach 10. It can carry either conventional or nuclear warheads and can be launched by Tu-22M3 bombers, MiG-31K interceptors, or modified Su-34 fighter–bombers.",
+      "wiki_summary": "The Kh-47M2 Kinzhal is a Russian air-launched ballistic missile. It has an estimated range of 460\u2013480\u00a0km (290\u2013300\u00a0mi) and a reported top speed of Mach 10. It can carry either conventional or nuclear warheads and can be launched by Tu-22M3 bombers, MiG-31K interceptors, or modified Su-34 fighter\u2013bombers.",
       "image_res_path": "res://assets/wiki_images/weapons/kh_47m2_kinzhal.jpg",
       "target_domain_mask": 6,
       "guidance_type": "GPS_INS",
@@ -2864,7 +2950,7 @@
       "display_name": "Stugna-P (Skif) Laser-Guided Heavy ATGM",
       "wiki_page_title": "Skif (anti-tank guided missile)",
       "wiki_url": "https://en.wikipedia.org/wiki/Skif_(anti-tank_guided_missile)",
-      "wiki_summary": "The Skif, also known as the Stugna-P or Stuhna-P, is a Ukrainian anti-tank guided missile (ATGM) system developed in the early 2010s by the Luch Design Bureau, a unit of UkrOboronProm. The initial guidance device PN-S (ПН-С) of the Skif was developed and manufactured by Belarusian design bureau Peleng based in Minsk.",
+      "wiki_summary": "The Skif, also known as the Stugna-P or Stuhna-P, is a Ukrainian anti-tank guided missile (ATGM) system developed in the early 2010s by the Luch Design Bureau, a unit of UkrOboronProm. The initial guidance device PN-S (\u041f\u041d-\u0421) of the Skif was developed and manufactured by Belarusian design bureau Peleng based in Minsk.",
       "image_res_path": "res://assets/wiki_images/weapons/stugna_p_atgm.jpg",
       "target_domain_mask": 2,
       "guidance_type": "IR",
@@ -2897,146 +2983,6 @@
       "warhead_damage": 850.0,
       "is_interceptable": 0,
       "round_cost_musd": 45.0
-    },
-    {
-      "weapon_id": 32,
-      "slug": "agm_114_hellfire",
-      "display_name": "AGM-114 Hellfire ATGM",
-      "wiki_page_title": "AGM-114 Hellfire",
-      "wiki_url": "https://en.wikipedia.org/wiki/AGM-114_Hellfire",
-      "wiki_summary": "The AGM-114 Hellfire is an American air-to-surface missile first developed for anti-armor use and precision strikes.",
-      "image_res_path": "res://assets/wiki_images/weapons/agm_114_hellfire.png",
-      "target_domain_mask": 2,
-      "guidance_type": "SEMI_ACTIVE_LASER",
-      "max_range_km": 11.0,
-      "no_escape_range_km": 7.0,
-      "min_range_km": 0.5,
-      "speed_mach": 1.3,
-      "flight_profile": "DIRECT_FIRE",
-      "base_pk": 0.88,
-      "warhead_damage": 95.0,
-      "is_interceptable": 1,
-      "round_cost_musd": 0.15
-    },
-    {
-      "weapon_id": 33,
-      "slug": "m230_30mm_chain_gun",
-      "display_name": "M230 30mm Automatic Chain Gun",
-      "wiki_page_title": "M230 chain gun",
-      "wiki_url": "https://en.wikipedia.org/wiki/M230_chain_gun",
-      "wiki_summary": "The M230 Chain Gun is a 30 mm automatic autocannon mounted on the AH-64 Apache attack helicopter.",
-      "image_res_path": "res://assets/wiki_images/weapons/m230_30mm_chain_gun.png",
-      "target_domain_mask": 2,
-      "guidance_type": "UNGUIDED",
-      "max_range_km": 3.5,
-      "no_escape_range_km": 1.5,
-      "min_range_km": 0.1,
-      "speed_mach": 2.4,
-      "flight_profile": "DIRECT_FIRE",
-      "base_pk": 0.65,
-      "warhead_damage": 35.0,
-      "is_interceptable": 0,
-      "round_cost_musd": 0.01
-    },
-    {
-      "weapon_id": 34,
-      "slug": "9k121_vikhr_atgm",
-      "display_name": "9K121 Vikhr Laser-Guided ATGM",
-      "wiki_page_title": "9K121 Vikhr",
-      "wiki_url": "https://en.wikipedia.org/wiki/9K121_Vikhr",
-      "wiki_summary": "The 9K121 Vikhr is a Russian laser beam-riding anti-tank missile deployed from the Ka-52 Alligator attack helicopter.",
-      "image_res_path": "res://assets/wiki_images/weapons/9k121_vikhr_atgm.png",
-      "target_domain_mask": 2,
-      "guidance_type": "LASER_BEAM_RIDER",
-      "max_range_km": 12.0,
-      "no_escape_range_km": 8.0,
-      "min_range_km": 0.5,
-      "speed_mach": 1.8,
-      "flight_profile": "DIRECT_FIRE",
-      "base_pk": 0.85,
-      "warhead_damage": 95.0,
-      "is_interceptable": 1,
-      "round_cost_musd": 0.12
-    },
-    {
-      "weapon_id": 35,
-      "slug": "cannon_2a42_30mm",
-      "display_name": "2A42 30mm Dual-Feed Autocannon",
-      "wiki_page_title": "2A42 autocannon",
-      "wiki_url": "https://en.wikipedia.org/wiki/2A42",
-      "wiki_summary": "The 2A42 is a 30 mm automatic autocannon developed in the Soviet Union and used on the Ka-52 Alligator.",
-      "image_res_path": "res://assets/wiki_images/weapons/cannon_2a42_30mm.png",
-      "target_domain_mask": 2,
-      "guidance_type": "UNGUIDED",
-      "max_range_km": 4.0,
-      "no_escape_range_km": 2.0,
-      "min_range_km": 0.1,
-      "speed_mach": 2.8,
-      "flight_profile": "DIRECT_FIRE",
-      "base_pk": 0.65,
-      "warhead_damage": 40.0,
-      "is_interceptable": 0,
-      "round_cost_musd": 0.01
-    },
-    {
-      "weapon_id": 36,
-      "slug": "trident_ii_d5_slbm",
-      "display_name": "UGM-133A Trident II D5 LE SLBM",
-      "wiki_page_title": "UGM-133 Trident II",
-      "wiki_url": "https://en.wikipedia.org/wiki/UGM-133_Trident_II",
-      "wiki_summary": "The UGM-133A Trident II is an American submarine-launched ballistic missile (SLBM) with multiple independently targetable reentry vehicles.",
-      "image_res_path": "res://assets/wiki_images/weapons/trident_ii_d5_slbm.png",
-      "target_domain_mask": 2,
-      "guidance_type": "ASTRO_INERTIAL",
-      "max_range_km": 12000.0,
-      "no_escape_range_km": 8000.0,
-      "min_range_km": 100.0,
-      "speed_mach": 24.0,
-      "flight_profile": "LOFTED_BALLISTIC",
-      "base_pk": 0.99,
-      "warhead_damage": 1000.0,
-      "is_interceptable": 1,
-      "round_cost_musd": 31.0
-    },
-    {
-      "weapon_id": 37,
-      "slug": "jl_3_slbm",
-      "display_name": "JL-3 Intercontinental SLBM",
-      "wiki_page_title": "JL-3",
-      "wiki_url": "https://en.wikipedia.org/wiki/JL-3",
-      "wiki_summary": "The Julang-3 is a third-generation Chinese intercontinental submarine-launched ballistic missile deployed aboard Type 094 SSBNs.",
-      "image_res_path": "res://assets/wiki_images/weapons/jl_3_slbm.png",
-      "target_domain_mask": 2,
-      "guidance_type": "ASTRO_INERTIAL",
-      "max_range_km": 10000.0,
-      "no_escape_range_km": 6500.0,
-      "min_range_km": 100.0,
-      "speed_mach": 20.0,
-      "flight_profile": "LOFTED_BALLISTIC",
-      "base_pk": 0.98,
-      "warhead_damage": 900.0,
-      "is_interceptable": 1,
-      "round_cost_musd": 25.0
-    },
-    {
-      "weapon_id": 38,
-      "slug": "yu_6_torpedo",
-      "display_name": "Yu-6 Heavyweight Torpedo",
-      "wiki_page_title": "Yu-6 torpedo",
-      "wiki_url": "https://en.wikipedia.org/wiki/Yu-6_torpedo",
-      "wiki_summary": "The Yu-6 is a Chinese thermal-powered wire-guided heavyweight torpedo used by nuclear submarines.",
-      "image_res_path": "res://assets/wiki_images/weapons/yu_6_torpedo.png",
-      "target_domain_mask": 4,
-      "guidance_type": "WIRE_ACOUSTIC",
-      "max_range_km": 45.0,
-      "no_escape_range_km": 25.0,
-      "min_range_km": 0.5,
-      "speed_mach": 0.15,
-      "flight_profile": "DIRECT_FIRE",
-      "base_pk": 0.85,
-      "warhead_damage": 280.0,
-      "is_interceptable": 1,
-      "round_cost_musd": 1.8
     }
   ],
   "platform_sensors": [
@@ -3254,11 +3200,11 @@
     },
     {
       "platform_id": 54,
-      "sensor_id": 10
+      "sensor_id": 2
     },
     {
       "platform_id": 55,
-      "sensor_id": 10
+      "sensor_id": 2
     },
     {
       "platform_id": 56,
@@ -3270,59 +3216,63 @@
     },
     {
       "platform_id": 58,
-      "sensor_id": 10
+      "sensor_id": 2
     },
     {
       "platform_id": 59,
-      "sensor_id": 10
-    },
-    {
-      "platform_id": 60,
-      "sensor_id": 10
-    },
-    {
-      "platform_id": 61,
       "sensor_id": 2
     },
     {
       "platform_id": 62,
-      "sensor_id": 7
+      "sensor_id": 10
     },
     {
       "platform_id": 63,
-      "sensor_id": 7
+      "sensor_id": 10
     },
     {
       "platform_id": 64,
-      "sensor_id": 6
+      "sensor_id": 10
     },
     {
       "platform_id": 65,
-      "sensor_id": 7
+      "sensor_id": 10
     },
     {
       "platform_id": 66,
-      "sensor_id": 7
+      "sensor_id": 10
     },
     {
       "platform_id": 67,
-      "sensor_id": 5
+      "sensor_id": 10
     },
     {
       "platform_id": 68,
-      "sensor_id": 10
+      "sensor_id": 2
     },
     {
       "platform_id": 69,
-      "sensor_id": 10
+      "sensor_id": 7
     },
     {
       "platform_id": 70,
-      "sensor_id": 13
+      "sensor_id": 7
     },
     {
       "platform_id": 71,
-      "sensor_id": 13
+      "sensor_id": 6
+    },
+    {
+      "platform_id": 72,
+      "sensor_id": 7
+    },
+    {
+      "platform_id": 73,
+      "sensor_id": 7
+    },
+    {
+      "platform_id": 74,
+      "sensor_id": 5
     }
   ],
   "platform_loadouts": [
@@ -3861,8 +3811,8 @@
       "platform_id": 54,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
-      "weapon_1_id": 16,
-      "weapon_1_qty": 8,
+      "weapon_1_id": 15,
+      "weapon_1_qty": 4,
       "weapon_2_id": 0,
       "weapon_2_qty": 0
     },
@@ -3871,14 +3821,84 @@
       "platform_id": 55,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
+      "weapon_1_id": 0,
+      "weapon_1_qty": 0,
+      "weapon_2_id": 0,
+      "weapon_2_qty": 0
+    },
+    {
+      "loadout_id": 56,
+      "platform_id": 56,
+      "role_code": "STANDARD",
+      "display_name": "Standard Combat Loadout",
+      "weapon_1_id": 16,
+      "weapon_1_qty": 8,
+      "weapon_2_id": 0,
+      "weapon_2_qty": 0
+    },
+    {
+      "loadout_id": 57,
+      "platform_id": 57,
+      "role_code": "STANDARD",
+      "display_name": "Standard Combat Loadout",
+      "weapon_1_id": 17,
+      "weapon_1_qty": 8,
+      "weapon_2_id": 0,
+      "weapon_2_qty": 0
+    },
+    {
+      "loadout_id": 58,
+      "platform_id": 58,
+      "role_code": "STANDARD",
+      "display_name": "Standard Combat Loadout",
+      "weapon_1_id": 21,
+      "weapon_1_qty": 16,
+      "weapon_2_id": 25,
+      "weapon_2_qty": 60
+    },
+    {
+      "loadout_id": 59,
+      "platform_id": 59,
+      "role_code": "STANDARD",
+      "display_name": "Standard Combat Loadout",
+      "weapon_1_id": 30,
+      "weapon_1_qty": 16,
+      "weapon_2_id": 25,
+      "weapon_2_qty": 60
+    },
+    {
+      "loadout_id": 60,
+      "platform_id": 60,
+      "role_code": "STANDARD",
+      "display_name": "Standard Combat Loadout",
+      "weapon_1_id": 9,
+      "weapon_1_qty": 16,
+      "weapon_2_id": 27,
+      "weapon_2_qty": 12
+    },
+    {
+      "loadout_id": 61,
+      "platform_id": 61,
+      "role_code": "STANDARD",
+      "display_name": "Standard Combat Loadout",
+      "weapon_1_id": 10,
+      "weapon_1_qty": 12,
+      "weapon_2_id": 27,
+      "weapon_2_qty": 8
+    },
+    {
+      "loadout_id": 62,
+      "platform_id": 62,
+      "role_code": "STANDARD",
+      "display_name": "Standard Combat Loadout",
       "weapon_1_id": 22,
       "weapon_1_qty": 40,
       "weapon_2_id": 30,
       "weapon_2_qty": 8
     },
     {
-      "loadout_id": 56,
-      "platform_id": 56,
+      "loadout_id": 63,
+      "platform_id": 63,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
       "weapon_1_id": 30,
@@ -3887,8 +3907,8 @@
       "weapon_2_qty": 18
     },
     {
-      "loadout_id": 57,
-      "platform_id": 57,
+      "loadout_id": 64,
+      "platform_id": 64,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
       "weapon_1_id": 28,
@@ -3897,8 +3917,8 @@
       "weapon_2_qty": 12
     },
     {
-      "loadout_id": 58,
-      "platform_id": 58,
+      "loadout_id": 65,
+      "platform_id": 65,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
       "weapon_1_id": 29,
@@ -3907,8 +3927,8 @@
       "weapon_2_qty": 8
     },
     {
-      "loadout_id": 59,
-      "platform_id": 59,
+      "loadout_id": 66,
+      "platform_id": 66,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
       "weapon_1_id": 28,
@@ -3917,8 +3937,8 @@
       "weapon_2_qty": 12
     },
     {
-      "loadout_id": 60,
-      "platform_id": 60,
+      "loadout_id": 67,
+      "platform_id": 67,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
       "weapon_1_id": 21,
@@ -3927,8 +3947,8 @@
       "weapon_2_qty": 12
     },
     {
-      "loadout_id": 61,
-      "platform_id": 61,
+      "loadout_id": 68,
+      "platform_id": 68,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
       "weapon_1_id": 1,
@@ -3937,8 +3957,8 @@
       "weapon_2_qty": 6
     },
     {
-      "loadout_id": 62,
-      "platform_id": 62,
+      "loadout_id": 69,
+      "platform_id": 69,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
       "weapon_1_id": 13,
@@ -3947,8 +3967,8 @@
       "weapon_2_qty": 8
     },
     {
-      "loadout_id": 63,
-      "platform_id": 63,
+      "loadout_id": 70,
+      "platform_id": 70,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
       "weapon_1_id": 13,
@@ -3957,8 +3977,8 @@
       "weapon_2_qty": 32
     },
     {
-      "loadout_id": 64,
-      "platform_id": 64,
+      "loadout_id": 71,
+      "platform_id": 71,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
       "weapon_1_id": 10,
@@ -3967,8 +3987,8 @@
       "weapon_2_qty": 64
     },
     {
-      "loadout_id": 65,
-      "platform_id": 65,
+      "loadout_id": 72,
+      "platform_id": 72,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
       "weapon_1_id": 2,
@@ -3977,8 +3997,8 @@
       "weapon_2_qty": 24
     },
     {
-      "loadout_id": 66,
-      "platform_id": 66,
+      "loadout_id": 73,
+      "platform_id": 73,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
       "weapon_1_id": 6,
@@ -3987,54 +4007,14 @@
       "weapon_2_qty": 32
     },
     {
-      "loadout_id": 67,
-      "platform_id": 67,
+      "loadout_id": 74,
+      "platform_id": 74,
       "role_code": "STANDARD",
       "display_name": "Standard Combat Loadout",
       "weapon_1_id": 10,
       "weapon_1_qty": 24,
       "weapon_2_id": 14,
       "weapon_2_qty": 32
-    },
-    {
-      "loadout_id": 68,
-      "platform_id": 68,
-      "role_code": "STANDARD",
-      "display_name": "Hellfire + Chain Gun",
-      "weapon_1_id": 32,
-      "weapon_1_qty": 16,
-      "weapon_2_id": 33,
-      "weapon_2_qty": 1200
-    },
-    {
-      "loadout_id": 69,
-      "platform_id": 69,
-      "role_code": "STANDARD",
-      "display_name": "Vikhr + 30mm Cannon",
-      "weapon_1_id": 34,
-      "weapon_1_qty": 12,
-      "weapon_2_id": 35,
-      "weapon_2_qty": 460
-    },
-    {
-      "loadout_id": 70,
-      "platform_id": 70,
-      "role_code": "STANDARD",
-      "display_name": "Trident II D5 + Mk 48",
-      "weapon_1_id": 36,
-      "weapon_1_qty": 16,
-      "weapon_2_id": 27,
-      "weapon_2_qty": 16
-    },
-    {
-      "loadout_id": 71,
-      "platform_id": 71,
-      "role_code": "STANDARD",
-      "display_name": "JL-3 SLBM + Yu-6 Torpedo",
-      "weapon_1_id": 37,
-      "weapon_1_qty": 12,
-      "weapon_2_id": 38,
-      "weapon_2_qty": 16
     }
   ],
   "formation_templates": [
@@ -4650,7 +4630,7 @@
       "display_name": "Operation High Sentinel (5,600m Himalayan LAC: Tejas Mk2 & Zorawar vs J-20)",
       "theater_slug": "himalaya_lac_theater",
       "era_label": "2028 Extreme-Altitude Mountain & Robot Dog Warfare",
-      "briefing_opord": "OPORD 28-06: Across 5,600m Karakoram peaks where heavy tanks bog down on >25° slopes, deploy Indian Zorawar high-altitude light tanks, HAL Tejas Mk2 fighters, BrahMos supersonic cruise batteries, and cliff-climbing Quadruped Robot Dog packs against J-20 stealth flights and JF-17 Block III squadrons.",
+      "briefing_opord": "OPORD 28-06: Across 5,600m Karakoram peaks where heavy tanks bog down on >25\u00b0 slopes, deploy Indian Zorawar high-altitude light tanks, HAL Tejas Mk2 fighters, BrahMos supersonic cruise batteries, and cliff-climbing Quadruped Robot Dog packs against J-20 stealth flights and JF-17 Block III squadrons.",
       "blue_budget_musd": 2900.0,
       "red_budget_musd": 2900.0,
       "orbat_json": "{\"scale\": \"HIMALAYA_LAC\", \"brigades_per_side\": 3}"
@@ -4683,7 +4663,7 @@
       "display_name": "Operation Doomsday Clock 2028 (8-Chapter Story Campaign with Live Veo 3.1 News & Capabilities)",
       "theater_slug": "strait_theater",
       "era_label": "2028 Complete Historical Progression & Capabilities Showcase (DEFCON 5 -> DEFCON 1)",
-      "briefing_opord": "OPORD 28-00 // STORY PROLOGUE & 8-MISSION PROGRESSION: Experience the complete historical escalation of the 2028 Global Conflict from DEFCON 5 to DEFCON 1 across 8 guided story missions—each introduced by a live Google Veo 3.1 TV News Video Broadcast, Presidential Directive, and Officer Voice Briefing while progressively unlocking Stealth SEAD, Robot Dogs & FPV Swarms, Naval USV Wolfpacks, Diplomacy & Airspace Treaties, R&D Tech Tree, Space ASAT & HEMP, Bunker Relocation, and Orbital Tungsten Rods / Thermonuclear Deterrence.",
+      "briefing_opord": "OPORD 28-00 // STORY PROLOGUE & 8-MISSION PROGRESSION: Experience the complete historical escalation of the 2028 Global Conflict from DEFCON 5 to DEFCON 1 across 8 guided story missions\u2014each introduced by a live Google Veo 3.1 TV News Video Broadcast, Presidential Directive, and Officer Voice Briefing while progressively unlocking Stealth SEAD, Robot Dogs & FPV Swarms, Naval USV Wolfpacks, Diplomacy & Airspace Treaties, R&D Tech Tree, Space ASAT & HEMP, Bunker Relocation, and Orbital Tungsten Rods / Thermonuclear Deterrence.",
       "blue_budget_musd": 4800.0,
       "red_budget_musd": 4800.0,
       "orbat_json": "{\"scale\": \"STORY_PROGRESSION_CAMPAIGN\", \"missions\": 8, \"brigades_per_side\": 5}"
@@ -4699,7 +4679,7 @@
       "prompt_text": "Welcome to the C4ISR Command Bunker, Commander. At 500km Macro View, units stack into Brigade & Air Wing counters. Scroll your mouse wheel (or pinch-spread with both VR hands) to zoom into a <15km mountain valley and watch Brigades split into Battalions and Companies.",
       "ui_highlight_target": "WAR_TABLE_ZOOM",
       "completion_signal_or_cmd": "ZOOM_TACTICAL_REACHED",
-      "reward_tip": "At any zoom level, you can order an entire Brigade at once—and its Subordinate AI will handle formation bounding—or zoom in to take Direct Manual Control of a single flight!"
+      "reward_tip": "At any zoom level, you can order an entire Brigade at once\u2014and its Subordinate AI will handle formation bounding\u2014or zoom in to take Direct Manual Control of a single flight!"
     },
     {
       "step_id": 2,
@@ -4718,10 +4698,10 @@
       "slug": "tut_deploy_robot_dogs",
       "title": "Lesson 3: Deploying Quadruped Robot Dogs & Jam-Proof FPV Swarms",
       "instructor_callsign": "HOUND ACTUAL (SPEC-OPS)",
-      "prompt_text": "Tanks cannot climb >30° mountain cliffs, and standard RF drones get jammed by Krasukha-4 EW stations. Select a friendly M2A4 Bradley Company or Special Forces team and press [DEPLOY UNMANNED (DOGS / FPV)] on the console to unpack Vision 60 Robot Dog Packs and Fiber-Optic FPV Swarms!",
+      "prompt_text": "Tanks cannot climb >30\u00b0 mountain cliffs, and standard RF drones get jammed by Krasukha-4 EW stations. Select a friendly M2A4 Bradley Company or Special Forces team and press [DEPLOY UNMANNED (DOGS / FPV)] on the console to unpack Vision 60 Robot Dog Packs and Fiber-Optic FPV Swarms!",
       "ui_highlight_target": "CONSOLE_DEPLOY_UNMANNED",
       "completion_signal_or_cmd": "CMD_DEPLOY_UNMANNED_SUBUNIT",
-      "reward_tip": "Quadruped Robot Dogs use 3D LiDAR + Autonomous AI (immune to EW jamming), have a tiny 0.0005 m² radar signature, and climb sheer cliffs to laser-designate enemy SAMs!"
+      "reward_tip": "Quadruped Robot Dogs use 3D LiDAR + Autonomous AI (immune to EW jamming), have a tiny 0.0005 m\u00b2 radar signature, and climb sheer cliffs to laser-designate enemy SAMs!"
     },
     {
       "step_id": 4,
@@ -4729,7 +4709,7 @@
       "slug": "tut_recon_photo_dossier",
       "title": "Lesson 4: Wikipedia Intelligence Dossier & Real Recon Photographs",
       "instructor_callsign": "INTEL DIRECTOR",
-      "prompt_text": "Select any token on the table—or flip the [RECON PHOTO MODE] switch on the console—to inspect real Wikipedia photographs of the platform and its equipped missiles, radar cross-section (RCS), and unit replacement cost in $M USD.",
+      "prompt_text": "Select any token on the table\u2014or flip the [RECON PHOTO MODE] switch on the console\u2014to inspect real Wikipedia photographs of the platform and its equipped missiles, radar cross-section (RCS), and unit replacement cost in $M USD.",
       "ui_highlight_target": "CONSOLE_RECON_PHOTO",
       "completion_signal_or_cmd": "RECON_PHOTO_TOGGLED",
       "reward_tip": "Every weapon shot has a real dollar cost: never waste a $4.0M Patriot PAC-3 interceptor on a $25,000 Shahed drone!"
@@ -4743,7 +4723,7 @@
       "prompt_text": "Select a friendly Fighter Flight or Brigade, right-click drag (or VR trigger-pull) a 3D Strike Vector onto a red target to preview parabolic missile arcs, then flip open the Red Safety Cover and slam [EXECUTE ALPHA STRIKE]!",
       "ui_highlight_target": "CONSOLE_ALPHA_STRIKE",
       "completion_signal_or_cmd": "CMD_COMMIT_ALPHA_STRIKE",
-      "reward_tip": "Tutorial Complete! Watch your Iron Beam 100kW Lasers ($2/shot) and Epirus Leonidas 30° HPM Microwave cones zap incoming enemy drone swarms while your hypersonics and stealth flights strike home."
+      "reward_tip": "Tutorial Complete! Watch your Iron Beam 100kW Lasers ($2/shot) and Epirus Leonidas 30\u00b0 HPM Microwave cones zap incoming enemy drone swarms while your hypersonics and stealth flights strike home."
     }
   ],
   "manual_sections": [
@@ -4753,7 +4733,7 @@
       "slug": "man_controls_ux",
       "title": "1. Desktop & OpenXR VR Controls + 5-Tier Planetary-to-Tactical Zoom",
       "category": "CONTROLS",
-      "markdown_body": "- **Desktop Camera & Table View:** `WASD` Pan | Right-Click Drag Orbit/Pitch | Scroll-Wheel / `Q` & `E` Zoom | `[C]` Tacview 3D Follow Camera | `[F11]` Toggle 3D VR Hands Simulator.\n- **OpenXR VR (`XRCommandRig` — Meta Quest 3 / PCVR):** Two-Hand Grip Pinch-Zoom & Pan | Single-Hand Grip Grab-Pan | Right Trigger Tap to Select Unit / Poke 3D Console Switch / Click 3D Globe Flashpoint | Right Trigger Hold-Drag to Expand **3D Holographic Sphere Volume Selector** | Left Trigger or Right `B` Button to Issue 3D Move Waypoint or Strike Vector | Right `A` Button to Escalate `Company -> Battalion -> Brigade` | Left `X` to Cycle Time Scale | Left `Y` to Deploy Robot Dogs / FPVs | Look at **Left Wrist** for live 3D C4ISR Telemetry.\n- **5-Tier Zoom Hierarchy (`[O]` / `[G]`):** `0.15x` Planetary 3D Orbital Globe (24 LEO Satellites + 7 Clickable Global Flashpoints) -> `0.45x` Continental Curved Space (`8,000x8,000 km`) -> `1.0x` Theater Macro (`2,000x2,000 km`) -> `2.2x–6.5x` Operational Sector (`Battalions + 3D Cities/Airports/Trains`) -> `6.5x–25.0x` Tactical Valley (`Individual Soldiers, Robot Dogs & 4-Ship Wings`).\n- **Interactive Boot-Camp (`[H]`):** Press `H` at any time to toggle the live 5-Step Interactive Boot-Camp Coach with 3D holographic target beacons."
+      "markdown_body": "- **Desktop Camera & Table View:** `WASD` Pan | Right-Click Drag Orbit/Pitch | Scroll-Wheel / `Q` & `E` Zoom | `[C]` Tacview 3D Follow Camera | `[F11]` Toggle 3D VR Hands Simulator.\n- **OpenXR VR (`XRCommandRig` \u2014 Meta Quest 3 / PCVR):** Two-Hand Grip Pinch-Zoom & Pan | Single-Hand Grip Grab-Pan | Right Trigger Tap to Select Unit / Poke 3D Console Switch / Click 3D Globe Flashpoint | Right Trigger Hold-Drag to Expand **3D Holographic Sphere Volume Selector** | Left Trigger or Right `B` Button to Issue 3D Move Waypoint or Strike Vector | Right `A` Button to Escalate `Company -> Battalion -> Brigade` | Left `X` to Cycle Time Scale | Left `Y` to Deploy Robot Dogs / FPVs | Look at **Left Wrist** for live 3D C4ISR Telemetry.\n- **5-Tier Zoom Hierarchy (`[O]` / `[G]`):** `0.15x` Planetary 3D Orbital Globe (24 LEO Satellites + 7 Clickable Global Flashpoints) -> `0.45x` Continental Curved Space (`8,000x8,000 km`) -> `1.0x` Theater Macro (`2,000x2,000 km`) -> `2.2x\u20136.5x` Operational Sector (`Battalions + 3D Cities/Airports/Trains`) -> `6.5x\u201325.0x` Tactical Valley (`Individual Soldiers, Robot Dogs & 4-Ship Wings`).\n- **Interactive Boot-Camp (`[H]`):** Press `H` at any time to toggle the live 5-Step Interactive Boot-Camp Coach with 3D holographic target beacons."
     },
     {
       "section_id": 2,
@@ -4761,7 +4741,7 @@
       "slug": "man_command_ai",
       "title": "2. 3-Tier Force Organization (`Company -> Battalion -> Brigade`), Easy Group Selection & Orders",
       "category": "DOCTRINE",
-      "markdown_body": "- **3-Tier Military Hierarchy:** Every force is organized into **Brigades / Air Wings / Carrier Strike Groups (`[2]` — 36 Companies)** -> **Battalions / Squadrons (`[1]` — 6 Companies)** -> **Companies / Flights / Packs (`[0]`)**.\n- **Easy Group Selection:**\n  - **Left-Mouse Box-Drag (Marquee)** on Desktop or **Right-Trigger Sphere Drag** in VR selects all friendly units inside the region (`Shift` adds to selection).\n  - Press **`[B]` (`[B] BATTALION`)** to select the entire parent Battalion (6 Companies) or **`[V]` (`[V] BRIGADE`)** to select the entire parent Brigade (36 Companies), highlighted with golden 3D selection rings and C2 tether lines.\n  - Use **`ALL AIR` / `ALL LAND` / `ALL SEA`** buttons or save/recall custom Control Groups with `Ctrl + 1/2/3` and `Alt + 1/2/3`.\n- **Reliable Order Execution:** Right-Click (or VR Left Trigger / `B`) on terrain to order formation movement (`Shift + Right-Click` chains multi-waypoint dogleg routes), or Right-Click an enemy unit to fire an immediate Strike Salvo and intercept vector. Player orders lock `DIRECT_PLAYER_CONTROL` (`180s` override) so autonomous AI never overwrites your waypoints.\n- **JOC Staff AI Courses of Action (`[F1]`–`[F3]`):** Execute 1-click Theater COAs (`[F1] JFACC Air Sweep`, `[F2] JFLCC Dog/Mech Vanguard`, `[F3] Joint TOT Salvo`) backed by a C# `.NET 8.0` T+15m Lanchester Monte-Carlo forecast."
+      "markdown_body": "- **3-Tier Military Hierarchy:** Every force is organized into **Brigades / Air Wings / Carrier Strike Groups (`[2]` \u2014 36 Companies)** -> **Battalions / Squadrons (`[1]` \u2014 6 Companies)** -> **Companies / Flights / Packs (`[0]`)**.\n- **Easy Group Selection:**\n  - **Left-Mouse Box-Drag (Marquee)** on Desktop or **Right-Trigger Sphere Drag** in VR selects all friendly units inside the region (`Shift` adds to selection).\n  - Press **`[B]` (`[B] BATTALION`)** to select the entire parent Battalion (6 Companies) or **`[V]` (`[V] BRIGADE`)** to select the entire parent Brigade (36 Companies), highlighted with golden 3D selection rings and C2 tether lines.\n  - Use **`ALL AIR` / `ALL LAND` / `ALL SEA`** buttons or save/recall custom Control Groups with `Ctrl + 1/2/3` and `Alt + 1/2/3`.\n- **Reliable Order Execution:** Right-Click (or VR Left Trigger / `B`) on terrain to order formation movement (`Shift + Right-Click` chains multi-waypoint dogleg routes), or Right-Click an enemy unit to fire an immediate Strike Salvo and intercept vector. Player orders lock `DIRECT_PLAYER_CONTROL` (`180s` override) so autonomous AI never overwrites your waypoints.\n- **JOC Staff AI Courses of Action (`[F1]`\u2013`[F3]`):** Execute 1-click Theater COAs (`[F1] JFACC Air Sweep`, `[F2] JFLCC Dog/Mech Vanguard`, `[F3] Joint TOT Salvo`) backed by a C# `.NET 8.0` T+15m Lanchester Monte-Carlo forecast."
     },
     {
       "section_id": 3,
@@ -4769,7 +4749,7 @@
       "slug": "man_realtime_casualties_ammo",
       "title": "3. True 1:1 Real-Time Physical Speeds, Time Acceleration & Live Casualties/Ammo Telemetry",
       "category": "TELEMETRY",
-      "markdown_body": "- **True 1:1 Real-Time Speeds (`1x REAL` Default):** All units and munitions move at exact physical speeds (`1 kt = 1.852 km/h = 0.0005144 km/s`, `Mach 1 = 343 m/s = 0.343 km/s`). Use one-click HUD or 3D Console buttons for **`0x PAUSE`**, **`1x REAL`**, **`10x`**, **`60x`**, **`300x`**, and **`900x`** time acceleration (`[T]`, `-`, `=`).\n- **Live Casualties Ledger (`BLUE` & `RED`):** Tracks real-time **Personnel KIA & WIA** based on authentic platform crew complements (`0` for unmanned Robot Dogs/FPVs/USVs, `4–12` for aircraft flights, `16` for armor/SAMs, `36` for infantry companies, `260` for warships, `2,800` for aircraft carriers), plus platform category losses (`Air`, `Land`, `Sea`, `Drone`, and `$M USD`).\n- **Live Ammunition Ledger (`BLUE` & `RED`):** Tracks **Remaining Munition Stock (`%`)**, **Expended/Fired Munitions**, **In-Flight Salvos**, and **Successful Intercepts** across both the active theater and all 7 global theaters."
+      "markdown_body": "- **True 1:1 Real-Time Speeds (`1x REAL` Default):** All units and munitions move at exact physical speeds (`1 kt = 1.852 km/h = 0.0005144 km/s`, `Mach 1 = 343 m/s = 0.343 km/s`). Use one-click HUD or 3D Console buttons for **`0x PAUSE`**, **`1x REAL`**, **`10x`**, **`60x`**, **`300x`**, and **`900x`** time acceleration (`[T]`, `-`, `=`).\n- **Live Casualties Ledger (`BLUE` & `RED`):** Tracks real-time **Personnel KIA & WIA** based on authentic platform crew complements (`0` for unmanned Robot Dogs/FPVs/USVs, `4\u201312` for aircraft flights, `16` for armor/SAMs, `36` for infantry companies, `260` for warships, `2,800` for aircraft carriers), plus platform category losses (`Air`, `Land`, `Sea`, `Drone`, and `$M USD`).\n- **Live Ammunition Ledger (`BLUE` & `RED`):** Tracks **Remaining Munition Stock (`%`)**, **Expended/Fired Munitions**, **In-Flight Salvos**, and **Successful Intercepts** across both the active theater and all 7 global theaters."
     },
     {
       "section_id": 4,
@@ -4777,7 +4757,7 @@
       "slug": "man_sensors_6spectrum",
       "title": "4. The 6-Spectrum Sensor Fusion Matrix",
       "category": "SENSORS",
-      "markdown_body": "1. **Active Radar (`ACTIVE_RADAR`):** Long range (20–420 km), blocked by terrain horizon, scales by $\\text{RCS}^{0.25}$. **Warning:** Enemy Passive ESM detects active radars at $1.6\\times$ range!\n2. **Passive ESM / ELINT (`PASSIVE_ESM`):** Silent receiver that triangulates enemy radar emitters ($1.6\\times$ range) and `RF_DATALINK` drones even while your own radar is DARK (EMCON).\n3. **Infrared / IRST (`IR_EO`):** Passive thermal detection (14–65 km, boosted $1.85\\times$ against afterburning jets). Counters radar stealth (*F-35 / J-20*) without triggering RWR!\n4. **3D LiDAR & Computer Vision (`LIDAR_CV`):** Short-range (5.5 km) obstacle & target recognition used by **Quadruped Robot Dogs** and UGVs in cliffs/cities; immune to stealth and jamming.\n5. **Acoustic & Sonar (`ACOUSTIC_SONAR`):** Non-Line-of-Sight valley diffraction hears low-flying propeller drones (*Shahed / FPV*) around mountain corners (+450m ridge diffraction); Towed Sonar hunts submerged submarines (*Orca XLUUV*) at sea.\n6. **Orbital Satellite (`SAT_SAR_EO`):** 24 LEO Recon/SATCOM/PNT/Early-Warning satellites orbiting overhead."
+      "markdown_body": "1. **Active Radar (`ACTIVE_RADAR`):** Long range (20\u2013420 km), blocked by terrain horizon, scales by $\\text{RCS}^{0.25}$. **Warning:** Enemy Passive ESM detects active radars at $1.6\\times$ range!\n2. **Passive ESM / ELINT (`PASSIVE_ESM`):** Silent receiver that triangulates enemy radar emitters ($1.6\\times$ range) and `RF_DATALINK` drones even while your own radar is DARK (EMCON).\n3. **Infrared / IRST (`IR_EO`):** Passive thermal detection (14\u201365 km, boosted $1.85\\times$ against afterburning jets). Counters radar stealth (*F-35 / J-20*) without triggering RWR!\n4. **3D LiDAR & Computer Vision (`LIDAR_CV`):** Short-range (5.5 km) obstacle & target recognition used by **Quadruped Robot Dogs** and UGVs in cliffs/cities; immune to stealth and jamming.\n5. **Acoustic & Sonar (`ACOUSTIC_SONAR`):** Non-Line-of-Sight valley diffraction hears low-flying propeller drones (*Shahed / FPV*) around mountain corners (+450m ridge diffraction); Towed Sonar hunts submerged submarines (*Orca XLUUV*) at sea.\n6. **Orbital Satellite (`SAT_SAR_EO`):** 24 LEO Recon/SATCOM/PNT/Early-Warning satellites orbiting overhead."
     },
     {
       "section_id": 5,
@@ -4785,7 +4765,7 @@
       "slug": "man_unmanned_ew_lasers",
       "title": "5. Unmanned Warfare: Robot Dogs, FPV Swarms, EW & Directed Energy",
       "category": "UNMANNED",
-      "markdown_body": "- **Quadruped Robot Dogs (*Vision 60 / Unitree B2-W*):** Unpacked in `<15km` tactical zoom (`[U]` or `[6]`). Ignore `>25°` cliff slope penalties, have near-zero RCS (`0.0005 m²`), clamber over urban rubble at `0.92x` speed, suffer `0` human KIA when lost, and carry Javelins/FPVs/Laser designators.\n- **EW Jamming vs. Autonomy:** `RF_DATALINK` drones suffer 85% $P_k$ loss inside *Krasukha-4* EW jammer cones; `FIBER_OPTIC` wired FPVs (12 km) and `AUTONOMOUS_AI` Loyal Wingmen/Robot Dogs are 100% immune to jamming!\n- **Directed Energy Economy:** Never waste $4.0M *Patriot PAC-3* missiles on $25k *Shahed* drones! Use *Iron Beam 100kW Lasers* ($2/shot) and *Epirus Leonidas HPM Microwaves* (30° EMP cone frying whole swarms)."
+      "markdown_body": "- **Quadruped Robot Dogs (*Vision 60 / Unitree B2-W*):** Unpacked in `<15km` tactical zoom (`[U]` or `[6]`). Ignore `>25\u00b0` cliff slope penalties, have near-zero RCS (`0.0005 m\u00b2`), clamber over urban rubble at `0.92x` speed, suffer `0` human KIA when lost, and carry Javelins/FPVs/Laser designators.\n- **EW Jamming vs. Autonomy:** `RF_DATALINK` drones suffer 85% $P_k$ loss inside *Krasukha-4* EW jammer cones; `FIBER_OPTIC` wired FPVs (12 km) and `AUTONOMOUS_AI` Loyal Wingmen/Robot Dogs are 100% immune to jamming!\n- **Directed Energy Economy:** Never waste $4.0M *Patriot PAC-3* missiles on $25k *Shahed* drones! Use *Iron Beam 100kW Lasers* ($2/shot) and *Epirus Leonidas HPM Microwaves* (30\u00b0 EMP cone frying whole swarms)."
     },
     {
       "section_id": 6,
@@ -4793,15 +4773,15 @@
       "slug": "man_9nations_theaters",
       "title": "6. 11-Nation Armed Forces, 1,000,000-Unit Global ORBAT & 7 `2,000x2,000 km` Theaters",
       "category": "THEATERS",
-      "markdown_body": "- **11-Nation Roster (62 Platforms, 30 Munitions — 92/92 Real Wikipedia Photos):** Authentic systems across `USA`, `EUR_NATO`, `UKR`, `MEX`, `CHN`, `RUS`, `KOR`, `PRK`, `IND`, `PAK`, and `TUR`.\n- **1,000,000-Unit Multi-Theater Global Order of Battle (`GlobalOrbatSystem`):** Simulates **1,000,000 tactical combat units** (`10,000` Battalion clusters) across all **7 `2,000x2,000 km` Global Theaters of War** simultaneously with authentic historical formation callsigns, aircraft carriers, and bases:\n  1. `ukraine_donbas_theater` (**240,000 Units** — `UKR + NATO` vs `RUS`): *3rd Assault Bde 'Azov'*, *47th Mech Bde 'Magura'*, *414th Strike UAV Bde 'Madyar's Birds'*, *BTR-4E*, *2S22 Bohdana*, *Neptune* vs *1st Guards Tank Army*, *58th CAA*, *Admiral Gorshkov*.\n  2. `strait_theater` (**220,000 Units** — `CHN PLA` vs `USA + TWN`): *USS Gerald R. Ford (CVN-78)*, *ROCAF 4th TFW* vs *PLA 71st/72nd/73rd Group Armies* & *CNS Fujian (CV-18)*.\n  3. `baltic_suwalki_theater` (**160,000 Units** — `EUR_NATO + USA` vs `RUS + BLR`): *Polish 18th 'Iron' Div*, *German 45th Panzer Bde*, *FS Charles de Gaulle (R91)*, *HMS Queen Elizabeth (R08)* vs *11th Army Corps Kaliningrad*.\n  4. `himalaya_lac_theater` (**150,000 Units** — `IND` vs `CHN + PAK`): *Indian XIV 'Fire and Fury' Corps*, *INS Vikrant (R11)*, *Tejas Mk2*, *Zorawar Light Tank*, *BrahMos* vs *PLA 76th/77th Group Armies* & *PAF No. 15 'Cobras'*.\n  5. `korean_dmz_theater` (**110,000 Units** — `KOR + USA` vs `PRK`): *ROK VII 'Vanguard' Corps*, *ROKS Jeongjo the Great*, *KF-21 Boramae*, *K2 Black Panther*, *Hyunmoo-5* vs *KPA II Corps* & *105th Ryu Kyong-su Tank Div*.\n  6. `mexico_rio_grande_theater` (**70,000 Units** — `USA NORTHCOM` vs `MEX SEDENA`): *US III Armored Corps (1st Cavalry Div, Fort Cavazos)* vs *SEDENA 1/a Brigada Blindada*, *FAM Escuadrón Aéreo 401*, *ARM Reformador (POLA-101)*.\n  7. `hormuz_theater` (**50,000 Units** — `USA 5th Fleet + Coalition` vs `IRN IRGC`): *USS Abraham Lincoln (CVN-72) CSG-3* vs *IRGCN 1st Naval Region (Bandar Abbas)*."
+      "markdown_body": "- **11-Nation Roster (62 Platforms, 30 Munitions \u2014 92/92 Real Wikipedia Photos):** Authentic systems across `USA`, `EUR_NATO`, `UKR`, `MEX`, `CHN`, `RUS`, `KOR`, `PRK`, `IND`, `PAK`, and `TUR`.\n- **1,000,000-Unit Multi-Theater Global Order of Battle (`GlobalOrbatSystem`):** Simulates **1,000,000 tactical combat units** (`10,000` Battalion clusters) across all **7 `2,000x2,000 km` Global Theaters of War** simultaneously with authentic historical formation callsigns, aircraft carriers, and bases:\n  1. `ukraine_donbas_theater` (**240,000 Units** \u2014 `UKR + NATO` vs `RUS`): *3rd Assault Bde 'Azov'*, *47th Mech Bde 'Magura'*, *414th Strike UAV Bde 'Madyar's Birds'*, *BTR-4E*, *2S22 Bohdana*, *Neptune* vs *1st Guards Tank Army*, *58th CAA*, *Admiral Gorshkov*.\n  2. `strait_theater` (**220,000 Units** \u2014 `CHN PLA` vs `USA + TWN`): *USS Gerald R. Ford (CVN-78)*, *ROCAF 4th TFW* vs *PLA 71st/72nd/73rd Group Armies* & *CNS Fujian (CV-18)*.\n  3. `baltic_suwalki_theater` (**160,000 Units** \u2014 `EUR_NATO + USA` vs `RUS + BLR`): *Polish 18th 'Iron' Div*, *German 45th Panzer Bde*, *FS Charles de Gaulle (R91)*, *HMS Queen Elizabeth (R08)* vs *11th Army Corps Kaliningrad*.\n  4. `himalaya_lac_theater` (**150,000 Units** \u2014 `IND` vs `CHN + PAK`): *Indian XIV 'Fire and Fury' Corps*, *INS Vikrant (R11)*, *Tejas Mk2*, *Zorawar Light Tank*, *BrahMos* vs *PLA 76th/77th Group Armies* & *PAF No. 15 'Cobras'*.\n  5. `korean_dmz_theater` (**110,000 Units** \u2014 `KOR + USA` vs `PRK`): *ROK VII 'Vanguard' Corps*, *ROKS Jeongjo the Great*, *KF-21 Boramae*, *K2 Black Panther*, *Hyunmoo-5* vs *KPA II Corps* & *105th Ryu Kyong-su Tank Div*.\n  6. `mexico_rio_grande_theater` (**70,000 Units** \u2014 `USA NORTHCOM` vs `MEX SEDENA`): *US III Armored Corps (1st Cavalry Div, Fort Cavazos)* vs *SEDENA 1/a Brigada Blindada*, *FAM Escuadr\u00f3n A\u00e9reo 401*, *ARM Reformador (POLA-101)*.\n  7. `hormuz_theater` (**50,000 Units** \u2014 `USA 5th Fleet + Coalition` vs `IRN IRGC`): *USS Abraham Lincoln (CVN-72) CSG-3* vs *IRGCN 1st Naval Region (Bandar Abbas)*."
     },
     {
       "section_id": 7,
       "section_order": 7,
       "slug": "man_logistics_infrastructure",
-      "title": "7. Living Battlefield Infrastructure, Logistics, Civilian PDE & Space/Cyber/CBRN (`[7]`–`[0]`)",
+      "title": "7. Living Battlefield Infrastructure, Logistics, Civilian PDE & Space/Cyber/CBRN (`[7]`\u2013`[0]`)",
       "category": "STRATEGIC",
-      "markdown_body": "- **Living Infrastructure (`128x128` Grid + 3,800+ 3D Buildings):** Hydrological rivers with strategic bridges, highway MSRs (`1.45x` speed), railways with 8 moving 3D military supply trains, 48 real-world metropolitan cities, airfields, and forests (`0.65x` damage cover).\n- **Dynamic War Destruction:** Heavy strikes crater runways, collapse 3D urban towers into smoking rubble (`+62%` fortification cover for Infantry & Robot Dogs), blow river bridges (`0.16x` ford penalty), and derail supply trains.\n- **Spreading Civilian Density Field & Multi-Domain Deterrence (`[7]`–`[0]`):** C# `.NET 8.0` parallel Advection-Diffusion PDE models ~397M civilians fleeing combat along road networks; `[7] ASAT`, `[8] CYBER`, `[9] PSYOP`, `[0] CBRN`."
+      "markdown_body": "- **Living Infrastructure (`128x128` Grid + 3,800+ 3D Buildings):** Hydrological rivers with strategic bridges, highway MSRs (`1.45x` speed), railways with 8 moving 3D military supply trains, 48 real-world metropolitan cities, airfields, and forests (`0.65x` damage cover).\n- **Dynamic War Destruction:** Heavy strikes crater runways, collapse 3D urban towers into smoking rubble (`+62%` fortification cover for Infantry & Robot Dogs), blow river bridges (`0.16x` ford penalty), and derail supply trains.\n- **Spreading Civilian Density Field & Multi-Domain Deterrence (`[7]`\u2013`[0]`):** C# `.NET 8.0` parallel Advection-Diffusion PDE models ~397M civilians fleeing combat along road networks; `[7] ASAT`, `[8] CYBER`, `[9] PSYOP`, `[0] CBRN`."
     }
   ],
   "tech_tree_nodes": [
