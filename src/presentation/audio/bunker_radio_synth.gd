@@ -337,6 +337,40 @@ func play_radio_squelch() -> void:
 	_queue_tone(340.0, 280.0, 0.05, 0.08, true)
 
 
+## Sprint 8: Resonant underwater acoustic sonar ping
+func play_submarine_sonar_ping() -> void:
+	synth_triggers_count += 1
+	if audio_muted:
+		return
+	# Pure resonant acoustic ocean chime: 580 Hz with long clean sine decay
+	_queue_tone(580.0, 560.0, 0.45, 0.18, false)
+
+
+## Sprint 8: Muffled 120mm APFSDS tank cannon report with low-frequency bunker resonance
+func play_tank_cannon_apfsds() -> void:
+	synth_triggers_count += 1
+	if audio_muted:
+		return
+	# Heavy kinetic thump (95 -> 38 Hz) with explosive transient
+	_queue_tone(95.0, 38.0, 0.14, 0.24, true)
+
+
+## Sprint 8: Low-frequency pulsing DEFCON emergency siren
+func play_defcon_alarm_pulse() -> void:
+	synth_triggers_count += 1
+	if audio_muted:
+		return
+	_queue_tone(175.0, 135.0, 0.35, 0.16, false)
+
+
+## Sprint 8: Tactical posture actuation C2 relay chirp
+func play_tactical_posture_actuate() -> void:
+	synth_triggers_count += 1
+	if audio_muted:
+		return
+	_queue_tone(360.0, 460.0, 0.045, 0.12, false)
+
+
 func _queue_tone(freq_start: float, freq_end: float, duration_sec: float, amp: float, add_noise: bool) -> void:
 	if _active_tones.size() < 10:
 		_active_tones.append({

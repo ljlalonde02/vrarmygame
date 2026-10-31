@@ -673,6 +673,54 @@ func _setup_command_radial_menu() -> void:
 	_target_reticle_root.add_child(_target_reticle_label)
 
 
+## Tests 6DOF raycast collision with the radial menu wedges
+## Returns posture index (0..5) if hit, or -1 if missed
+func check_radial_ray_intersection(ray_origin: Vector3, ray_dir: Vector3) -> int:
+	if _command_radial_root == null or not _command_radial_root.visible:
+		return -1
+	var center := _command_radial_root.global_position if _command_radial_root.is_inside_tree() else _command_radial_root.position
+	var denom := ray_dir.dot(Vector3.UP)
+	if absf(denom) < 0.001:
+		return -1
+	var t := (center.y - ray_origin.y) / denom
+	if t < 0.0 or t > 4.0:
+		return -1
+	var hit_pos := ray_origin + ray_dir * t
+	var local_hit := hit_pos - center
+	var dist := Vector2(local_hit.x, local_hit.z).length()
+	if dist < 0.015 or dist > 0.075:
+		return -1
+
+	var hit_ang_deg := wrapf(rad_to_deg(atan2(-local_hit.z, local_hit.x)), 0.0, 360.0)
+	var angles_deg := [90.0, 30.0, 330.0, 270.0, 210.0, 150.0]
+	var best_idx := -1
+	var min_diff := 999.0
+	for i in range(angles_deg.size()):
+		var diff := absf(wrapf(hit_ang_deg - angles_deg[i], -180.0, 180.0))
+		if diff < min_diff and diff < 32.0:
+			min_diff = diff
+			best_idx = i
+	return best_idx
+
+
+## Actuates a posture command on currently selected units
+func actuate_radial_posture(posture_idx: int) -> void:
+	if posture_idx < 0 or posture_idx > 5:
+		return
+	var uids: Array = selected_unit_ids.duplicate()
+	if uids.is_empty() and selected_unit_id >= 0:
+		uids.append(selected_unit_id)
+	if uids.is_empty():
+		return
+	var cmd_bus: Node = get_node_or_null("/root/CommandBus") if is_inside_tree() else null
+	if cmd_bus != null:
+		cmd_bus.enqueue_set_tactical_posture(uids, posture_idx)
+	elif sim_server != null:
+		for u in uids:
+			if u >= 0 and u < sim_server.world_state.unit_count:
+				sim_server.world_state.unit_tactical_posture[u] = posture_idx
+
+
 func _process(_delta: float) -> void:
 	sync_visuals()
 

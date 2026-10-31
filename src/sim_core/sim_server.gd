@@ -747,6 +747,25 @@ func _apply_command(cmd: Dictionary) -> void:
 		"CMD_UNIT_ABILITY":
 			_execute_unit_ability_command(cmd)
 
+		"CMD_SET_TACTICAL_POSTURE":
+			var raw_uids: Array = cmd.get("unit_ids", [])
+			var posture: int = int(cmd.get("posture", 0))
+			for u in raw_uids:
+				var uid := int(u)
+				if uid < 0 or uid >= world_state.unit_count or world_state.unit_active[uid] == 0:
+					continue
+				if world_state.unit_echelon[uid] == WorldState.ECHELON_COMPANY:
+					world_state.unit_tactical_posture[uid] = posture
+				else:
+					var subordinates: Array[int] = EchelonClusterSystem.get_subordinate_leaf_units(world_state, uid)
+					for s in subordinates:
+						world_state.unit_tactical_posture[s] = posture
+			world_state.sim_events_queue.append({
+				"type": "tactical_posture_changed",
+				"unit_count": raw_uids.size(),
+				"posture": posture
+			})
+
 
 func _execute_unit_ability_command(cmd: Dictionary) -> void:
 	var raw_uids: Array = cmd.get("unit_ids", [])

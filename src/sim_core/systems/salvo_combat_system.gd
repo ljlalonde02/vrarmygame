@@ -96,6 +96,23 @@ static func launch_strike_salvo(
 					"target_pos_km": final_target_pos,
 					"faction": state.unit_faction[attacker_uid],
 				})
+
+			# Sprint 8: Close Air Support (CAS) & SEAD Air-Ground Coordination
+			var att_dom: int = sim_db.plat_domain_id[att_pid] if (att_pid > 0 and att_pid < sim_db.plat_domain_id.size()) else 0
+			if att_dom == 1 and target_uid >= 0 and target_uid < state.unit_count:
+				var att_fac: int = state.unit_faction[attacker_uid]
+				for f_uid in range(state.unit_count):
+					if state.unit_active[f_uid] == 1 and state.unit_faction[f_uid] == att_fac:
+						if f_uid < state.unit_pos.size() and state.unit_pos[f_uid].distance_to(final_target_pos) < 12.0:
+							if f_uid < state.unit_suppression_level.size():
+								state.unit_suppression_level[f_uid] *= 0.20
+				if state.unit_radar_active[target_uid] == 1:
+					state.unit_radar_active[target_uid] = 0
+					state.sim_events_queue.append({
+						"type": "sead_radar_neutralized",
+						"target_id": target_uid,
+						"attacker_id": attacker_uid
+					})
 	return launched
 
 

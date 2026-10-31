@@ -1065,6 +1065,11 @@ func evaluate_match_conditions() -> String:
 	if bunker_is_lost or bunker_hp <= 0.0 or bunker_status_code == "LOST":
 		match_outcome = "DEFEAT"
 		tactical_match_active = false
+		sim_events_queue.append({
+			"type": "match_ended",
+			"outcome": "DEFEAT",
+			"scenario": active_theater_slug
+		})
 		return match_outcome
 
 	var obj_all_done := true
@@ -1090,6 +1095,11 @@ func evaluate_match_conditions() -> String:
 	if obj_all_done:
 		match_outcome = "VICTORY"
 		tactical_match_active = false
+		sim_events_queue.append({
+			"type": "match_ended",
+			"outcome": "VICTORY",
+			"scenario": active_theater_slug
+		})
 	return match_outcome
 
 
