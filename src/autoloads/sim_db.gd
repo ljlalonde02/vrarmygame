@@ -112,6 +112,12 @@ var tech_tree_nodes: Array[Dictionary] = []
 var tech_tree_by_slug: Dictionary = {}
 var sovereign_nations: Array[Dictionary] = []
 var sovereign_nations_by_slug: Dictionary = {}
+var campaign_nations: Array[Dictionary] = []
+var campaign_nations_by_slug: Dictionary = {}
+var campaign_story_nodes: Array[Dictionary] = []
+var campaign_story_nodes_by_slug: Dictionary = {}
+var campaign_story_edges: Array[Dictionary] = []
+var campaign_story_edges_by_from_node: Dictionary = {}
 var news_video_clips: Array[Dictionary] = []
 var news_video_by_slug: Dictionary = {}
 var news_video_by_trigger: Dictionary = {}
@@ -151,6 +157,12 @@ func load_database() -> void:
 	tech_tree_by_slug.clear()
 	sovereign_nations.clear()
 	sovereign_nations_by_slug.clear()
+	campaign_nations.clear()
+	campaign_nations_by_slug.clear()
+	campaign_story_nodes.clear()
+	campaign_story_nodes_by_slug.clear()
+	campaign_story_edges.clear()
+	campaign_story_edges_by_from_node.clear()
 
 	platforms_by_id.append({"platform_id": 0, "slug": "none", "display_name": "None"})
 	weapons_by_id.append({"weapon_id": 0, "slug": "none", "display_name": "None"})
@@ -163,7 +175,7 @@ func load_database() -> void:
 		if db != null:
 			db.set("path", DB_PATH)
 			if db.call("open_db"):
-				for tbl in ["platforms", "sensors", "weapons", "platform_sensors", "platform_loadouts", "formation_templates", "theaters", "theater_sites", "scenarios", "tutorial_steps", "manual_sections", "tech_tree_nodes", "sovereign_nations"]:
+				for tbl in ["platforms", "sensors", "weapons", "platform_sensors", "platform_loadouts", "formation_templates", "theaters", "theater_sites", "scenarios", "tutorial_steps", "manual_sections", "tech_tree_nodes", "sovereign_nations", "campaign_nations", "campaign_story_nodes", "campaign_story_edges"]:
 					if db.call("query", "SELECT * FROM " + tbl):
 						payload[tbl] = db.get("query_result")
 				db.call("close_db")
@@ -502,6 +514,26 @@ func load_database() -> void:
 		sovereign_nations.append(sn_copy)
 		sovereign_nations_by_slug[String(sn["slug"])] = sn_copy
 
+	for cn in payload.get("campaign_nations", []):
+		var cn_copy: Dictionary = cn.duplicate()
+		var p_caps = JSON.parse_string(String(cn.get("special_capabilities_json", "{}")))
+		cn_copy["special_capabilities"] = p_caps if typeof(p_caps) == TYPE_DICTIONARY else {}
+		campaign_nations.append(cn_copy)
+		campaign_nations_by_slug[String(cn["slug"])] = cn_copy
+
+	for csn in payload.get("campaign_story_nodes", []):
+		var csn_copy: Dictionary = csn.duplicate()
+		campaign_story_nodes.append(csn_copy)
+		campaign_story_nodes_by_slug[String(csn["slug"])] = csn_copy
+
+	for cse in payload.get("campaign_story_edges", []):
+		var cse_copy: Dictionary = cse.duplicate()
+		campaign_story_edges.append(cse_copy)
+		var from_s := String(cse.get("from_node_slug", ""))
+		if not campaign_story_edges_by_from_node.has(from_s):
+			campaign_story_edges_by_from_node[from_s] = []
+		campaign_story_edges_by_from_node[from_s].append(cse_copy)
+
 	reload_news_videos_manifest()
 	is_loaded = true
 
@@ -652,3 +684,43 @@ func get_wiki_photo_texture(image_res_path: String) -> Texture2D:
 	if tex != null:
 		_photo_cache[image_res_path] = tex
 	return tex
+
+
+func get_campaign_nations() -> Array[Dictionary]:
+	return campaign_nations.duplicate(true)
+
+
+func get_campaign_nation(nation_slug: String) -> Dictionary:
+	return campaign_nations_by_slug.get(nation_slug, {})
+
+
+func get_campaign_story_node(node_slug: String) -> Dictionary:
+	return campaign_story_nodes_by_slug.get(node_slug, {})
+
+
+func get_campaign_story_nodes_for_nation(nation_slug: String) -> Array[Dictionary]:
+	var res: Array[Dictionary] = []
+	for n in campaign_story_nodes:
+		if String(n.get("nation_slug", "")) == nation_slug:
+			res.append(n.duplicate(true))
+	return res
+
+
+func get_campaign_story_edges_from(from_node_slug: String) -> Array[Dictionary]:
+	var arr: Array = campaign_story_edges_by_from_node.get(from_node_slug, [])
+	var res: Array[Dictionary] = []
+	for item in arr:
+		if typeof(item) == TYPE_DICTIONARY:
+			res.append(item.duplicate(true))
+	return res
+
+
+func get_campaign_edge(from_node_slug: String, outcome: String) -> Dictionary:
+	var edges: Array = campaign_story_edges_by_from_node.get(from_node_slug, [])
+	for e in edges:
+		if typeof(e) == TYPE_DICTIONARY and String(e.get("condition_outcome", "")) == outcome:
+			return e.duplicate(true)
+	if not edges.is_empty() and typeof(edges[0]) == TYPE_DICTIONARY:
+		return edges[0].duplicate(true)
+	return {}
+

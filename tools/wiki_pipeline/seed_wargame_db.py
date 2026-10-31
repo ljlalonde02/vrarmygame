@@ -508,6 +508,9 @@ def build_database() -> None:
 
     cur.executescript(
         """
+        DROP TABLE IF EXISTS campaign_story_edges;
+        DROP TABLE IF EXISTS campaign_story_nodes;
+        DROP TABLE IF EXISTS campaign_nations;
         DROP TABLE IF EXISTS sovereign_nations;
         DROP TABLE IF EXISTS tech_tree_nodes;
         DROP TABLE IF EXISTS manual_sections;
@@ -693,6 +696,49 @@ def build_database() -> None:
             grant_package_musd REAL NOT NULL,
             expeditionary_platform_slug TEXT NOT NULL,
             diplomatic_profile TEXT NOT NULL
+        );
+
+        CREATE TABLE campaign_nations (
+            nation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            slug TEXT UNIQUE NOT NULL,
+            country_name TEXT NOT NULL,
+            iso_code TEXT NOT NULL,
+            capital_name TEXT NOT NULL,
+            flag_res_path TEXT NOT NULL,
+            theater_slug TEXT NOT NULL,
+            doctrine_label TEXT NOT NULL,
+            doctrine_summary TEXT NOT NULL,
+            budget_musd REAL NOT NULL,
+            is_playable INTEGER DEFAULT 1,
+            unlocked_by_default INTEGER DEFAULT 1,
+            starting_node_slug TEXT NOT NULL,
+            flagship_platform_slug TEXT NOT NULL,
+            special_capabilities_json TEXT NOT NULL
+        );
+
+        CREATE TABLE campaign_story_nodes (
+            node_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            slug TEXT UNIQUE NOT NULL,
+            nation_slug TEXT NOT NULL,
+            act_number INTEGER NOT NULL,
+            chapter_title TEXT NOT NULL,
+            scenario_slug TEXT NOT NULL,
+            situation_briefing TEXT NOT NULL,
+            chyron_headline TEXT NOT NULL,
+            news_flash_body TEXT NOT NULL,
+            action_video_tag TEXT NOT NULL,
+            is_terminal_climax INTEGER DEFAULT 0,
+            climax_type TEXT DEFAULT ''
+        );
+
+        CREATE TABLE campaign_story_edges (
+            edge_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            from_node_slug TEXT NOT NULL,
+            to_node_slug TEXT NOT NULL,
+            condition_outcome TEXT NOT NULL,
+            transition_narrative TEXT NOT NULL,
+            defcon_escalation INTEGER DEFAULT 0,
+            unlocked_tech_slug TEXT DEFAULT ''
         );
         """
     )
@@ -1360,6 +1406,10 @@ def build_database() -> None:
             sn,
         )
 
+    # 10. Seed Branching Story Trees & Playable Nations (Sprint 4)
+    from seed_campaign_narrative import seed_campaign_narrative
+    seed_campaign_narrative(cur)
+
     conn.commit()
 
     # Export JSON mirror for instant SimDB loading in Godot 4.7
@@ -1380,6 +1430,9 @@ def build_database() -> None:
         "manual_sections",
         "tech_tree_nodes",
         "sovereign_nations",
+        "campaign_nations",
+        "campaign_story_nodes",
+        "campaign_story_edges",
     ):
         rcur.execute(f"SELECT * FROM {table}")
         cache_payload[table] = [dict(row) for row in rcur.fetchall()]

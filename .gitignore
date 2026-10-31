@@ -18,7 +18,7 @@ builds/
 Thumbs.db
 *.tmp
 # Temporary capture and studio working files
-temp_frames/
+temp_frames*/
 __pycache__/
 *.pyc
 .studio/
