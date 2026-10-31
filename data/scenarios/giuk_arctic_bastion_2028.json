@@ -1,0 +1,19 @@
+{
+  "scenario_id": 104,
+  "slug": "giuk_arctic_bastion_2028",
+  "display_name": "Crisis 2028: GIUK Gap & Arctic Bastion Under-Ice ASW Duel",
+  "theater_slug": "baltic_suwalki_theater",
+  "era_label": "2028 Under-Ice Submarine & SOSUS Theater War",
+  "briefing_opord": "OPORD 28-104: OPFOR Northern Fleet SSBNs (Borei and Yasen-M) sortie into the Greenland-Iceland-UK (GIUK) Gap beneath polar pack ice to establish second-strike launch points. NATO activates the SOSUS hydrophone acoustic barrier. US Navy SSN-688(I) Cheyenne and Virginia-class attack submarines, supported by P-8A Poseidon ASW flights and Orca XLUUV autonomous subs, engage in a silent cat-and-mouse duel to defend the North Atlantic sea lanes.",
+  "blue_budget_musd": 4600.0,
+  "red_budget_musd": 4900.0,
+  "defcon_initial": 2,
+  "tension_initial": 78.0,
+  "orbat_json": "{\"scale\": \"UNDER_ICE_ASW\", \"brigades_per_side\": 4, \"sosus_active\": true, \"ssbn_patrol\": true}",
+  "key_features": [
+    "Under-Ice Acoustic Sonar Propagation",
+    "Fixed SOSUS Hydrophone Barrier Line",
+    "Mark 48 ADCAP Torpedo Sub-Surface Engagements",
+    "P-8A Poseidon Sonobuoy Fields & ASW Torpedo Drops"
+  ]
+}

@@ -26,6 +26,7 @@ const TheaterDirectorScript := preload("res://src/ai/storyteller/theater_directo
 const StoryProgressionDirectorScript := preload("res://src/ai/storyteller/story_progression_director.gd")
 const FpvTargetingPodControllerScript := preload("res://src/presentation/bunker/fpv_targeting_pod_controller.gd")
 const SubmarineConnControllerScript := preload("res://src/presentation/bunker/submarine_conn_controller.gd")
+const TriCommandSystemScript := preload("res://src/presentation/bunker/tri_command_system.gd")
 const SubordinateStaffAIScript := preload("res://src/ai/advisor/subordinate_staff_ai.gd")
 const BunkerRadioSynthScript := preload("res://src/presentation/audio/bunker_radio_synth.gd")
 const DesktopCommandRigScript := preload("res://src/presentation/rigs/desktop_command_rig.gd")
@@ -46,6 +47,7 @@ var theater_director: Node = null
 var story_director: CanvasLayer = null
 var fpv_pod_controller: Node3D = null
 var submarine_conn: Node3D = null
+var tri_command: Node3D = null
 var subordinate_staff: Node = null
 var radio_synth: Node = null
 var desktop_rig: Node3D = null
@@ -206,6 +208,12 @@ func initialize_bunker(p_sim_db: Node = null, p_cmd_bus: Node = null, p_sig_bus:
 		submarine_conn._ready()
 	submarine_conn.setup(sim_server, war_table, radio_synth)
 
+	# FEAT-10: Instantiate TriCommandSystem (Deep Granite Bunker / Submarine Conn / E-4B Doomsday Plane)
+	tri_command = TriCommandSystemScript.new()
+	tri_command.name = "TriCommandSystem"
+	add_child(tri_command)
+	tri_command.setup(sim_server, war_table, submarine_conn, self)
+
 	# 10. Instantiate Dual Rigs (XRCommandRig + DesktopCommandRig) with automatic OpenXR detection
 	xr_rig = XRCommandRigScript.new()
 	xr_rig.name = "XRCommandRig"
@@ -224,10 +232,12 @@ func initialize_bunker(p_sim_db: Node = null, p_cmd_bus: Node = null, p_sig_bus:
 	desktop_rig.story_director_ref = story_director
 	desktop_rig.fpv_pod_ref = fpv_pod_controller
 	desktop_rig.submarine_conn_ref = submarine_conn
+	desktop_rig.tri_command_ref = tri_command
 	story_director.setup(sim_db, sim_server, command_bus, signal_bus, war_table, tactile_console, radio_synth, desktop_rig)
 	main_menu.story_director = story_director
 	main_menu.fpv_pod_controller = fpv_pod_controller
 	xr_rig.setup(war_table, sim_server, command_bus, signal_bus, tactile_console, desktop_rig, main_menu)
+	xr_rig.tri_command_ref = tri_command
 	tactile_console.war_table_ref = war_table
 	tactile_console.desktop_rig_ref = desktop_rig
 	tactile_console.main_menu_ref = main_menu

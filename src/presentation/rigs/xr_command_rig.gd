@@ -36,6 +36,7 @@ var _vr_selection_sphere: MeshInstance3D = null
 var _wrist_tablet_root: Node3D = null
 var _wrist_label_3d: Label3D = null
 var _wrist_buttons: Dictionary = {}
+var tri_command_ref: Node3D = null
 var _current_tactical_posture_idx: int = 0
 const POSTURE_NAMES: Array[String] = ["AUTO", "BVR", "PURSUIT", "BREAK"]
 const POSTURE_VALUES: Array[int] = [
@@ -183,6 +184,8 @@ func _build_vr_hand_and_wrist_visuals() -> void:
 	_create_wrist_button("btn_ssbn", "SSBN\nOFF", 0.020, -0.046, TacticalTheme.COL_FLIR_GREEN)
 	_create_wrist_button("btn_strike", "ALPHA\nSTRIKE", 0.060, -0.046, TacticalTheme.COL_OPFOR_RED)
 	_create_wrist_button("btn_trial", "TRIAL\nARENA", 0.100, -0.046, TacticalTheme.COL_NATO_BLUE)
+	# FEAT-10: Tri-Command Headquarters (BKR / SSBN / E-4B)
+	_create_wrist_button("btn_hq", "HQ:\nBKR", -0.060, -0.076, TacticalTheme.COL_FLIR_GREEN)
 
 
 func _create_wrist_button(id: String, label_text: String, local_x: float, local_y: float, col: Color, half_w: float = 0.018, half_h: float = 0.012) -> void:
@@ -303,6 +306,14 @@ func actuate_wrist_button(btn_id: String) -> String:
 		"btn_trial":
 			var trial_res := launch_selected_unit_trial()
 			return "TRIAL_LAUNCHED_" + String(trial_res.get("trial_title", "OK"))
+		"btn_hq":
+			if tri_command_ref != null and tri_command_ref.has_method("cycle_next_station"):
+				var next_st: int = tri_command_ref.cycle_next_station()
+				var s_name: String = tri_command_ref.get_station_short_name(next_st)
+				if _wrist_buttons.has("btn_hq"):
+					_wrist_buttons["btn_hq"]["label"].text = "HQ:\n" + s_name
+				return "HQ_SWITCHED_" + s_name
+			return "HQ_SWITCHED_OK"
 	return ""
 
 
@@ -834,9 +845,34 @@ func _update_wrist_c4isr_tablet() -> void:
 	var posture_name: String = POSTURE_NAMES[_current_tactical_posture_idx]
 	var sub_str := "SSBN:ON" if (desktop_rig != null and desktop_rig.submarine_conn_ref != null and desktop_rig.submarine_conn_ref.is_sub_sim_active) else "SSBN:OFF"
 
+	var defcon_codename := "FADE OUT"
+	var defcon_col: Color = TacticalTheme.COL_NATO_BLUE
+	match st.defcon_level:
+		1:
+			defcon_codename = "COCKED PISTOL"
+			defcon_col = Color(1.0, 0.22, 0.22)
+		2:
+			defcon_codename = "FAST PACE"
+			defcon_col = Color(1.0, 0.45, 0.12)
+		3:
+			defcon_codename = "ROUND HOUSE"
+			defcon_col = Color(1.0, 0.82, 0.15)
+		4:
+			defcon_codename = "DOUBLE TAKE"
+			defcon_col = Color(0.18, 0.95, 0.55)
+		5:
+			defcon_codename = "FADE OUT"
+			defcon_col = Color(0.25, 0.65, 1.0)
+
+	_wrist_label_3d.modulate = defcon_col
+
+	var hq_str := "BKR"
+	if tri_command_ref != null and tri_command_ref.has_method("get_station_short_name"):
+		hq_str = tri_command_ref.get_station_short_name()
+
 	var next_txt := (
-		"VR C4ISR WRIST // DEFCON %d // BUDGET: $%.0fM // TECHS:%d/15\n" % [st.defcon_level, st.blue_budget_musd, st.blue_unlocked_techs.size()] +
-		"%s | TIME: %.0fx\n" % [org_str, st.time_scale] +
+		"VR C4ISR WRIST // DEFCON %d (%s) // ESC: %.0f%% // HQ:%s\n" % [st.defcon_level, defcon_codename, st.global_escalation_score, hq_str] +
+		"%s | TIME: %.0fx | BUDGET: $%.0fM\n" % [org_str, st.time_scale, st.blue_budget_musd] +
 		"BLUE KIA:%d WIA:%d | AMMO:%d (%d%%) || RED KIA:%d AMMO:%d (%d%%)\n" % [st.blue_personnel_kia, st.blue_personnel_wia, st.blue_ammo_remaining, b_pct, st.red_personnel_kia, st.red_ammo_remaining, r_pct] +
 		"POSTURE: %s | %s | %s\n" % [posture_name, floor_str, sub_str] +
 		"[R-Trig:Laser/WristBtn/Sphere | B:Move/Strike | A:Bn/Bde]"
@@ -855,6 +891,8 @@ func _update_wrist_c4isr_tablet() -> void:
 	if _wrist_buttons.has("btn_ssbn") and desktop_rig != null and desktop_rig.submarine_conn_ref != null:
 		var is_sub: bool = desktop_rig.submarine_conn_ref.is_sub_sim_active
 		_wrist_buttons["btn_ssbn"]["label"].text = "SSBN\nON" if is_sub else "SSBN\nOFF"
+	if _wrist_buttons.has("btn_hq"):
+		_wrist_buttons["btn_hq"]["label"].text = "HQ:\n" + hq_str
 	if _wrist_buttons.has("btn_trial"):
 		if sel_uid >= 0 and sel_uid < st.unit_count and st.unit_active[sel_uid] == 1:
 			var pid: int = st.unit_platform_id[sel_uid]

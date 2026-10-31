@@ -1,0 +1,19 @@
+{
+  "scenario_id": 101,
+  "slug": "taiwan_strait_blockade_2028",
+  "display_name": "Crisis 2028: Taiwan Strait Full Blockade & Carrier Clash",
+  "theater_slug": "strait_theater",
+  "era_label": "2028 A2/AD & Hypersonic CSG War",
+  "briefing_opord": "OPORD 28-101: PLA Eastern Theater Command establishes a multi-axis maritime and air blockade around Taiwan. DF-21D and DF-26 Anti-Ship Ballistic Missiles (ASBM) establish a 1,500km anti-access envelope. US Carrier Strike Group (USS Gerald R. Ford) and ROC defenses coordinate BVR intercepts with F-35A, Loyal Wingmen, and coastal Patriot/BrahMos batteries to break the encirclement.",
+  "blue_budget_musd": 5200.0,
+  "red_budget_musd": 5800.0,
+  "defcon_initial": 3,
+  "tension_initial": 55.0,
+  "orbat_json": "{\"scale\": \"FULL_BLOCKADE\", \"brigades_per_side\": 6, \"carrier_group\": true, \"asbm_threat\": true}",
+  "key_features": [
+    "ASBM Threat Envelope",
+    "CSG Carrier Air Wing Alpha Strikes",
+    "Undersea Submarine Wolfpack Interdiction",
+    "Loyal Wingman Collaborative Combat Aircraft (CCA)"
+  ]
+}

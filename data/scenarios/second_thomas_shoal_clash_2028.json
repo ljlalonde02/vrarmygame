@@ -1,0 +1,19 @@
+{
+  "scenario_id": 103,
+  "slug": "second_thomas_shoal_clash_2028",
+  "display_name": "Crisis 2028: Second Thomas Shoal Littoral Clash & USV Swarms",
+  "theater_slug": "strait_theater",
+  "era_label": "2028 Littoral Gray-Zone to High-End Naval War",
+  "briefing_opord": "OPORD 28-103: Gray-zone escalation escalates into open combat around Ayungin (Second Thomas) Shoal. Chinese Maritime Militia and CCG vessels backed by Type 055 guided-missile cruisers attempt to seize BRP Sierra Madre. Allied US-Philippine task forces deploy MAGURA V5 autonomous strike USVs, MQ-28 Ghost Bat combat drones, and F-35A BVR air overwatch to maintain freedom of navigation.",
+  "blue_budget_musd": 3900.0,
+  "red_budget_musd": 4300.0,
+  "defcon_initial": 3,
+  "tension_initial": 58.0,
+  "orbat_json": "{\"scale\": \"LITTORAL_SWARM\", \"brigades_per_side\": 4, \"usv_swarms\": true, \"bvr_cover\": true}",
+  "key_features": [
+    "Autonomous USV Wolfpack Swarms",
+    "BVR Air Cover & Combat Air Patrol (CAP)",
+    "Type 055 Renhai VLS Saturation",
+    "Undersea Drone Reconnaissance"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "scenario_id": 102,
+  "slug": "suwalki_corridor_breach_2028",
+  "display_name": "Crisis 2028: Suwalki Corridor High-Intensity Armored Breach",
+  "theater_slug": "baltic_suwalki_theater",
+  "era_label": "2028 High-Intensity Electronic & Heavy Armor Clash",
+  "briefing_opord": "OPORD 28-102: OPFOR 1st Guards Tank Army launches an armored pincer across the 65-mile Suwalki Gap to link Belarus with Kaliningrad. Heavy Krasukha-4 Electronic Warfare blankets the corridor, severing GPS and datalinks. NATO Enhanced Forward Presence (Leopard 2A8, Bradley IFVs, Milrem THeMIS UGVs, and Rafale F4) must execute active defense and air-ground coordination to prevent the isolation of the Baltic states.",
+  "blue_budget_musd": 4800.0,
+  "red_budget_musd": 5200.0,
+  "defcon_initial": 2,
+  "tension_initial": 72.0,
+  "orbat_json": "{\"scale\": \"ARMORED_CORRIDOR\", \"brigades_per_side\": 5, \"ew_dense\": true, \"heavy_armor\": true}",
+  "key_features": [
+    "Krasukha-4 GPS/C2 Jamming Blanket",
+    "Leopard 2A8 Trophy APS Active Defense",
+    "Robotic UGV Scouting & Combat Engineering",
+    "S-400 vs Rafale F4 SEAD duels"
+  ]
+}

@@ -43,6 +43,7 @@ var _studio_info_rich_label: RichTextLabel = null
 var _studio_channels_vb: VBoxContainer = null
 var _studio_anim_time: float = 0.0
 var _red_phone_rich_label: RichTextLabel = null
+var _defcon_status_label: Label = null
 
 const UnitTacticalTrialsSystemScript := preload("res://src/sim_core/systems/unit_tactical_trials_system.gd")
 
@@ -141,6 +142,7 @@ func set_menu_visible(vis: bool) -> void:
 		if rd != null and rd.get("root_panel") != null:
 			rd.root_panel.visible = not vis
 	if vis:
+		update_defcon_badge()
 		_refresh_campaign_view()
 		_refresh_aar_view(true, "THEATER COMMANDER INSPECTION")
 		_refresh_manual_and_tutorial_view()
@@ -148,6 +150,37 @@ func set_menu_visible(vis: bool) -> void:
 		_refresh_news_video_studio_view()
 		_refresh_red_phone_and_save_view()
 		_refresh_trials_view()
+
+
+func update_defcon_badge() -> void:
+	if _defcon_status_label == null or sim_server == null:
+		return
+	var st: WorldState = sim_server.world_state
+	var dc: int = st.defcon_level
+	var codename := "FADE OUT"
+	var col: Color = TacticalTheme.COL_NATO_BLUE
+	match dc:
+		1:
+			codename = "COCKED PISTOL"
+			col = Color(1.0, 0.2, 0.2)
+		2:
+			codename = "FAST PACE"
+			col = Color(1.0, 0.45, 0.1)
+		3:
+			codename = "ROUND HOUSE"
+			col = Color(1.0, 0.8, 0.1)
+		4:
+			codename = "DOUBLE TAKE"
+			col = Color(0.2, 0.9, 0.5)
+		5:
+			codename = "FADE OUT"
+			col = Color(0.2, 0.6, 1.0)
+
+	var pal_str := "AUTHORIZED" if (sim_server.has_method("verify_pal_code") and sim_server.defcon_escalation_system != null and sim_server.defcon_escalation_system.pal_authorized) else "STANDBY"
+	_defcon_status_label.text = "■ DEFCON %d: %s // TENSION: %.1f%% // PAL AUTH: %s // ESCALATION WATCH" % [
+		dc, codename, st.global_escalation_score, pal_str
+	]
+	_defcon_status_label.add_theme_color_override("font_color", col)
 
 
 func _build_menu_ui() -> void:
@@ -213,6 +246,12 @@ func _build_menu_ui() -> void:
 				war_table.call("set_graphic_style_mode", s_idx)
 		)
 		style_hb.add_child(s_btn)
+
+	# FEAT-09: Dynamic DEFCON Status Banner
+	_defcon_status_label = Label.new()
+	_defcon_status_label.text = "■ DEFCON 5: FADE OUT // TENSION: 10% // DUAL-KEY PAL ARMED"
+	_defcon_status_label.add_theme_color_override("font_color", TacticalTheme.COL_NATO_BLUE)
+	main_vb.add_child(_defcon_status_label)
 
 	_tab_container = TabContainer.new()
 	_tab_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -346,6 +385,36 @@ func _build_menu_ui() -> void:
 		launch_scenario("op_global_escalation_chronicle_2028", 1.25, Vector2.ZERO)
 	)
 	scen_hb2.add_child(btn_op9)
+
+	# FEAT-11: 2028 Dynamic Crisis Scenarios
+	var crisis_lbl := Label.new()
+	crisis_lbl.text = "2028 GEOPOLITICAL CRISIS SCENARIOS (FEAT-11):"
+	crisis_lbl.add_theme_color_override("font_color", TacticalTheme.COL_FLIR_GREEN)
+	scen_tab.add_child(crisis_lbl)
+
+	var scen_hb3 := HBoxContainer.new()
+	scen_hb3.add_theme_constant_override("separation", 8)
+	scen_tab.add_child(scen_hb3)
+
+	var btn_cr1 := Button.new()
+	btn_cr1.text = "CRISIS 1: TAIWAN STRAIT BLOCKADE"
+	btn_cr1.pressed.connect(func(): launch_scenario("taiwan_strait_blockade_2028", 1.8, Vector2(10.0, 5.0)))
+	scen_hb3.add_child(btn_cr1)
+
+	var btn_cr2 := Button.new()
+	btn_cr2.text = "CRISIS 2: SUWALKI CORRIDOR BREACH"
+	btn_cr2.pressed.connect(func(): launch_scenario("suwalki_corridor_breach_2028", 2.2, Vector2(15.0, 0.0)))
+	scen_hb3.add_child(btn_cr2)
+
+	var btn_cr3 := Button.new()
+	btn_cr3.text = "CRISIS 3: SECOND THOMAS SHOAL"
+	btn_cr3.pressed.connect(func(): launch_scenario("second_thomas_shoal_clash_2028", 2.4, Vector2(0.0, 10.0)))
+	scen_hb3.add_child(btn_cr3)
+
+	var btn_cr4 := Button.new()
+	btn_cr4.text = "CRISIS 4: GIUK ARCTIC BASTION"
+	btn_cr4.pressed.connect(func(): launch_scenario("giuk_arctic_bastion_2028", 2.0, Vector2(0.0, 0.0)))
+	scen_hb3.add_child(btn_cr4)
 
 	var doc_lbl := Label.new()
 	doc_lbl.text = "SELECT OPFOR RED COMMANDER AI DOCTRINE:"

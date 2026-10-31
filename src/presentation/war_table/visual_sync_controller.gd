@@ -825,6 +825,19 @@ func sync_visuals() -> void:
 						veh_mm.set_instance_color(veh_idx, col)
 						veh_idx += 1
 
+					# Combined arms tank 120mm cannon fire tracer bursts & bounding overwatch when zoomed in
+					if zoom >= 2.0 and (flg & int(sim_db.FLAG_ARMOR)) != 0 and ((int(curr_snap.timestamp_sec * 2.5) + uid) % 4) == 0:
+						var fwd := (-attitude_basis.z).normalized()
+						var canon_orig := local_pos + Vector3(0.0, 0.006, 0.0) + fwd * 0.012
+						var canon_end := canon_orig + fwd * clampf(0.05 * zoom, 0.03, 0.15)
+						var pulse_t := fmod(float(curr_snap.timestamp_sec) * 4.0 + float(uid) * 0.5, 1.0)
+						var c_a := canon_orig.lerp(canon_end, pulse_t * 0.8)
+						var c_b := canon_orig.lerp(canon_end, minf(1.0, pulse_t * 0.8 + 0.2))
+						beams_immediate.surface_set_color(Color(1.0, 0.85, 0.3, 0.95))
+						beams_immediate.surface_add_vertex(c_a)
+						beams_immediate.surface_add_vertex(c_b)
+						drew_any_line = true
+
 		# ====================================================================
 		# 2. RENDER HOLOGRAPHIC NATO TOKEN PLAQUES (FOR ACTIVE SEMANTIC ECHELON)
 		# ====================================================================

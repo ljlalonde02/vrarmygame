@@ -452,6 +452,36 @@ func load_database() -> void:
 		scenarios_by_slug[String(sc["slug"])] = sc_copy
 		scenarios_list.append(sc_copy)
 
+	# FEAT-11: Load external crisis scenario JSON files from res://data/scenarios/
+	var sc_dir := DirAccess.open("res://data/scenarios")
+	if sc_dir != null:
+		sc_dir.list_dir_begin()
+		var sc_fname := sc_dir.get_next()
+		while not sc_fname.is_empty():
+			if not sc_dir.current_is_dir() and sc_fname.ends_with(".json"):
+				var fpath := "res://data/scenarios/" + sc_fname
+				var sc_file := FileAccess.open(fpath, FileAccess.READ)
+				if sc_file != null:
+					var sc_json = JSON.parse_string(sc_file.get_as_text())
+					sc_file.close()
+					if typeof(sc_json) == TYPE_DICTIONARY:
+						var sc_dict: Dictionary = sc_json
+						var s_slug := String(sc_dict.get("slug", sc_fname.get_basename()))
+						if not sc_dict.has("theater_slug"):
+							sc_dict["theater_slug"] = "strait_theater"
+						var parsed_orb = JSON.parse_string(String(sc_dict.get("orbat_json", "{}")))
+						sc_dict["orbat"] = parsed_orb if typeof(parsed_orb) == TYPE_DICTIONARY else {}
+						scenarios_by_slug[s_slug] = sc_dict
+						var exists := false
+						for existing in scenarios_list:
+							if String(existing.get("slug", "")) == s_slug:
+								exists = true
+								break
+						if not exists:
+							scenarios_list.append(sc_dict)
+			sc_fname = sc_dir.get_next()
+		sc_dir.list_dir_end()
+
 	for ts in payload.get("tutorial_steps", []):
 		tutorial_steps.append(ts)
 	for ms in payload.get("manual_sections", []):

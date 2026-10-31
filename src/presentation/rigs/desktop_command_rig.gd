@@ -23,6 +23,7 @@ var tutorial_controller: Node = null
 var story_director_ref: Node = null
 var fpv_pod_ref: Node = null
 var submarine_conn_ref: Node = null
+var tri_command_ref: Node = null
 var xr_rig_ref: Node3D = null
 var radio_synth_ref: Node = null
 

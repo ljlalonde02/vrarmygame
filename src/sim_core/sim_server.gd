@@ -27,6 +27,8 @@ const NuclearSubmarineSystemScript := preload("res://src/sim_core/systems/nuclea
 const SwarmIntelligenceSystemScript := preload("res://src/sim_core/systems/swarm_intelligence_system.gd")
 const UnitTacticalTrialsSystemScript := preload("res://src/sim_core/systems/unit_tactical_trials_system.gd")
 const ReplayRecorderScript := preload("res://src/sim_core/replay_recorder.gd")
+const DefconEscalationSystemScript := preload("res://src/sim_core/systems/defcon_escalation_system.gd")
+const CoordinatedStrikeSystemScript := preload("res://src/sim_core/systems/coordinated_strike_system.gd")
 
 const BASE_TICK_DT := 0.10 # 10 Hz simulation tick (100 ms)
 
@@ -37,6 +39,7 @@ var replay_recorder: RefCounted = ReplayRecorderScript.new()
 var weather_solar_system: RefCounted = WeatherSolarSystemScript.new()
 var red_phone_hotline_system: RefCounted = RedPhoneHotlineSystemScript.new()
 var campaign_persistence_system: RefCounted = CampaignPersistenceSystemScript.new()
+var defcon_escalation_system: RefCounted = DefconEscalationSystemScript.new()
 var cs_kernel: Object = null
 
 var current_scenario_slug: String = "op_pacific_shield_2028"
@@ -111,6 +114,16 @@ func load_scenario(scenario_slug: String = "op_pacific_shield_2028") -> void:
 		site_copy["hp"] = 500.0
 		world_state.active_sites.append(site_copy)
 
+	# FEAT-09: Initialize Dynamic DEFCON Escalation System
+	if defcon_escalation_system == null:
+		defcon_escalation_system = DefconEscalationSystemScript.new()
+	var defcon_init: int = int(sc_info.get("defcon_initial", 5))
+	var tens_init: float = float(sc_info.get("tension_initial", 10.0))
+	defcon_escalation_system.current_defcon = defcon_init
+	defcon_escalation_system.tension_score = tens_init
+	world_state.defcon_level = defcon_init
+	world_state.global_escalation_score = tens_init
+
 	match scenario_slug:
 		"op_iron_hound_ridge":
 			_seed_scenario_iron_hound_ridge()
@@ -126,6 +139,14 @@ func load_scenario(scenario_slug: String = "op_pacific_shield_2028") -> void:
 			_seed_scenario_ukraine_donbas()
 		"op_mexico_rio_grande_2028":
 			_seed_scenario_mexico_rio_grande()
+		"taiwan_strait_blockade_2028":
+			_seed_scenario_taiwan_strait_blockade()
+		"suwalki_corridor_breach_2028":
+			_seed_scenario_suwalki_corridor_breach()
+		"second_thomas_shoal_clash_2028":
+			_seed_scenario_second_thomas_shoal()
+		"giuk_arctic_bastion_2028":
+			_seed_scenario_giuk_arctic_bastion()
 		_:
 			_seed_scenario_pacific_shield_600()
 
@@ -370,6 +391,34 @@ func _seed_scenario_mexico_rio_grande() -> void:
 	_spawn_symmetric_theater_forces(blue_slugs, red_slugs, Vector2(-42.0, -68.0), Vector2(-58.0, 55.0), Vector2(-5.0, 32.0), 3, 3, 6)
 
 
+func _seed_scenario_taiwan_strait_blockade() -> void:
+	# FEAT-11: Taiwan Strait Blockade & Carrier Strike Group Clash
+	var blue_slugs := ["cvn_78_gerald_r_ford", "f_35a_lightning", "xq_58a_valkyrie", "ddg_51_arleigh_burke", "mim_104f_patriot", "brahmos_coastal_battery", "ssn_688i_los_angeles", "magura_v5_usv"]
+	var red_slugs := ["type_055_renhai", "type_093b_shang_ssn", "j_20_mighty_dragon", "s_70_okhotnik", "s_400_triumf", "tu_22m3_backfire", "krasukha_4_ew", "shahed_136_launcher"]
+	_spawn_symmetric_theater_forces(blue_slugs, red_slugs, Vector2(55.0, -25.0), Vector2(-45.0, 30.0), Vector2(-25.0, 15.0), 4, 3, 6)
+
+
+func _seed_scenario_suwalki_corridor_breach() -> void:
+	# FEAT-11: Suwalki Corridor Heavy Armor & EW Jamming Clash
+	var blue_slugs := ["leopard_2a8_platoon", "m2a4_mech_company", "milrem_themis_ugv", "skynex_ahead_battery", "rafale_f4_flight", "f_35a_lightning", "tier1_sniper_recon_team", "hemtt_supply_convoy"]
+	var red_slugs := ["t_90m_platoon", "uran_9_ugv", "lancet_3_team", "s_400_triumf", "krasukha_4_ew", "su_57_felon", "tu_22m3_backfire", "spetsnaz_sniper_commando"]
+	_spawn_symmetric_theater_forces(blue_slugs, red_slugs, Vector2(-30.0, 35.0), Vector2(50.0, -25.0), Vector2(25.0, -10.0), 4, 3, 6)
+
+
+func _seed_scenario_second_thomas_shoal() -> void:
+	# FEAT-11: Second Thomas Shoal Littoral USV Swarm & BVR Air Cover
+	var blue_slugs := ["magura_v5_usv", "ddg_51_arleigh_burke", "f_35a_lightning", "mq_28_ghost_bat", "navy_seal_commando_squad", "orca_xluuv", "fpv_fiber_swarm", "kc_46_pegasus"]
+	var red_slugs := ["type_055_renhai", "sea_baby_usv", "type_093b_shang_ssn", "j_20_mighty_dragon", "shahed_136_launcher", "spetsnaz_sniper_commando", "tu_22m3_backfire", "krasukha_4_ew"]
+	_spawn_symmetric_theater_forces(blue_slugs, red_slugs, Vector2(30.0, -45.0), Vector2(-35.0, 40.0), Vector2(-15.0, 20.0), 3, 3, 6)
+
+
+func _seed_scenario_giuk_arctic_bastion() -> void:
+	# FEAT-11: GIUK Arctic Bastion Under-Ice SSBN & SOSUS Barrier Duel
+	var blue_slugs := ["ssn_688i_los_angeles", "orca_xluuv", "ddg_51_arleigh_burke", "f_35a_lightning", "navy_seal_commando_squad", "tier1_sniper_recon_team", "magura_v5_usv", "kc_46_pegasus"]
+	var red_slugs := ["type_093b_shang_ssn", "sea_baby_usv", "tu_22m3_backfire", "su_57_felon", "s_400_triumf", "spetsnaz_sniper_commando", "uran_9_ugv", "t_90m_platoon"]
+	_spawn_symmetric_theater_forces(blue_slugs, red_slugs, Vector2(-20.0, 45.0), Vector2(40.0, -35.0), Vector2(15.0, -15.0), 3, 3, 6)
+
+
 func _spawn_symmetric_theater_forces(
 	blue_slugs: Array,
 	red_slugs: Array,
@@ -497,6 +546,9 @@ func step_tick(dt: float = BASE_TICK_DT) -> void:
 		CivilianDensitySystemScript.step(world_state, cs_kernel, dt)
 	GlobalOrbatSystemScript.step_global_orbat(world_state, dt)
 	BudgetTechSystemScript.step(world_state, sim_db_ref, dt)
+	if defcon_escalation_system != null:
+		defcon_escalation_system.step(world_state, dt)
+	CoordinatedStrikeSystemScript.step_combined_arms_synergy(world_state, sim_db_ref, spatial_grid, dt)
 	DiplomacySystemScript.step(world_state, sim_db_ref, dt)
 	red_phone_hotline_system.step(world_state, sim_db_ref, dt)
 	_last_news_video_sim_sec = WarNewsVideoSystemScript.evaluate_and_broadcast_events(world_state, sim_db_ref, prev_news_metrics, _last_news_video_sim_sec)
@@ -842,6 +894,33 @@ func execute_mdd_action(action_code: String, faction: int = WorldState.FACTION_B
 	snapshot_buffer.publish_snapshot(world_state)
 	_flush_sim_events_to_signals()
 	return res
+
+
+## FEAT-12: Executes a 4-phase coordinated strike package (CEMA, SEAD, Decoys, Hypersonic)
+func execute_coordinated_strike_package(target_coord: Vector3, package_config: Dictionary = {}) -> Dictionary:
+	_resolve_autoloads()
+	var res: Dictionary = CoordinatedStrikeSystemScript.execute_strike_package(world_state, sim_db_ref, target_coord, package_config)
+	if defcon_escalation_system != null:
+		defcon_escalation_system.trigger_event("BALLISTIC_LAUNCH", 8.0, "Coordinated Strike Package Launched")
+	WarNewsVideoSystemScript.trigger_broadcast(world_state, sim_db_ref, "missile_alpha_strike", "COORDINATED MULTI-DOMAIN 4-PHASE STRIKE WAVE EXECUTED")
+	snapshot_buffer.publish_snapshot(world_state)
+	_flush_sim_events_to_signals()
+	return res
+
+
+## FEAT-09: Verifies dual-key Permissive Action Link (PAL) authorization
+func verify_pal_code(key_alpha: String, key_bravo: String) -> bool:
+	if defcon_escalation_system != null:
+		return defcon_escalation_system.verify_pal_code(key_alpha, key_bravo)
+	return false
+
+
+## FEAT-09: Triggers explicit DEFCON escalation event
+func trigger_defcon_event(event_type: String, weight: float = 5.0, reason: String = "") -> void:
+	if defcon_escalation_system != null:
+		defcon_escalation_system.trigger_event(event_type, weight, reason)
+	snapshot_buffer.publish_snapshot(world_state)
+	_flush_sim_events_to_signals()
 
 
 ## Unlocks a 5-Branch R&D Technology Tree node (`tech_slug`) for `faction` (1=BLUE, 2=RED).
