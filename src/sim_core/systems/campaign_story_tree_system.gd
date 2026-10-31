@@ -37,6 +37,12 @@ func _init(p_sim_db: Node = null, initial_nation: String = "usa") -> void:
 	select_nation(initial_nation)
 
 
+func setup(p_sim_db: Node) -> void:
+	sim_db_ref = p_sim_db
+	if not current_nation_slug.is_empty():
+		select_nation(current_nation_slug)
+
+
 func _get_db() -> Node:
 	if sim_db_ref != null:
 		return sim_db_ref
@@ -199,6 +205,36 @@ func advance_campaign(outcome: String, simulation_metrics: Dictionary = {}) -> D
 			"history": campaign_history.duplicate(true)
 		}
 		campaign_climax_reached.emit(climax_type, climax_summary)
+
+	# US-13.1: Synchronize narrative progression to realistic journalistic war news broadcast
+	var WarNewsVideoSystemScript := preload("res://src/sim_core/systems/war_news_video_system.gd")
+	var headline: String = String(target_node.get("chapter_title", "BREAKING WAR DESK UPDATE"))
+	var chyron: String = String(edge.get("transition_narrative", "Military situation evolving across theater."))
+	var clip_slug := String(target_node.get("action_video_tag", "missile_alpha_strike"))
+
+	if clip_slug.is_empty():
+		match outcome:
+			OUTCOME_DECISIVE_VICTORY:
+				clip_slug = "stealth_airstrike_sortie"
+			OUTCOME_TACTICAL_HOLD:
+				clip_slug = "sam_air_defense_intercept"
+			OUTCOME_HEAVY_ATTRITION:
+				clip_slug = "urban_armor_robot_dogs"
+			OUTCOME_DEFEAT:
+				clip_slug = "naval_carrier_strike"
+
+	if is_climax:
+		var c_type := String(target_node.get("climax_type", ""))
+		if c_type == CLIMAX_NUCLEAR_ESCALATION:
+			clip_slug = "thermonuclear_detonation"
+		elif c_type == CLIMAX_VICTORY_HEGEMONY:
+			clip_slug = "stealth_airstrike_sortie"
+
+	var main_loop := Engine.get_main_loop()
+	if main_loop is SceneTree and main_loop.root != null:
+		var sim_server: Node = main_loop.root.find_child("SimServer", true, false)
+		if sim_server != null and "world_state" in sim_server and sim_server.world_state != null:
+			WarNewsVideoSystemScript.trigger_broadcast(sim_server.world_state, db, clip_slug, headline + " // " + chyron, false, false)
 
 	return step_record
 

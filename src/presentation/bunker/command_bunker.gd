@@ -68,6 +68,8 @@ var _news_wall_3d: Node3D = null
 var _news_wall_screen_mat: StandardMaterial3D = null
 var _news_wall_header_3d: Label3D = null
 var _news_wall_chyron_3d: Label3D = null
+var _news_wall_ticker_3d: Label3D = null
+var _news_ticker_scroll_offset: float = 0.0
 var _news_wall_anim_time: float = 0.0
 var _beacon_spin_angle: float = 0.0
 var _last_nuke_count: int = 0
@@ -425,12 +427,21 @@ func _build_bunker_architecture() -> void:
 
 	_news_wall_chyron_3d = Label3D.new()
 	_news_wall_chyron_3d.name = "NewsWallChyronLabel3D"
-	_news_wall_chyron_3d.position = Vector3(0.0, -0.24, 0.022)
+	_news_wall_chyron_3d.position = Vector3(0.0, -0.21, 0.022)
 	_news_wall_chyron_3d.pixel_size = 0.00068
 	_news_wall_chyron_3d.font_size = 20
 	_news_wall_chyron_3d.modulate = Color(1.0, 0.92, 0.45)
 	_news_wall_chyron_3d.text = "BREAKING: MASSIVE CRUISE & HYPERSONIC MISSILE SALVO LAUNCHED"
 	_news_wall_3d.add_child(_news_wall_chyron_3d)
+
+	_news_wall_ticker_3d = Label3D.new()
+	_news_wall_ticker_3d.name = "NewsWallTickerLabel3D"
+	_news_wall_ticker_3d.position = Vector3(0.0, -0.26, 0.022)
+	_news_wall_ticker_3d.pixel_size = 0.00055
+	_news_wall_ticker_3d.font_size = 17
+	_news_wall_ticker_3d.modulate = Color(0.35, 0.88, 1.0)
+	_news_wall_ticker_3d.text = "► DEFCON 4 // THEATER: STRAIT // AIRSPACE ACTIVE // CASUALTIES 0 // FLASHPOINTS MONITORED..."
+	_news_wall_3d.add_child(_news_wall_ticker_3d)
 
 
 func _process(delta: float) -> void:
@@ -549,6 +560,24 @@ func update_bunker_defcon_and_integrity_atmosphere(delta: float) -> void:
 			var c_txt := st.active_news_video_headline.substr(0, 68)
 			if _news_wall_chyron_3d.text != c_txt:
 				_news_wall_chyron_3d.text = c_txt
+		if _news_wall_ticker_3d != null:
+			_news_ticker_scroll_offset += delta * 12.0
+			var b_lost: int = st.match_stats.get("blue_lost", 0) if st.match_stats != null else 0
+			var r_lost: int = st.match_stats.get("red_lost", 0) if st.match_stats != null else 0
+			var civ_cas: float = st.estimated_civilian_casualties if "estimated_civilian_casualties" in st else 0.0
+			var ticker_raw := "+++ STRATCOM SITREP +++ DEFCON %d +++ THEATER: %s +++ LOSSES BLUE:%d RED:%d +++ CASUALTIES EST: %.0f +++ %s +++ " % [
+				dc,
+				st.active_theater_slug.to_upper(),
+				b_lost,
+				r_lost,
+				civ_cas,
+				st.active_news_video_headline
+			]
+			var t_len := ticker_raw.length()
+			var start_idx := int(_news_ticker_scroll_offset) % maxi(1, t_len)
+			var double_text := ticker_raw + ticker_raw
+			var visible_slice := double_text.substr(start_idx, 52)
+			_news_wall_ticker_3d.text = "► " + visible_slice
 
 	# Bunker Camera Seismic Shake from nearby impacts or thermonuclear detonations
 	if desktop_rig != null and desktop_rig.camera != null and st.bunker_shock_tremor > 0.005:
