@@ -1,0 +1,10 @@
+{
+  "platform_slug": "b_21_raider",
+  "display_name": "B-21 Raider Stealth Bomber Cell",
+  "prompts": {
+    "atk": "Cinematic 4K military footage, dynamic aerial chase tracking B-21 Raider Stealth Bomber Cell (USA) flying at high speed. Fires primary weapon (autocannon) with intense rocket motor plume, contrails swirling in low-light dusk sky, photorealistic cockpit HUD reflection and heat shimmer.",
+    "def": "High-speed aerial combat sequence, B-21 Raider Stealth Bomber Cell banks sharply in high-G defensive break maneuver, deploying a salvo of bright magnesium infrared flares and chaff cartridges against incoming threat, afterburners pulsing against cloud layer.",
+    "win": "Air superiority victory shot, camera pans past B-21 Raider Stealth Bomber Cell as a distant hostile aircraft bursts into a massive fireball with debris disintegrating into the ocean below, pilot executes combat barrel roll over horizon.",
+    "loss": "Grim military reportage, B-21 Raider Stealth Bomber Cell suffers critical missile impact on left wing, thick black smoke and orange flames streaming from fuselage as aircraft spins out of control towards terrain, emergency ejection sequence initiated."
+  }
+}

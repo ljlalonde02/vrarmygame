@@ -1,0 +1,10 @@
+{
+  "platform_slug": "cvn_78_gerald_r_ford",
+  "display_name": "USS Gerald R. Ford (CVN-78) Supercarrier CSG",
+  "prompts": {
+    "atk": "Cinematic naval warfare, heavy seas crashing against hull of USS Gerald R. Ford (CVN-78) Supercarrier CSG (USA), Vertical Launch System (VLS) cells ignite in rapid salvo sequence, supersonic missiles piercing ocean mist with dazzling orange rocket blast reflecting on seawater.",
+    "def": "Naval close-in defense, Phalanx CIWS radar lock-on, 20mm rotary cannon unleashing unbroken stream of red tracer rounds into oncoming anti-ship missile skimming above ocean waves, detonating it into water spray.",
+    "win": "Maritime victory, surface radar displays target neutralized, distant enemy warship capsizing with massive water column explosion, USS Gerald R. Ford (CVN-78) Supercarrier CSG maintaining defensive perimeter under sunset sky.",
+    "loss": "Catastrophic naval casualty, heavy torpedo hit beneath keel of USS Gerald R. Ford (CVN-78) Supercarrier CSG, violent hull flex and cascading internal electrical failure, emergency damage control alarms sounding as ship lists heavily."
+  }
+}

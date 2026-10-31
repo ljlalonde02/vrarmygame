@@ -1146,6 +1146,33 @@ func get_terrain_elevation_m(x_km: float, z_km: float) -> float:
 	return heightmap_elev_m[iy * heightmap_size + ix]
 
 
+func get_water_depth_m(x_km: float, z_km: float) -> float:
+	var elev := get_terrain_elevation_m(x_km, z_km)
+	if elev < 0.0:
+		return -elev
+	return 0.0
+
+
+func get_ship_required_draft_m(pid: int, flags: int, p_slug: String = "") -> float:
+	# Submarines require significant depth to submerge safely
+	if (flags & (1 << 17)) != 0: # FLAG_UUV_SUB
+		return 15.0
+	# Supercarriers (CVN-78, CV-18, Charles de Gaulle, Vikrant)
+	if p_slug.find("carrier") != -1 or p_slug.find("cvn") != -1 or p_slug.find("cv18") != -1 or p_slug.find("charles") != -1 or p_slug.find("vikrant") != -1:
+		return 12.0
+	# Guided Missile Cruisers & Heavy Destroyers (Type 055, Arleigh Burke, Gorshkov)
+	if p_slug.find("type_055") != -1 or p_slug.find("arleigh") != -1 or p_slug.find("gorshkov") != -1 or p_slug.find("cruiser") != -1 or p_slug.find("destroyer") != -1:
+		return 7.5
+	# Frigates, Corvettes, and Littoral Patrol
+	if p_slug.find("frigate") != -1 or p_slug.find("benito") != -1 or p_slug.find("corvette") != -1:
+		return 4.8
+	# Unmanned Surface Vehicles (USVs / kamikaze wolfpacks: Sea Baby, MAGURA V5)
+	if (flags & (1 << 11)) != 0 or p_slug.find("usv") != -1 or p_slug.find("magura") != -1 or p_slug.find("sea_baby") != -1: # FLAG_SWARM
+		return 1.2
+	# Default surface combatant draft
+	return 5.5
+
+
 func get_terrain_slope_deg(x_km: float, z_km: float) -> float:
 	var step_km := 1.0
 	var h_c := maxf(0.0, get_terrain_elevation_m(x_km, z_km))
@@ -1155,6 +1182,7 @@ func get_terrain_slope_deg(x_km: float, z_km: float) -> float:
 	var dz_m := h_z - h_c
 	var grad := sqrt(dx_m * dx_m + dz_m * dz_m) / (step_km * 1000.0)
 	return rad_to_deg(atan(grad))
+
 
 
 func spawn_unit(faction: int, platform_id: int, pos_km: Vector3, echelon: int = ECHELON_COMPANY, parent_id: int = -1, p_def: Dictionary = {}) -> int:

@@ -1,0 +1,10 @@
+{
+  "platform_slug": "type_055_renhai",
+  "display_name": "Type 055 Renhai Guided-Missile Cruiser",
+  "prompts": {
+    "atk": "Cinematic naval warfare, heavy seas crashing against hull of Type 055 Renhai Guided-Missile Cruiser (USA), Vertical Launch System (VLS) cells ignite in rapid salvo sequence, supersonic missiles piercing ocean mist with dazzling orange rocket blast reflecting on seawater.",
+    "def": "Naval close-in defense, Phalanx CIWS radar lock-on, 20mm rotary cannon unleashing unbroken stream of red tracer rounds into oncoming anti-ship missile skimming above ocean waves, detonating it into water spray.",
+    "win": "Maritime victory, surface radar displays target neutralized, distant enemy warship capsizing with massive water column explosion, Type 055 Renhai Guided-Missile Cruiser maintaining defensive perimeter under sunset sky.",
+    "loss": "Catastrophic naval casualty, heavy torpedo hit beneath keel of Type 055 Renhai Guided-Missile Cruiser, violent hull flex and cascading internal electrical failure, emergency damage control alarms sounding as ship lists heavily."
+  }
+}

@@ -206,12 +206,28 @@ static func step(state: WorldState, sim_db: Node, dt: float) -> void:
 			var dy_land := new_y - pos.y
 			u_pitch[uid] = clampf(atan2(dy_land, maxf(step_km * 1000.0, 1.0)), -0.45, 0.45)
 		elif dom_id == 2:
+			# Naval Bathymetry & Draft Enforcement:
+			var p_dict: Dictionary = sim_db.platforms_by_id[pid] if (sim_db != null and pid < sim_db.platforms_by_id.size()) else {}
+			var p_slug: String = String(p_dict.get("slug", ""))
+			var req_draft: float = state.get_ship_required_draft_m(pid, flg, p_slug)
+			var dest_water_depth: float = state.get_water_depth_m(new_x, new_z)
+
+			# Ships cannot enter dry land or water shallower than their required draft
+			if dest_water_depth < req_draft:
+				new_x = pos.x
+				new_z = pos.z
+				dest_water_depth = state.get_water_depth_m(new_x, new_z)
+
 			if (flg & int(sim_db.FLAG_UUV_SUB)) != 0:
 				var sub_depth := p_op_alt[pid] if (pid < p_op_alt.size() and p_op_alt[pid] < -5.0) else -180.0
-				new_y = clampf(u_des_alt[uid] if u_des_alt[uid] < -5.0 else sub_depth, -450.0, -15.0)
+				var pref_depth := u_des_alt[uid] if u_des_alt[uid] < -5.0 else sub_depth
+				# Submarine depth is clamped above seafloor (-dest_water_depth + 4.0m) and below surface (-8.0m)
+				var max_dive := -maxf(10.0, dest_water_depth - 4.0)
+				new_y = clampf(pref_depth, max_dive, -8.0)
 			else:
 				new_y = 0.0
 			u_pitch[uid] = 0.0
+
 		elif dom_id == 1:
 			var terrain_below := maxf(0.0, state.get_terrain_elevation_m(new_x, new_z))
 			var is_heli: bool = (pid < p_op_alt.size() and p_op_alt[pid] <= 250.0 and p_op_alt[pid] > 20.0)

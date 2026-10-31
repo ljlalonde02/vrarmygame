@@ -1,5 +1,7 @@
 class_name VisualSyncController
 extends Node3D
+
+const PlatformMeshArmoryScript := preload("res://src/presentation/war_table/platform_mesh_armory.gd")
 ## 90 Hz Tacview-Style 3D Miniature & Ribbon Presentation Synchronizer.
 ## Renders little 3D miniature units for ALL domains (Air, Sea, Land Vehicles, Robot Dogs, Infantry Soldiers, Missiles)
 ## at ALL zoom levels (expanding into full 4-ship flights, 4-tank platoons, 8-dog packs, and 12-man infantry squads on zoom)
@@ -17,6 +19,8 @@ const MAX_VISIBLE_SATELLITES := 32
 const MAX_VISIBLE_BUILDINGS := 6144
 const MAX_VISIBLE_TRAIN_CARS := 256
 const MAX_FLOATING_PHOTO_CARDS := 16
+const MAX_VISIBLE_FLAGSHIP := 256
+const MAX_VISIBLE_FLARES := 512
 
 var sim_server: Node = null
 var sim_db: Node = null
@@ -37,6 +41,30 @@ var beams_mesh_instance: MeshInstance3D = null
 var beams_immediate: ImmediateMesh = null
 var ribbons_mesh_instance: MeshInstance3D = null
 var ribbons_immediate: ImmediateMesh = null
+
+var f35_mmi: MultiMeshInstance3D = null
+var j20_mmi: MultiMeshInstance3D = null
+var su57_mmi: MultiMeshInstance3D = null
+var b21_mmi: MultiMeshInstance3D = null
+var cvn78_mmi: MultiMeshInstance3D = null
+var type055_mmi: MultiMeshInstance3D = null
+var m1a2_mmi: MultiMeshInstance3D = null
+var robot_dog_mmi: MultiMeshInstance3D = null
+var flares_mmi: MultiMeshInstance3D = null
+
+var last_visible_f35_count: int = 0
+var last_visible_j20_count: int = 0
+var last_visible_su57_count: int = 0
+var last_visible_b21_count: int = 0
+var last_visible_cvn78_count: int = 0
+var last_visible_type055_count: int = 0
+var last_visible_m1a2_count: int = 0
+var last_visible_dog_count: int = 0
+var last_visible_flare_count: int = 0
+
+var _city_labels_root: Node3D = null
+var _city_labels: Array[Label3D] = []
+
 
 var _nuke_mesh_root: Node3D = null
 var _nuke_fireball_mi: MeshInstance3D = null
@@ -93,6 +121,8 @@ func _ready() -> void:
 		_setup_floating_photo_cards()
 	if _command_radial_root == null:
 		_setup_command_radial_menu()
+	if _city_labels_root == null:
+		_setup_real_city_labels()
 	var sig_bus: Node = get_node_or_null("/root/SignalBus") if is_inside_tree() else null
 	if sig_bus != null:
 		sig_bus.recon_photo_mode_toggled.connect(func(enabled: bool): recon_photo_mode = enabled)
@@ -539,6 +569,8 @@ func _setup_multimesh_layers() -> void:
 
 	# 10. ThermonuclearDetonationFX (3D Volumetric Mesh Explosion: Core, Stem, Toroidal Cap, Shockwave)
 	_setup_nuke_detonation_meshes()
+	_setup_flagship_multimeshes()
+
 
 
 func _setup_nuke_detonation_meshes() -> void:
@@ -601,7 +633,83 @@ func _setup_nuke_detonation_meshes() -> void:
 	_nuke_mesh_root.add_child(_nuke_shockwave_mi)
 
 
+func _setup_flagship_multimeshes() -> void:
+	var unshaded_mat := StandardMaterial3D.new()
+	unshaded_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	unshaded_mat.vertex_color_use_as_albedo = true
+	unshaded_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+	var flagships: Array[Dictionary] = [
+		{"name": "F35MultiMesh", "prop": "f35_mmi", "slug": PlatformMeshArmoryScript.FLAGSHIP_F35},
+		{"name": "J20MultiMesh", "prop": "j20_mmi", "slug": PlatformMeshArmoryScript.FLAGSHIP_J20},
+		{"name": "Su57MultiMesh", "prop": "su57_mmi", "slug": PlatformMeshArmoryScript.FLAGSHIP_SU57},
+		{"name": "B21MultiMesh", "prop": "b21_mmi", "slug": PlatformMeshArmoryScript.FLAGSHIP_B21},
+		{"name": "Cvn78MultiMesh", "prop": "cvn78_mmi", "slug": PlatformMeshArmoryScript.FLAGSHIP_CVN78},
+		{"name": "Type055MultiMesh", "prop": "type055_mmi", "slug": PlatformMeshArmoryScript.FLAGSHIP_TYPE055},
+		{"name": "M1A2MultiMesh", "prop": "m1a2_mmi", "slug": PlatformMeshArmoryScript.FLAGSHIP_M1A2},
+		{"name": "RobotDogMultiMesh", "prop": "robot_dog_mmi", "slug": PlatformMeshArmoryScript.FLAGSHIP_VISION60},
+	]
+
+	for cfg in flagships:
+		var node_name: String = cfg["name"]
+		var prop_name: String = cfg["prop"]
+		var slug: String = cfg["slug"]
+		var mmi: MultiMeshInstance3D = get_node_or_null(node_name) as MultiMeshInstance3D
+		if mmi == null:
+			mmi = MultiMeshInstance3D.new()
+			mmi.name = node_name
+			add_child(mmi)
+		set(prop_name, mmi)
+
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_colors = true
+		mm.mesh = PlatformMeshArmoryScript.get_mesh_for_platform(slug, unshaded_mat)
+		mm.instance_count = MAX_VISIBLE_FLAGSHIP
+		mm.visible_instance_count = 0
+		mmi.multimesh = mm
+
+	# Defensive Countermeasure Flare Particles MultiMesh
+	flares_mmi = get_node_or_null("FlaresMultiMesh") as MultiMeshInstance3D
+	if flares_mmi == null:
+		flares_mmi = MultiMeshInstance3D.new()
+		flares_mmi.name = "FlaresMultiMesh"
+		add_child(flares_mmi)
+
+	var flare_box := BoxMesh.new()
+	flare_box.size = Vector3(0.0035, 0.0035, 0.0035)
+	flare_box.material = unshaded_mat
+
+	var flare_mm := MultiMesh.new()
+	flare_mm.transform_format = MultiMesh.TRANSFORM_3D
+	flare_mm.use_colors = true
+	flare_mm.mesh = flare_box
+	flare_mm.instance_count = MAX_VISIBLE_FLARES
+	flare_mm.visible_instance_count = 0
+	flares_mmi.multimesh = flare_mm
+
+
+func _setup_real_city_labels() -> void:
+	_city_labels_root = Node3D.new()
+	_city_labels_root.name = "RealCityHologramLabels"
+	add_child(_city_labels_root)
+
+	for i in range(16):
+		var lbl := Label3D.new()
+		lbl.font_size = 18
+		lbl.pixel_size = 0.0006
+		lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		lbl.no_depth_test = true
+		lbl.modulate = Color(0.45, 0.95, 1.0, 0.92) # Cyan holographic label
+		lbl.outline_modulate = Color(0.0, 0.12, 0.25, 0.95)
+		lbl.outline_size = 4
+		lbl.visible = false
+		_city_labels_root.add_child(lbl)
+		_city_labels.append(lbl)
+
+
 func _setup_floating_photo_cards() -> void:
+
 	_photo_cards_root = Node3D.new()
 	_photo_cards_root.name = "FloatingReconPhotoCards"
 	add_child(_photo_cards_root)
@@ -762,6 +870,17 @@ func sync_visuals() -> void:
 	var stem_idx := 0
 	var photo_idx := 0
 
+	var f35_idx := 0
+	var j20_idx := 0
+	var su57_idx := 0
+	var b21_idx := 0
+	var cvn78_idx := 0
+	var type055_idx := 0
+	var m1a2_idx := 0
+	var dog_idx := 0
+	var flare_idx := 0
+
+
 	var platforms: Array = sim_db.platforms_by_id
 	var p_dom: PackedByteArray = sim_db.plat_domain_id
 	var p_flags: PackedInt32Array = sim_db.plat_class_flags
@@ -834,28 +953,59 @@ func sync_visuals() -> void:
 				unit_scale *= 1.38
 
 			if dom_id == 1:
-				# AIR: 3D Swept-Wing Jet pitching/banking in 3D + Banked 3D Tacview Flight Ribbon!
+				# AIR: 3D Tactical Jet / Bomber with Flagship Mesh Recognition & Defensive Flares!
 				var jet_pos := local_pos + Vector3(0.0, 0.012, 0.0)
-				if jet_idx < MAX_VISIBLE_JETS:
-					jet_mm.set_instance_transform(jet_idx, Transform3D(attitude_basis.scaled(Vector3.ONE * unit_scale), jet_pos))
-					jet_mm.set_instance_color(jet_idx, col.lightened(0.28) if uid == selected_unit_id else col)
+				var slug := String(platforms[pid].get("slug", ""))
+				var is_f35: bool = (slug == PlatformMeshArmoryScript.FLAGSHIP_F35)
+				var is_j20: bool = (slug == PlatformMeshArmoryScript.FLAGSHIP_J20)
+				var is_su57: bool = (slug == PlatformMeshArmoryScript.FLAGSHIP_SU57)
+				var is_b21: bool = (slug == PlatformMeshArmoryScript.FLAGSHIP_B21)
+				var jet_col := col.lightened(0.28) if uid == selected_unit_id else col
+				var jet_xform := Transform3D(attitude_basis.scaled(Vector3.ONE * unit_scale), jet_pos)
+
+				if is_f35 and f35_idx < MAX_VISIBLE_FLAGSHIP and f35_mmi != null:
+					f35_mmi.multimesh.set_instance_transform(f35_idx, jet_xform)
+					f35_mmi.multimesh.set_instance_color(f35_idx, jet_col)
+					f35_idx += 1
+				elif is_j20 and j20_idx < MAX_VISIBLE_FLAGSHIP and j20_mmi != null:
+					j20_mmi.multimesh.set_instance_transform(j20_idx, jet_xform)
+					j20_mmi.multimesh.set_instance_color(j20_idx, jet_col)
+					j20_idx += 1
+				elif is_su57 and su57_idx < MAX_VISIBLE_FLAGSHIP and su57_mmi != null:
+					su57_mmi.multimesh.set_instance_transform(su57_idx, jet_xform)
+					su57_mmi.multimesh.set_instance_color(su57_idx, jet_col)
+					su57_idx += 1
+				elif is_b21 and b21_idx < MAX_VISIBLE_FLAGSHIP and b21_mmi != null:
+					b21_mmi.multimesh.set_instance_transform(b21_idx, jet_xform)
+					b21_mmi.multimesh.set_instance_color(b21_idx, jet_col)
+					b21_idx += 1
+				elif jet_idx < MAX_VISIBLE_JETS:
+					jet_mm.set_instance_transform(jet_idx, jet_xform)
+					jet_mm.set_instance_color(jet_idx, jet_col)
 					jet_idx += 1
 
-					# 4-Ship Finger-Four Wingman Formation when zoomed in or selected
-					if (expand_squads or uid == selected_unit_id) and (flg & int(sim_db.FLAG_TANKER | sim_db.FLAG_AWACS)) == 0:
-						var wing_offsets := [
-							Vector3(-0.015, -0.002, 0.013),
-							Vector3(0.015, -0.002, 0.013),
-							Vector3(0.030, -0.004, 0.026),
-						]
-						for w_off in wing_offsets:
-							if jet_idx >= MAX_VISIBLE_JETS:
-								break
-							var w_off_v: Vector3 = w_off
-							var w_pos: Vector3 = jet_pos + (attitude_basis * w_off_v)
-							jet_mm.set_instance_transform(jet_idx, Transform3D(attitude_basis.scaled(Vector3.ONE * (unit_scale * 0.80)), w_pos))
-							jet_mm.set_instance_color(jet_idx, col)
-							jet_idx += 1
+				# Tactical Countermeasure Flares deployed during evasive maneuvers (US-15.1)
+				if curr_snap.unit_ai_state[uid] == WorldState.AI_EVASIVE_DEFENSIVE and flare_idx < MAX_VISIBLE_FLARES and flares_mmi != null:
+					var flare_pos := jet_pos - attitude_basis.z * 0.018 + Vector3(0.0, -0.003, 0.0)
+					flares_mmi.multimesh.set_instance_transform(flare_idx, Transform3D(Basis().scaled(Vector3.ONE * 1.8), flare_pos))
+					flares_mmi.multimesh.set_instance_color(flare_idx, Color(1.0, 0.88, 0.35, 0.95))
+					flare_idx += 1
+
+				# 4-Ship Finger-Four Wingman Formation when zoomed in or selected
+				if (expand_squads or uid == selected_unit_id) and (flg & int(sim_db.FLAG_TANKER | sim_db.FLAG_AWACS)) == 0:
+					var wing_offsets := [
+						Vector3(-0.015, -0.002, 0.013),
+						Vector3(0.015, -0.002, 0.013),
+						Vector3(0.030, -0.004, 0.026),
+					]
+					for w_off in wing_offsets:
+						if jet_idx >= MAX_VISIBLE_JETS:
+							break
+						var w_off_v: Vector3 = w_off
+						var w_pos: Vector3 = jet_pos + (attitude_basis * w_off_v)
+						jet_mm.set_instance_transform(jet_idx, Transform3D(attitude_basis.scaled(Vector3.ONE * (unit_scale * 0.80)), w_pos))
+						jet_mm.set_instance_color(jet_idx, col)
+						jet_idx += 1
 
 				# Banked 3D Tacview Ribbon Strip (`PRIMITIVE_TRIANGLES`) behind aircraft wings
 				var wing_right := (attitude_basis.x).normalized() * (0.0085 * unit_scale)
@@ -905,12 +1055,27 @@ func sync_visuals() -> void:
 					stem_idx += 1
 
 			elif dom_id == 2:
-				# SEA: 3D Miniature Warship / USV / Submarine Hull + Water Wake
-				if ship_idx < MAX_VISIBLE_SHIPS:
-					var ship_pos := local_pos + Vector3(0.0, 0.002, 0.0)
-					ship_mm.set_instance_transform(ship_idx, Transform3D(attitude_basis.scaled(Vector3.ONE * unit_scale), ship_pos))
-					ship_mm.set_instance_color(ship_idx, col.lightened(0.20) if uid == selected_unit_id else col)
+				# SEA: 3D Miniature Flagship Supercarrier / Cruiser / Generic Warship Hull
+				var s_slug := String(platforms[pid].get("slug", ""))
+				var is_cvn78: bool = (s_slug == PlatformMeshArmoryScript.FLAGSHIP_CVN78 or s_slug.find("carrier") != -1)
+				var is_type055: bool = (s_slug == PlatformMeshArmoryScript.FLAGSHIP_TYPE055 or s_slug.find("type_055") != -1)
+				var ship_pos := local_pos + Vector3(0.0, 0.002, 0.0)
+				var ship_xform := Transform3D(attitude_basis.scaled(Vector3.ONE * unit_scale), ship_pos)
+				var ship_col := col.lightened(0.20) if uid == selected_unit_id else col
+
+				if is_cvn78 and cvn78_idx < MAX_VISIBLE_FLAGSHIP and cvn78_mmi != null:
+					cvn78_mmi.multimesh.set_instance_transform(cvn78_idx, ship_xform)
+					cvn78_mmi.multimesh.set_instance_color(cvn78_idx, ship_col)
+					cvn78_idx += 1
+				elif is_type055 and type055_idx < MAX_VISIBLE_FLAGSHIP and type055_mmi != null:
+					type055_mmi.multimesh.set_instance_transform(type055_idx, ship_xform)
+					type055_mmi.multimesh.set_instance_color(type055_idx, ship_col)
+					type055_idx += 1
+				elif ship_idx < MAX_VISIBLE_SHIPS:
+					ship_mm.set_instance_transform(ship_idx, ship_xform)
+					ship_mm.set_instance_color(ship_idx, ship_col)
 					ship_idx += 1
+
 
 			else:
 				# LAND: Little 3D Soldiers, Snipers, Commandos, Quadruped Robot Dogs, Tanks, IFVs, Artillery & SAMs!
@@ -977,7 +1142,13 @@ func sync_visuals() -> void:
 						sniper_commando_beam_idx += 1
 
 				# B) Quadruped Robot Dog Packs -> 1 dog at macro zoom, 8 individual Robot Dogs when zoomed in!
-				if (flg & int(sim_db.FLAG_ROBOT_DOG)) != 0:
+				if (flg & int(sim_db.FLAG_ROBOT_DOG)) != 0 or slug == PlatformMeshArmoryScript.FLAGSHIP_VISION60:
+					if robot_dog_mmi != null and dog_idx < MAX_VISIBLE_FLAGSHIP:
+						var dog_xform := Transform3D(attitude_basis.scaled(Vector3.ONE * (unit_scale * 1.35)), local_pos + Vector3(0.0, 0.001, 0.0))
+						robot_dog_mmi.multimesh.set_instance_transform(dog_idx, dog_xform)
+						robot_dog_mmi.multimesh.set_instance_color(dog_idx, TacticalTheme.COL_UNMANNED_GOLD if fac == WorldState.FACTION_BLUE else col.lerp(TacticalTheme.COL_UNMANNED_GOLD, 0.5))
+						dog_idx += 1
+
 					var num_dogs := 8 if (expand_squads or uid == selected_unit_id) else (3 if zoom >= 2.2 else 1)
 					for d_i in range(num_dogs):
 						if veh_idx >= MAX_VISIBLE_VEHICLES:
@@ -999,6 +1170,14 @@ func sync_visuals() -> void:
 					if is_armor and uid < curr_snap.unit_turret_hdg_rad.size():
 						var t_hdg: float = curr_snap.unit_turret_hdg_rad[uid]
 						turret_basis = Basis.from_euler(Vector3(0.0, -t_hdg - PI * 0.5, 0.0))
+
+					# Dedicated M1A2 SEPv3 Abrams 3D Mesh
+					var is_m1a2: bool = (slug == PlatformMeshArmoryScript.FLAGSHIP_M1A2)
+					if is_m1a2 and m1a2_mmi != null and m1a2_idx < MAX_VISIBLE_FLAGSHIP:
+						var m1_xform := Transform3D(turret_basis.scaled(Vector3.ONE * unit_scale), local_pos + Vector3(0.0, 0.0014, 0.0))
+						m1a2_mmi.multimesh.set_instance_transform(m1a2_idx, m1_xform)
+						m1a2_mmi.multimesh.set_instance_color(m1a2_idx, col)
+						m1a2_idx += 1
 
 					var num_vehs := 4 if (expand_squads or uid == selected_unit_id) else (2 if zoom >= 2.2 else 1)
 					for v_i in range(num_vehs):
@@ -1025,6 +1204,18 @@ func sync_visuals() -> void:
 						beams_immediate.surface_add_vertex(c_a)
 						beams_immediate.surface_add_vertex(c_b)
 						drew_any_line = true
+
+					# Ground SAM Radar Search & Lock-On Beam (US-15.2)
+					if (flg & int(sim_db.FLAG_SAM)) != 0:
+						var radar_hdg := fmod(float(curr_snap.timestamp_sec) * 1.5 + float(uid), TAU)
+						var beam_len := 0.09 * unit_scale
+						var beam_end := local_pos + Vector3(cos(radar_hdg) * beam_len, 0.055, sin(radar_hdg) * beam_len)
+						var sam_beam_col := Color(1.0, 0.75, 0.20, 0.65) if fac == WorldState.FACTION_BLUE else Color(1.0, 0.25, 0.20, 0.65)
+						beams_immediate.surface_set_color(sam_beam_col)
+						beams_immediate.surface_add_vertex(local_pos + Vector3(0.0, 0.005, 0.0))
+						beams_immediate.surface_add_vertex(beam_end)
+						drew_any_line = true
+
 
 		# ====================================================================
 		# 2. RENDER HOLOGRAPHIC NATO TOKEN PLAQUES (FOR ACTIVE SEMANTIC ECHELON)
@@ -1095,12 +1286,42 @@ func sync_visuals() -> void:
 	ship_mm.visible_instance_count = ship_idx
 	soldier_mm.visible_instance_count = soldier_idx
 	veh_mm.visible_instance_count = veh_idx
+
+	if f35_mmi != null and f35_mmi.multimesh != null:
+		f35_mmi.multimesh.visible_instance_count = f35_idx
+	if j20_mmi != null and j20_mmi.multimesh != null:
+		j20_mmi.multimesh.visible_instance_count = j20_idx
+	if su57_mmi != null and su57_mmi.multimesh != null:
+		su57_mmi.multimesh.visible_instance_count = su57_idx
+	if b21_mmi != null and b21_mmi.multimesh != null:
+		b21_mmi.multimesh.visible_instance_count = b21_idx
+	if cvn78_mmi != null and cvn78_mmi.multimesh != null:
+		cvn78_mmi.multimesh.visible_instance_count = cvn78_idx
+	if type055_mmi != null and type055_mmi.multimesh != null:
+		type055_mmi.multimesh.visible_instance_count = type055_idx
+	if m1a2_mmi != null and m1a2_mmi.multimesh != null:
+		m1a2_mmi.multimesh.visible_instance_count = m1a2_idx
+	if robot_dog_mmi != null and robot_dog_mmi.multimesh != null:
+		robot_dog_mmi.multimesh.visible_instance_count = dog_idx
+	if flares_mmi != null and flares_mmi.multimesh != null:
+		flares_mmi.multimesh.visible_instance_count = flare_idx
+
 	last_visible_token_count = token_idx
 	last_visible_jet_count = jet_idx
 	last_visible_ship_count = ship_idx
 	last_visible_soldier_count = soldier_idx
 	last_visible_vehicle_count = veh_idx
+	last_visible_f35_count = f35_idx
+	last_visible_j20_count = j20_idx
+	last_visible_su57_count = su57_idx
+	last_visible_b21_count = b21_idx
+	last_visible_cvn78_count = cvn78_idx
+	last_visible_type055_count = type055_idx
+	last_visible_m1a2_count = m1a2_idx
+	last_visible_dog_count = dog_idx
+	last_visible_flare_count = flare_idx
 	last_active_sniper_commando_beams_count = sniper_commando_beam_idx
+
 
 	# ====================================================================
 	# 3. SPREADING CIVILIAN DENSITY FIELD (civ/m^2 ON TERRAIN SHADER + ISO-DENSITY CONTOURS)
@@ -1397,7 +1618,26 @@ func sync_visuals() -> void:
 					beams_immediate.surface_add_vertex(ew1)
 				drew_any_line = true
 
+			# Real Named City 3D Holographic Badges (OpenStreetMap GIS Integration)
+			var real_cities := CivilianDensitySystem.get_theater_real_cities(ws_ref.active_theater_slug)
+			for c_i in range(_city_labels.size()):
+				var lbl: Label3D = _city_labels[c_i]
+				if c_i < real_cities.size() and zoom >= 0.75:
+					var rc_d: Dictionary = real_cities[c_i]
+					var rc_x: float = float(rc_d.get("x_km", 0.0))
+					var rc_z: float = float(rc_d.get("z_km", 0.0))
+					var rc_loc: Vector3 = war_table.theater_km_to_table_local(Vector3(rc_x, 0.0, rc_z))
+					if absf(rc_loc.x) <= 0.88 and absf(rc_loc.z) <= 0.88:
+						lbl.text = String(rc_d.get("name", "CITY"))
+						lbl.position = rc_loc + Vector3(0.0, 0.052, 0.0)
+						lbl.visible = true
+					else:
+						lbl.visible = false
+				else:
+					lbl.visible = false
+
 		# Render 3D Multi-Car Military Echelon Logistics Trains along Strategic Railways
+
 		var t_cnt: int = curr_snap.train_count
 		var train_scale: float = clampf(1.0 + (zoom - 1.0) * 0.10, 0.9, 2.0)
 		for tid in range(t_cnt):
