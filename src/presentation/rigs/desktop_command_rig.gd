@@ -26,9 +26,11 @@ var submarine_conn_ref: Node = null
 var tri_command_ref: Node = null
 var xr_rig_ref: Node3D = null
 var radio_synth_ref: Node = null
+var welcome_controller_ref: Node = null
 
 var camera: Camera3D = null
 var hud_layer: CanvasLayer = null
+var _briefing_top_btn: Button = null
 var _audio_mute_btn: Button = null
 var _style_mode_btn: Button = null
 var _hud_mode_btn: Button = null
@@ -161,6 +163,18 @@ func _build_tactical_hud() -> void:
 	var top_hb := HBoxContainer.new()
 	top_hb.add_theme_constant_override("separation", 6)
 	top_bar.add_child(top_hb)
+
+	var briefing_top_btn := Button.new()
+	_briefing_top_btn = briefing_top_btn
+	briefing_top_btn.text = "[? BRIEFING & CONTROLS]"
+	briefing_top_btn.add_theme_font_size_override("font_size", 11)
+	briefing_top_btn.add_theme_color_override("font_color", TacticalTheme.COL_CONTOUR_EMERALD)
+	briefing_top_btn.pressed.connect(func():
+		if welcome_controller_ref != null and welcome_controller_ref.has_method("set_visible_briefing") and welcome_controller_ref.has_method("is_briefing_open"):
+			var cur_open: bool = welcome_controller_ref.call("is_briefing_open")
+			welcome_controller_ref.call("set_visible_briefing", not cur_open)
+	)
+	top_hb.add_child(briefing_top_btn)
 
 	var menu_btn := Button.new()
 	menu_btn.text = "[MENU / SCENARIOS (ESC)]"

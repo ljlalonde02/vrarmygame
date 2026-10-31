@@ -141,6 +141,9 @@ func set_menu_visible(vis: bool) -> void:
 		var rd: Variant = p.get("recon_dossier")
 		if rd != null and rd.get("root_panel") != null:
 			rd.root_panel.visible = not vis
+		var wc: Variant = p.get("welcome_controller")
+		if wc != null and wc.has_method("set_visible_briefing") and vis:
+			wc.call("set_visible_briefing", false)
 	if vis:
 		update_defcon_badge()
 		_refresh_campaign_view()

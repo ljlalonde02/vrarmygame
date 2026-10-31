@@ -87,6 +87,9 @@ func start_bootcamp(from_beginning: bool = true) -> void:
 		var mm: Variant = p.get("main_menu")
 		if mm != null and mm.has_method("set_menu_visible") and bool(mm.get("is_menu_open")):
 			mm.set_menu_visible(false)
+		var wc: Variant = p.get("welcome_controller")
+		if wc != null and wc.has_method("set_visible_briefing"):
+			wc.call("set_visible_briefing", false)
 	is_active = true
 	visible = true
 	if beacon_3d != null:

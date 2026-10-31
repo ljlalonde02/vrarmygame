@@ -32,6 +32,7 @@ const SubordinateStaffAIScript := preload("res://src/ai/advisor/subordinate_staf
 const BunkerRadioSynthScript := preload("res://src/presentation/audio/bunker_radio_synth.gd")
 const DesktopCommandRigScript := preload("res://src/presentation/rigs/desktop_command_rig.gd")
 const XRCommandRigScript := preload("res://src/presentation/rigs/xr_command_rig.gd")
+const WelcomeOnboardingControllerScript := preload("res://src/presentation/bunker/welcome_onboarding_controller.gd")
 
 var sim_db: Node = null
 var command_bus: Node = null
@@ -44,6 +45,7 @@ var nation_selector: Node3D = null
 var recon_dossier: CanvasLayer = null
 var main_menu: CanvasLayer = null
 var tutorial_controller: CanvasLayer = null
+var welcome_controller: CanvasLayer = null
 var opfor_commander: Node = null
 var theater_director: Node = null
 var story_director: CanvasLayer = null
@@ -54,6 +56,7 @@ var subordinate_staff: Node = null
 var radio_synth: Node = null
 var desktop_rig: Node3D = null
 var xr_rig: XROrigin3D = null
+var controls_plaque: Label3D = null
 
 var _env_ref: Environment = null
 var _key_light: OmniLight3D = null
@@ -207,6 +210,32 @@ func initialize_bunker(p_sim_db: Node = null, p_cmd_bus: Node = null, p_sig_bus:
 		main_menu._ready()
 	main_menu.setup(sim_db, sim_server, command_bus, signal_bus, war_table, recon_dossier, opfor_commander, tutorial_controller)
 
+	# 9e. Instantiate First-Time Commander Welcome & Onboarding Controller
+	welcome_controller = WelcomeOnboardingControllerScript.new()
+	welcome_controller.name = "WelcomeOnboardingController"
+	add_child(welcome_controller)
+	if welcome_controller.modal_root == null:
+		welcome_controller._ready()
+	welcome_controller.setup(radio_synth)
+	welcome_controller.start_tutorial_requested.connect(func():
+		if tutorial_controller != null and tutorial_controller.has_method("start_bootcamp"):
+			tutorial_controller.call("start_bootcamp", true)
+		if radio_synth != null and radio_synth.has_method("play_tactical_posture_actuate"):
+			radio_synth.call("play_tactical_posture_actuate")
+	)
+	welcome_controller.open_campaign_requested.connect(func():
+		if main_menu != null:
+			main_menu.set_menu_visible(true)
+			if main_menu._tab_container != null:
+				main_menu._tab_container.current_tab = 0
+	)
+	welcome_controller.open_manual_requested.connect(func():
+		if main_menu != null:
+			main_menu.set_menu_visible(true)
+			if main_menu._tab_container != null and main_menu._tab_container.get_tab_count() >= 5:
+				main_menu._tab_container.current_tab = 4
+	)
+
 	# 9b. Instantiate 8-Mission Historical Story & Capabilities Progression Director (`StoryProgressionDirector`)
 	story_director = StoryProgressionDirectorScript.new()
 	story_director.name = "StoryProgressionDirector"
@@ -255,6 +284,7 @@ func initialize_bunker(p_sim_db: Node = null, p_cmd_bus: Node = null, p_sig_bus:
 	desktop_rig.fpv_pod_ref = fpv_pod_controller
 	desktop_rig.submarine_conn_ref = submarine_conn
 	desktop_rig.tri_command_ref = tri_command
+	desktop_rig.welcome_controller_ref = welcome_controller
 	story_director.setup(sim_db, sim_server, command_bus, signal_bus, war_table, tactile_console, radio_synth, desktop_rig)
 	main_menu.story_director = story_director
 	main_menu.fpv_pod_controller = fpv_pod_controller
@@ -290,6 +320,24 @@ func initialize_bunker(p_sim_db: Node = null, p_cmd_bus: Node = null, p_sig_bus:
 		if sim_server.world_state.unit_active[uid] == 1 and sim_server.world_state.unit_faction[uid] == WorldState.FACTION_BLUE and sim_server.world_state.unit_echelon[uid] == WorldState.ECHELON_COMPANY:
 			desktop_rig.select_unit(uid)
 			break
+
+	# 12. 3D Tactical Controls Quick-Reference Plaque on War Table front bezel
+	var plaque_lbl := Label3D.new()
+	controls_plaque = plaque_lbl
+	plaque_lbl.name = "QuickControlsPlaque3D"
+	plaque_lbl.text = "COMMAND CONTROLS: [H] BOOTCAMP TUTORIAL  •  [ESC] MAIN MENU  •  [SPACE] ALPHA STRIKE  •  [SCROLL] ZOOM  •  [DRAG] PAN"
+	plaque_lbl.font_size = 18
+	plaque_lbl.pixel_size = 0.0012
+	plaque_lbl.modulate = TacticalTheme.COL_UNMANNED_GOLD
+	plaque_lbl.outline_modulate = Color.BLACK
+	plaque_lbl.outline_size = 4
+	plaque_lbl.position = Vector3(0.0, 0.865, 0.96)
+	plaque_lbl.rotation_degrees = Vector3(-30.0, 0.0, 0.0)
+	add_child(plaque_lbl)
+
+	# 13. Present Welcome Briefing Modal on startup so new players are immediately oriented
+	if welcome_controller != null and not OS.has_feature("test_headless"):
+		welcome_controller.set_visible_briefing(true)
 
 
 func _build_bunker_architecture() -> void:
