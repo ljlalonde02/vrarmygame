@@ -364,3 +364,128 @@ static func execute_cbrn_mopp_and_hazard(state: WorldState, faction: int, target
 	if deploy_plume:
 		state.inject_hazard_plume(target_xz.x, target_xz.y, 26.0, 0.92)
 	return maxi(1, toggled)
+
+
+## [11] US-12.1: Executes Coordinated Strategic Nuclear Triad SIOP / Dead Hand Retaliatory Strike
+static func execute_strategic_triad_siop(
+	state: WorldState,
+	sim_db: Node,
+	faction: int,
+	target_citadels: Array = []
+) -> Dictionary:
+	var enemy_fac: int = WorldState.FACTION_RED if faction == WorldState.FACTION_BLUE else WorldState.FACTION_BLUE
+	state.defcon_level = 1
+	state.global_escalation_score = 100.0
+
+	# 1. Identify Target Citadels / Strategic Sites if not provided
+	var targets: Array[Vector3] = []
+	for tc in target_citadels:
+		if tc is Vector3:
+			targets.append(tc)
+		elif tc is Vector2:
+			targets.append(Vector3(tc.x, 0.0, tc.y))
+
+	if targets.is_empty():
+		for u in range(state.unit_count):
+			if state.unit_active[u] == 1 and state.unit_faction[u] == enemy_fac and targets.size() < 4:
+				targets.append(state.unit_pos[u])
+
+	if targets.is_empty():
+		targets = [
+			Vector3(80.0, 0.0, -60.0),
+			Vector3(120.0, 0.0, 20.0),
+			Vector3(-90.0, 0.0, 110.0),
+			Vector3(40.0, 0.0, 140.0),
+		]
+
+	var icbm_count := 0
+	var ssbn_count := 0
+	var alcm_count := 0
+	var total_warheads := 0
+
+	# Leg 1: Land-Based ICBM Silo Wings (Minuteman III / Yars)
+	var silo_origins := [Vector3(-140.0, 150.0, -120.0), Vector3(-110.0, 220.0, -80.0)]
+	for s_pos in silo_origins:
+		var tgt: Vector3 = targets[icbm_count % targets.size()]
+		state.active_beams.append({
+			"shooter_pos": s_pos,
+			"target_pos": Vector3(tgt.x, 150000.0, tgt.z),
+			"is_hpm_cone": false,
+			"cone_deg": 0.0,
+			"faction": faction,
+			"ttl": 5.0,
+		})
+		state.recent_impacts.append({
+			"pos_km": tgt,
+			"radius_km": 45.0,
+			"cost_musd": 850.0,
+			"is_intercept": false,
+			"is_nuke": true,
+			"ttl": 6.0,
+		})
+		state.trigger_thermonuclear_detonation(tgt, faction, 450.0)
+		icbm_count += 3
+		total_warheads += 3
+
+	# Leg 2: SSBN Submerged Ballistic Missiles (Trident II D5 / Bulava)
+	var ssbn_origins := [Vector3(-60.0, -100.0, 120.0), Vector3(70.0, -120.0, -140.0)]
+	for sub_pos in ssbn_origins:
+		var tgt: Vector3 = targets[(ssbn_count + 1) % targets.size()]
+		state.active_beams.append({
+			"shooter_pos": sub_pos,
+			"target_pos": Vector3(tgt.x, 120000.0, tgt.z),
+			"is_hpm_cone": false,
+			"cone_deg": 0.0,
+			"faction": faction,
+			"ttl": 5.0,
+		})
+		state.recent_impacts.append({
+			"pos_km": tgt,
+			"radius_km": 40.0,
+			"cost_musd": 720.0,
+			"is_intercept": false,
+			"is_nuke": true,
+			"ttl": 6.0,
+		})
+		state.trigger_thermonuclear_detonation(tgt, faction, 300.0)
+		ssbn_count += 4
+		total_warheads += 4
+
+	# Leg 3: Strategic ALCM Bomber Standoff Releases (B-21 / Tu-160)
+	var b_pos := Vector3(-20.0, 10500.0, 10.0)
+	var tgt_alcm: Vector3 = targets[(alcm_count + 2) % targets.size()]
+	state.active_beams.append({
+		"shooter_pos": b_pos,
+		"target_pos": tgt_alcm,
+		"is_hpm_cone": false,
+		"cone_deg": 0.0,
+		"faction": faction,
+		"ttl": 4.5,
+	})
+	state.trigger_thermonuclear_detonation(tgt_alcm, faction, 200.0)
+	alcm_count += 2
+	total_warheads += 2
+
+	state.sim_events_queue.append({
+		"type": "STRATEGIC_TRIAD_SIOP_EXECUTED",
+		"faction": faction,
+		"icbm_warheads": icbm_count,
+		"ssbn_warheads": ssbn_count,
+		"alcm_warheads": alcm_count,
+		"total_warheads": total_warheads,
+		"defcon_level": 1
+	})
+
+	return {
+		"status": "SIOP_TRIAD_LAUNCHED",
+		"faction": faction,
+		"icbm_salvos": icbm_count / 3,
+		"ssbn_salvos": ssbn_count / 4,
+		"alcm_salvos": alcm_count / 2,
+		"icbm_warheads": icbm_count,
+		"ssbn_warheads": ssbn_count,
+		"alcm_warheads": alcm_count,
+		"total_warheads": total_warheads,
+		"defcon_level": 1
+	}
+

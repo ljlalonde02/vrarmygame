@@ -16,6 +16,18 @@ var recon_photo_mode: bool = false
 var force_all_tokens: bool = false
 var true_sight_mode: bool = false
 
+# US-12.2: Nuclear Two-Man Rule Key Interlock
+var nuclear_key_alpha_turned: bool = false
+var nuclear_key_bravo_turned: bool = false
+var key_alpha_turn_time_sec: float = -999.0
+var key_bravo_turn_time_sec: float = -999.0
+var nuclear_interlock_unlocked: bool = false
+
+var _key_alpha_pivot: Node3D = null
+var _key_bravo_pivot: Node3D = null
+var _key_alpha_lbl: Label3D = null
+var _key_bravo_lbl: Label3D = null
+
 var _iads_lever_pivot: Node3D = null
 var _throttle_pivot: Node3D = null
 var _guard_cover_pivot: Node3D = null
@@ -113,6 +125,10 @@ func _build_console_3d_hardware() -> void:
 	alpha_lbl.modulate = TacticalTheme.COL_OPFOR_RED
 	add_child(alpha_lbl)
 
+	# US-12.2: Dual Nuclear Key Turn Assemblies (Two-Man Rule Protocol)
+	_key_alpha_pivot = _create_key_assembly("NuclearKeyAlpha3D", Vector3(-0.16, 0.052, 0.0), "KEY ALPHA\n[SAFE]", TacticalTheme.COL_UNMANNED_GOLD)
+	_key_bravo_pivot = _create_key_assembly("NuclearKeyBravo3D", Vector3(0.16, 0.052, 0.0), "KEY BRAVO\n[SAFE]", TacticalTheme.COL_OPFOR_RED)
+
 	# 4. DEPLOY UNMANNED (ROBOT DOGS / FPV SWARMS) Button (x = +0.34)
 	_unmanned_button_mesh = MeshInstance3D.new()
 	_unmanned_button_mesh.name = "DeployUnmannedButton3D"
@@ -171,6 +187,8 @@ func _build_console_3d_hardware() -> void:
 		{"name": "MasterIADSLever", "node": _iads_lever_pivot, "radius": 0.085},
 		{"name": "TimeScaleThrottle", "node": _throttle_pivot, "radius": 0.085},
 		{"name": "ExecuteAlphaStrikeButton3D", "node": _alpha_button_mesh, "radius": 0.095},
+		{"name": "NuclearKeyAlpha3D", "node": _key_alpha_pivot, "radius": 0.075},
+		{"name": "NuclearKeyBravo3D", "node": _key_bravo_pivot, "radius": 0.075},
 		{"name": "DeployUnmannedButton3D", "node": _unmanned_button_mesh, "radius": 0.095},
 		{"name": "ReconPhotoSwitch", "node": _recon_switch_pivot, "radius": 0.080},
 		{"name": "EchelonOverrideSwitch", "node": _echelon_switch_pivot, "radius": 0.080},
@@ -240,6 +258,49 @@ func _create_pushbutton_3d(node_name: String, pos: Vector3, label_text: String, 
 	return btn_mi
 
 
+func _create_key_assembly(node_name: String, pos: Vector3, label_text: String, col: Color) -> Node3D:
+	var pivot := Node3D.new()
+	pivot.name = node_name
+	pivot.position = pos
+	add_child(pivot)
+
+	var tumbler := MeshInstance3D.new()
+	var t_cyl := CylinderMesh.new()
+	t_cyl.top_radius = 0.016
+	t_cyl.bottom_radius = 0.018
+	t_cyl.height = 0.025
+	var t_mat := StandardMaterial3D.new()
+	t_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	t_mat.albedo_color = Color(0.25, 0.28, 0.32)
+	tumbler.mesh = t_cyl
+	tumbler.position = Vector3(0.0, 0.012, 0.0)
+	pivot.add_child(tumbler)
+
+	var key_grip := MeshInstance3D.new()
+	var k_box := BoxMesh.new()
+	k_box.size = Vector3(0.008, 0.045, 0.024)
+	var k_mat := StandardMaterial3D.new()
+	k_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	k_mat.albedo_color = col
+	key_grip.mesh = k_box
+	key_grip.position = Vector3(0.0, 0.038, 0.0)
+	pivot.add_child(key_grip)
+
+	var lbl := Label3D.new()
+	lbl.name = "KeyLabel"
+	lbl.text = label_text
+	lbl.font_size = 14
+	lbl.pixel_size = 0.00060
+	lbl.position = pos + Vector3(0.0, 0.065, -0.04)
+	lbl.modulate = col
+	add_child(lbl)
+	if node_name == "NuclearKeyAlpha3D":
+		_key_alpha_lbl = lbl
+	else:
+		_key_bravo_lbl = lbl
+	return pivot
+
+
 func _create_switch_assembly(node_name: String, pos: Vector3, label_text: String, col: Color) -> Node3D:
 	var pivot := Node3D.new()
 	pivot.name = node_name
@@ -285,6 +346,12 @@ func _process(delta: float) -> void:
 	if _echelon_switch_pivot != null:
 		var target_ech_x := -25.0 if force_all_tokens else 25.0
 		_echelon_switch_pivot.rotation_degrees.x = lerpf(_echelon_switch_pivot.rotation_degrees.x, target_ech_x, damp)
+	if _key_alpha_pivot != null:
+		var target_ka := 90.0 if nuclear_key_alpha_turned else 0.0
+		_key_alpha_pivot.rotation_degrees.z = lerpf(_key_alpha_pivot.rotation_degrees.z, target_ka, damp)
+	if _key_bravo_pivot != null:
+		var target_kb := -90.0 if nuclear_key_bravo_turned else 0.0
+		_key_bravo_pivot.rotation_degrees.z = lerpf(_key_bravo_pivot.rotation_degrees.z, target_kb, damp)
 
 	# Pulse the physical 3D Red Hotline Phone crimson/gold when ringing!
 	if _red_phone_mat != null and sim_server != null and sim_server.world_state != null:
@@ -371,6 +438,12 @@ func actuate_control(control_name: String, selected_uid: int = -1) -> bool:
 			return true
 		"ExecuteAlphaStrikeButton3D":
 			press_execute_alpha_strike()
+			return true
+		"NuclearKeyAlpha3D":
+			turn_nuclear_key_alpha()
+			return true
+		"NuclearKeyBravo3D":
+			turn_nuclear_key_bravo()
 			return true
 		"DeployUnmannedButton3D":
 			press_deploy_unmanned(selected_uid)
@@ -485,9 +558,52 @@ func press_execute_alpha_strike() -> void:
 	alpha_guard_open = true
 	if radio_synth != null:
 		radio_synth.play_alpha_strike_klaxon()
-	if command_bus != null:
+	if nuclear_interlock_unlocked and sim_server != null:
+		# US-12.1: Two-Man Rule Key Interlock Unlocked -> Launch Strategic Triad SIOP Salvo!
+		var StrategicMddSystemScript := preload("res://src/sim_core/systems/strategic_mdd_system.gd")
+		StrategicMddSystemScript.execute_strategic_triad_siop(sim_server.world_state, sim_server.sim_db_ref, WorldState.FACTION_BLUE)
+	elif command_bus != null:
 		command_bus.enqueue_commit_alpha_strike(WorldState.FACTION_BLUE)
 	_refresh_status_label()
+
+
+## US-12.2: Dual Nuclear Key Turn Assemblies (Two-Man Rule Protocol)
+func turn_nuclear_key_alpha() -> bool:
+	nuclear_key_alpha_turned = not nuclear_key_alpha_turned
+	key_alpha_turn_time_sec = float(Time.get_ticks_msec()) * 0.001
+	if radio_synth != null:
+		radio_synth.play_switch_clunk()
+	if _key_alpha_lbl != null:
+		_key_alpha_lbl.text = "KEY ALPHA\n[ARMED]" if nuclear_key_alpha_turned else "KEY ALPHA\n[SAFE]"
+		_key_alpha_lbl.modulate = TacticalTheme.COL_OPFOR_RED if nuclear_key_alpha_turned else TacticalTheme.COL_UNMANNED_GOLD
+	check_two_man_rule_interlock()
+	return nuclear_key_alpha_turned
+
+
+func turn_nuclear_key_bravo() -> bool:
+	nuclear_key_bravo_turned = not nuclear_key_bravo_turned
+	key_bravo_turn_time_sec = float(Time.get_ticks_msec()) * 0.001
+	if radio_synth != null:
+		radio_synth.play_switch_clunk()
+	if _key_bravo_lbl != null:
+		_key_bravo_lbl.text = "KEY BRAVO\n[ARMED]" if nuclear_key_bravo_turned else "KEY BRAVO\n[SAFE]"
+		_key_bravo_lbl.modulate = TacticalTheme.COL_OPFOR_RED if nuclear_key_bravo_turned else TacticalTheme.COL_OPFOR_RED_DIM
+	check_two_man_rule_interlock()
+	return nuclear_key_bravo_turned
+
+
+func check_two_man_rule_interlock() -> bool:
+	if nuclear_key_alpha_turned and nuclear_key_bravo_turned:
+		var time_diff := absf(key_alpha_turn_time_sec - key_bravo_turn_time_sec)
+		if time_diff <= 5.0:
+			nuclear_interlock_unlocked = true
+			if radio_synth != null and radio_synth.has_method("play_defcon_klaxon"):
+				radio_synth.play_defcon_klaxon()
+			_refresh_status_label()
+			return true
+	nuclear_interlock_unlocked = false
+	_refresh_status_label()
+	return false
 
 
 func press_deploy_unmanned(selected_uid: int = -1) -> int:
@@ -550,4 +666,5 @@ func _refresh_status_label() -> void:
 		return
 	var iads_str := "ACTIVE" if master_iads_active else "EMCON DARK"
 	var photo_str := "WIKI PHOTOS ON" if recon_photo_mode else "NATO SYMBOLOGY"
-	_status_label_3d.text = "IADS: %s | TIME: %.0fx | VIEW: %s" % [iads_str, current_time_scale, photo_str]
+	var nuke_str := "AUTH UNLOCKED" if nuclear_interlock_unlocked else ("ARMED: 1/2" if (nuclear_key_alpha_turned or nuclear_key_bravo_turned) else "SAFE")
+	_status_label_3d.text = "IADS: %s | TIME: %.0fx | KEYS: %s | VIEW: %s" % [iads_str, current_time_scale, nuke_str, photo_str]
