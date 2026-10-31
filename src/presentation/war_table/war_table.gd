@@ -42,6 +42,9 @@ var is_floor_mode: bool = false
 var _threat_domes_root: Node3D = null
 var _site_labels_root: Node3D = null
 var _planetary_globe_root: Node3D = null
+var _nuclear_epicenter_uv: Vector2 = Vector2(-999.0, -999.0)
+var _nuclear_shockwave_radius: float = 0.0
+var _emp_glitch_intensity: float = 0.0
 
 enum DisplayMode {
 	TACTICAL_MAP,
@@ -544,6 +547,31 @@ func _process(delta: float) -> void:
 	if _planetary_globe_root != null and _planetary_globe_root.visible:
 		_planetary_globe_root.rotation.y += delta * 0.14
 	_apply_shader_zoom_and_pan()
+
+	# US-9.4: Volumetric nuclear shockwave expansion and EMP holographic glitch decay
+	if _nuclear_shockwave_radius > 0.0:
+		_nuclear_shockwave_radius += delta * 0.35
+		_emp_glitch_intensity = maxf(0.0, _emp_glitch_intensity - delta * 0.45)
+		if terrain_material != null:
+			terrain_material.set_shader_parameter("nuclear_det_epicenter_uv", Vector3(_nuclear_epicenter_uv.x, _nuclear_epicenter_uv.y, _nuclear_shockwave_radius))
+			terrain_material.set_shader_parameter("emp_glitch_intensity", _emp_glitch_intensity)
+		if _nuclear_shockwave_radius > 1.4:
+			_nuclear_shockwave_radius = 0.0
+			if terrain_material != null:
+				terrain_material.set_shader_parameter("nuclear_det_epicenter_uv", Vector3(-999.0, -999.0, 0.0))
+				terrain_material.set_shader_parameter("emp_glitch_intensity", 0.0)
+
+
+## US-9.4: Triggers expanding shockwave ring and EMP distortion on the War Table
+func trigger_nuclear_detonation(epicenter_km: Vector3) -> void:
+	var u := clampf((epicenter_km.x + THEATER_SIZE_KM * 0.5) / THEATER_SIZE_KM, 0.0, 1.0)
+	var v := clampf((epicenter_km.z + THEATER_SIZE_KM * 0.5) / THEATER_SIZE_KM, 0.0, 1.0)
+	_nuclear_epicenter_uv = Vector2(u, v)
+	_nuclear_shockwave_radius = 0.015
+	_emp_glitch_intensity = 1.0
+	if terrain_material != null:
+		terrain_material.set_shader_parameter("nuclear_det_epicenter_uv", Vector3(u, v, _nuclear_shockwave_radius))
+		terrain_material.set_shader_parameter("emp_glitch_intensity", _emp_glitch_intensity)
 
 
 func set_zoom_and_pan(new_zoom: float, new_pan_km: Vector2 = target_pan_offset_km, instant: bool = false) -> void:

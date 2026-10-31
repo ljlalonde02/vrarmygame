@@ -461,11 +461,15 @@ func update_bunker_defcon_and_integrity_atmosphere(delta: float) -> void:
 		target_key_col = Color(1.0, 0.78, 0.25)
 		target_amb_col = Color(0.10, 0.08, 0.03)
 		beacon_energy = 0.55 * pulse
-	# Sprint 6: Detect newly detonated thermonuclear weapons for immediate blinding flash & seismic shockwave
+	# Sprint 6 & 9: Detect newly detonated thermonuclear weapons for immediate blinding flash, seismic shockwave, and EMP burst
 	if st.nuclear_detonations_count > _last_nuke_count:
 		_last_nuke_count = st.nuclear_detonations_count
 		_thermal_flash_timer = 0.55
 		st.bunker_shock_tremor = 1.0
+		if war_table != null and war_table.has_method("trigger_nuclear_detonation"):
+			war_table.trigger_nuclear_detonation(Vector3.ZERO)
+		if radio_synth != null and radio_synth.has_method("play_nuclear_emp_burst"):
+			radio_synth.play_nuclear_emp_burst()
 
 	if _thermal_flash_timer > 0.0:
 		_thermal_flash_timer = maxf(0.0, _thermal_flash_timer - delta)

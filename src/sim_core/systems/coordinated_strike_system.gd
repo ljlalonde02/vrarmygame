@@ -238,3 +238,175 @@ static func step_combined_arms_synergy(
 		"bounding_tanks": bounding_tanks,
 		"dismounts_advancing": dismounts_advancing,
 	}
+
+
+## US-9.1: Multi-Echelon AI Strike Package Coordination (Sweep/Escort + SEAD + Strike Bomber)
+static func form_air_strike_package(
+	state: WorldState,
+	sim_db: Node,
+	faction: int,
+	target_coord: Vector3,
+	escort_uids: Array = [],
+	sead_uids: Array = [],
+	strike_uids: Array = []
+) -> Dictionary:
+	var flag_fighter: int = int(sim_db.FLAG_FIGHTER) if sim_db != null else 1
+	var flag_bomber: int = int(sim_db.FLAG_BOMBER) if (sim_db != null and "FLAG_BOMBER" in sim_db) else 1
+
+	var assigned_escorts: Array[int] = []
+	var assigned_sead: Array[int] = []
+	var assigned_strike: Array[int] = []
+
+	# Auto-discover if not explicitly provided
+	if escort_uids.is_empty() or sead_uids.is_empty() or strike_uids.is_empty():
+		for uid in range(state.unit_count):
+			if state.unit_active[uid] == 0 or state.unit_faction[uid] != faction:
+				continue
+			var pid: int = state.unit_platform_id[uid]
+			var dom: int = sim_db.plat_domain_id[pid] if (sim_db != null and pid > 0 and pid < sim_db.plat_domain_id.size()) else -1
+			if dom != 1: # Air domain only
+				continue
+			var flags: int = sim_db.plat_class_flags[pid] if (sim_db != null and pid > 0 and pid < sim_db.plat_class_flags.size()) else 0
+
+			if escort_uids.is_empty() and assigned_escorts.size() < 2 and (flags & flag_fighter) != 0:
+				assigned_escorts.append(uid)
+			elif sead_uids.is_empty() and assigned_sead.size() < 2 and uid not in assigned_escorts:
+				assigned_sead.append(uid)
+			elif strike_uids.is_empty() and assigned_strike.size() < 2 and uid not in assigned_escorts and uid not in assigned_sead:
+				assigned_strike.append(uid)
+	else:
+		for e in escort_uids: assigned_escorts.append(int(e))
+		for s in sead_uids: assigned_sead.append(int(s))
+		for b in strike_uids: assigned_strike.append(int(b))
+
+	# Compute package ingress vector from average centroid toward target
+	var centroid := Vector3.ZERO
+	var total_units := assigned_escorts.size() + assigned_sead.size() + assigned_strike.size()
+	if total_units > 0:
+		for uid in assigned_escorts + assigned_sead + assigned_strike:
+			centroid += state.unit_pos[uid]
+		centroid /= float(total_units)
+	else:
+		centroid = target_coord - Vector3(50.0, 0.0, 50.0)
+
+	var dir_to_tgt := (target_coord - centroid).normalized()
+	if dir_to_tgt.length_squared() < 0.001:
+		dir_to_tgt = Vector3(1.0, 0.0, 0.0)
+
+	# 1. Escorts lead package (+18km) at high-altitude (10,500m) BVR Stand-off
+	for uid in assigned_escorts:
+		if uid >= 0 and uid < state.unit_count and state.unit_active[uid] == 1:
+			state.unit_desired_alt_m[uid] = 10500.0
+			state.unit_tactical_posture[uid] = WorldState.TACTICAL_POSTURE_BVR_STANDOFF
+			state.unit_target_pos[uid] = target_coord + dir_to_tgt * 18.0
+			state.unit_has_waypoint[uid] = 1
+			state.unit_afterburner[uid] = 1
+
+	# 2. SEAD aircraft ingress at medium altitude (4,500m) offset (+6km) prioritizing hostile radar suppression
+	for uid in assigned_sead:
+		if uid >= 0 and uid < state.unit_count and state.unit_active[uid] == 1:
+			state.unit_desired_alt_m[uid] = 4500.0
+			state.unit_tactical_posture[uid] = WorldState.TACTICAL_POSTURE_AUTO
+			state.unit_target_pos[uid] = target_coord + dir_to_tgt * 6.0
+			state.unit_has_waypoint[uid] = 1
+			state.unit_radar_active[uid] = 1
+
+	# 3. Strike aircraft follow at 8,200m ingress altitude committed to target terminal release point
+	for uid in assigned_strike:
+		if uid >= 0 and uid < state.unit_count and state.unit_active[uid] == 1:
+			state.unit_desired_alt_m[uid] = 8200.0
+			state.unit_tactical_posture[uid] = WorldState.TACTICAL_POSTURE_AUTO
+			state.unit_target_pos[uid] = target_coord
+			state.unit_has_waypoint[uid] = 1
+
+	var package_info := {
+		"faction": faction,
+		"target_coord": target_coord,
+		"escorts": assigned_escorts,
+		"sead": assigned_sead,
+		"strike": assigned_strike,
+		"ingress_vector": dir_to_tgt,
+		"package_size": total_units,
+		"status": "INGRESSING"
+	}
+
+	state.sim_events_queue.append({
+		"type": "STRIKE_PACKAGE_FORMED",
+		"faction": faction,
+		"target": target_coord,
+		"package_size": total_units,
+		"escorts_count": assigned_escorts.size(),
+		"sead_count": assigned_sead.size(),
+		"strike_count": assigned_strike.size()
+	})
+
+	return package_info
+
+
+## US-9.2: Naval Task Force Screening Umbrella Doctrine (Air Defense Screen around Carrier/HVU)
+static func form_naval_task_force_screen(
+	state: WorldState,
+	sim_db: Node,
+	flagship_uid: int,
+	escort_uids: Array = [],
+	screen_radius_km: float = 35.0
+) -> Dictionary:
+	if flagship_uid < 0 or flagship_uid >= state.unit_count or state.unit_active[flagship_uid] == 0:
+		return {"error": "Invalid flagship"}
+
+	var flag_pos: Vector3 = state.unit_pos[flagship_uid]
+	var faction: int = state.unit_faction[flagship_uid]
+	var flag_surface: int = int(sim_db.FLAG_SHIP) if (sim_db != null and "FLAG_SHIP" in sim_db) else 1
+
+	var assigned_escorts: Array[int] = []
+	if escort_uids.is_empty():
+		for uid in range(state.unit_count):
+			if uid == flagship_uid or state.unit_active[uid] == 0 or state.unit_faction[uid] != faction:
+				continue
+			var pid: int = state.unit_platform_id[uid]
+			var dom: int = sim_db.plat_domain_id[pid] if (sim_db != null and pid > 0 and pid < sim_db.plat_domain_id.size()) else -1
+			if dom != 2: # Naval domain only
+				continue
+			var flags: int = sim_db.plat_class_flags[pid] if (sim_db != null and pid > 0 and pid < sim_db.plat_class_flags.size()) else 0
+			if (flags & flag_surface) != 0:
+				assigned_escorts.append(uid)
+				if assigned_escorts.size() >= 4:
+					break
+	else:
+		for e in escort_uids:
+			assigned_escorts.append(int(e))
+
+	# 4 Quadrant Screening Offsets (NE 45°, SE 135°, SW 225°, NW 315°)
+	var angles_deg := [45.0, 135.0, 225.0, 315.0]
+	var station_coords: Array[Vector3] = []
+
+	for i in range(assigned_escorts.size()):
+		var esc_uid: int = assigned_escorts[i]
+		if esc_uid < 0 or esc_uid >= state.unit_count or state.unit_active[esc_uid] == 0:
+			continue
+		var angle_rad := deg_to_rad(angles_deg[i % angles_deg.size()])
+		var offset := Vector3(cos(angle_rad) * screen_radius_km, 0.0, sin(angle_rad) * screen_radius_km)
+		var station_pos := flag_pos + offset
+		station_coords.append(station_pos)
+
+		state.unit_target_pos[esc_uid] = station_pos
+		state.unit_has_waypoint[esc_uid] = 1
+		state.unit_radar_active[esc_uid] = 1 # Active radar umbrella
+		state.unit_tactical_posture[esc_uid] = WorldState.TACTICAL_POSTURE_AUTO
+
+	state.sim_events_queue.append({
+		"type": "NAVAL_SCREEN_FORMED",
+		"flagship_uid": flagship_uid,
+		"faction": faction,
+		"escorts_count": assigned_escorts.size(),
+		"screen_radius_km": screen_radius_km
+	})
+
+	return {
+		"flagship_uid": flagship_uid,
+		"faction": faction,
+		"escorts": assigned_escorts,
+		"stations": station_coords,
+		"screen_radius_km": screen_radius_km,
+		"status": "SCREEN_ACTIVE"
+	}

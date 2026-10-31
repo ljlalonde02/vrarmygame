@@ -371,6 +371,16 @@ func play_tactical_posture_actuate() -> void:
 	_queue_tone(360.0, 460.0, 0.045, 0.12, false)
 
 
+## Sprint 9: Visceral low-frequency nuclear EMP rumble & static RF blackout
+func play_nuclear_emp_burst() -> void:
+	synth_triggers_count += 1
+	if audio_muted:
+		return
+	# Seismic subterranean thump (48 -> 22 Hz) with prolonged electromagnetic static burst
+	_queue_tone(48.0, 22.0, 0.65, 0.32, true)
+	_queue_tone(90.0, 40.0, 0.45, 0.22, true)
+
+
 func _queue_tone(freq_start: float, freq_end: float, duration_sec: float, amp: float, add_noise: bool) -> void:
 	if _active_tones.size() < 10:
 		_active_tones.append({

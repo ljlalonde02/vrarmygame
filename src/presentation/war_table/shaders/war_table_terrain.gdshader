@@ -26,6 +26,10 @@ uniform float table_zoom : hint_range(0.12, 30.0) = 1.0;
 // 0: HOLO C4ISR OBSIDIAN, 1: SATELLITE TRUE-EARTH DAYLIGHT, 2: NIGHT-VISION FLIR GREEN, 3: RETRO NORAD WOPR AMBER, 4: NATO TOPOGRAPHIC MAP
 uniform int graphic_style_mode : hint_range(0, 4) = 0;
 
+// US-9.4: Volumetric Nuclear Detonation Shockwave & EMP Glitch Uniforms
+uniform vec3 nuclear_det_epicenter_uv = vec3(-999.0, -999.0, 0.0); // xy: UV pos, z: radius (0.0 to 1.5)
+uniform float emp_glitch_intensity : hint_range(0.0, 1.0) = 0.0;
+
 varying float v_height_norm;
 varying vec2 v_map_uv;
 varying vec3 v_local_pos;
@@ -123,23 +127,29 @@ void fragment() {
 
 		vec3 color = obsidian_sea;
 		if (frag_h <= sea_level_norm) {
-			// Ocean bathymetry rings + subtle obsidian grid
+			// US-9.3: Ocean bathymetry depth contours (-500m, -1500m, -3000m) & coastal shelf shading
 			float depth_factor = clamp(frag_h / max(sea_level_norm, 0.01), 0.0, 1.0);
+			float bathy_phase = (sea_level_norm - frag_h) * 16.0;
+			float bathy_dist = abs(fract(bathy_phase - 0.5) - 0.5) / max(fwidth(bathy_phase), 0.001);
+			float bathy_iso = 1.0 - clamp(bathy_dist, 0.0, 1.0);
 			float coast_glow = smoothstep(0.82, 1.0, depth_factor);
 			if (graphic_style_mode == 1) {
 				// Style 1: SATELLITE TRUE-EARTH DAYLIGHT (GEOINT EO)
 				vec3 deep_ocean = vec3(0.04, 0.18, 0.38);
 				vec3 shallow_shelf = vec3(0.10, 0.44, 0.66);
 				color = mix(deep_ocean, shallow_shelf, depth_factor);
+				color += vec3(0.18, 0.55, 0.75) * bathy_iso * 0.30;
 				color += vec3(0.28, 0.72, 0.88) * coast_glow * 0.28;
 				color += vec3(0.12, 0.35, 0.52) * (line_50 * 0.18 + line_10 * 0.05);
 			} else if (graphic_style_mode == 4) {
 				// Style 4: NATO TOPOGRAPHIC SITUATION MAP
 				color = mix(vec3(0.10, 0.22, 0.36), vec3(0.18, 0.36, 0.54), depth_factor);
+				color += vec3(0.20, 0.42, 0.60) * bathy_iso * 0.35;
 				color += vec3(0.32, 0.62, 0.82) * coast_glow * 0.25;
 				color += vec3(0.06, 0.14, 0.24) * (line_50 * 0.28 + line_10 * 0.10);
 			} else {
 				color = mix(obsidian_sea * 0.75, vec3(0.03, 0.11, 0.16), depth_factor);
+				color += nato_cyan * bathy_iso * 0.32;
 				color += nato_cyan * coast_glow * 0.22;
 				color += vec3(0.0, 0.28, 0.38) * (line_50 * 0.25 + line_10 * 0.08);
 			}
@@ -329,6 +339,34 @@ void fragment() {
 
 			color += nato_cyan * blue_los * 0.15;
 			color = mix(color, color + opfor_crimson * 0.32, clamp(red_sam, 0.0, 1.0));
+		}
+
+		// US-9.4: Volumetric Nuclear Detonation Shockwave & Blast Crater Decal
+		if (nuclear_det_epicenter_uv.z > 0.001) {
+			float nuke_d = length(v_map_uv - nuclear_det_epicenter_uv.xy);
+			float shock_radius = nuclear_det_epicenter_uv.z;
+			float ring_thickness = 0.028;
+			float shock_ring = 1.0 - smoothstep(0.0, ring_thickness, abs(nuke_d - shock_radius));
+			vec3 shock_glow = vec3(1.0, 0.92, 0.60);
+			color += shock_glow * shock_ring * 1.65;
+			// Scorched earth crater inside fireball core
+			float fireball_radius = shock_radius * 0.42;
+			if (nuke_d < fireball_radius) {
+				float core_t = 1.0 - (nuke_d / max(fireball_radius, 0.001));
+				vec3 scorched_crater = vec3(0.08, 0.02, 0.015);
+				color = mix(color, scorched_crater, core_t * 0.88);
+				color += vec3(1.0, 0.35, 0.08) * pow(core_t, 3.0) * 0.65;
+			}
+		}
+
+		// US-9.4: EMP Holographic Electronic Distortion Glitch
+		if (emp_glitch_intensity > 0.005) {
+			float glitch_bands = sin(v_map_uv.y * 420.0 + TIME * 60.0);
+			if (abs(glitch_bands) > 0.60) {
+				color = mix(color, vec3(0.85, 0.95, 1.0), emp_glitch_intensity * 0.45);
+			}
+			float scanline_jitter = sin(v_map_uv.y * 120.0 - TIME * 35.0);
+			color *= (1.0 - emp_glitch_intensity * 0.25 * abs(scanline_jitter));
 		}
 
 		// Apply Full-Table Style Post-Grading for Night-Vision FLIR Green (2) and Retro NORAD WOPR Amber (3)
