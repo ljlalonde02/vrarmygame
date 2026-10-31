@@ -187,6 +187,10 @@ func _build_vr_hand_and_wrist_visuals() -> void:
 	_create_wrist_button("btn_trial", "TRIAL\nARENA", 0.100, -0.046, TacticalTheme.COL_NATO_BLUE)
 	# FEAT-10: Tri-Command Headquarters (BKR / SSBN / E-4B)
 	_create_wrist_button("btn_hq", "HQ:\nBKR", -0.060, -0.076, TacticalTheme.COL_FLIR_GREEN)
+	# US-11.3: C4ISR SITREP, DEFCON Threat Monitor & Theater Mode Toggle
+	_create_wrist_button("btn_sitrep", "C4ISR\nSITREP", -0.020, -0.076, TacticalTheme.COL_NATO_BLUE)
+	_create_wrist_button("btn_defcon", "DEFCON\nSTAT", 0.020, -0.076, TacticalTheme.COL_UNMANNED_GOLD)
+	_create_wrist_button("btn_theater", "THEATER\nMAP", 0.060, -0.076, TacticalTheme.COL_CONTOUR_EMERALD)
 
 
 func _create_wrist_button(id: String, label_text: String, local_x: float, local_y: float, col: Color, half_w: float = 0.018, half_h: float = 0.012) -> void:
@@ -260,6 +264,38 @@ func pick_wrist_button_by_ray(orig: Vector3, dir: Vector3) -> String:
 	return ""
 
 
+func get_wrist_tablet_transform() -> Transform3D:
+	if _wrist_tablet_root == null:
+		return Transform3D.IDENTITY
+	return _wrist_tablet_root.global_transform if _wrist_tablet_root.is_inside_tree() else _wrist_tablet_root.transform
+
+
+## US-11.3: Direct physical finger touch proximity check for smartwatch buttons
+func pick_wrist_button_by_touch(touch_world_pos: Vector3, touch_margin: float = 0.01) -> String:
+	if _wrist_tablet_root == null or not _wrist_tablet_root.visible:
+		return ""
+	var tablet_trans: Transform3D = get_wrist_tablet_transform()
+	var inv_trans: Transform3D = tablet_trans.affine_inverse()
+	var local_hit: Vector3 = inv_trans * touch_world_pos
+
+	if absf(local_hit.z) > 0.035:
+		return ""
+
+	var best_btn := ""
+	var best_dist_sq := 1e9
+
+	for btn_id in _wrist_buttons:
+		var btn: Dictionary = _wrist_buttons[btn_id]
+		var dx := absf(local_hit.x - float(btn["center_x"]))
+		var dy := absf(local_hit.y - float(btn["center_y"]))
+		if dx <= (float(btn["half_w"]) + touch_margin) and dy <= (float(btn["half_h"]) + touch_margin):
+			var d_sq := dx * dx + dy * dy
+			if d_sq < best_dist_sq:
+				best_dist_sq = d_sq
+				best_btn = btn_id
+	return best_btn
+
+
 func actuate_wrist_button(btn_id: String) -> String:
 	match btn_id:
 		"btn_floor":
@@ -322,6 +358,35 @@ func actuate_wrist_button(btn_id: String) -> String:
 				if _wrist_buttons.has("btn_story_tree"):
 					_wrist_buttons["btn_story_tree"]["label"].text = "TREE:\nON" if is_tree else "TREE:\nOFF"
 				return "STORY_TREE_" + ("ON" if is_tree else "OFF")
+		"btn_sitrep":
+			if sim_server != null and _wrist_label_3d != null:
+				var st: WorldState = sim_server.world_state
+				var air_cnt := 0
+				var sea_cnt := 0
+				for u in range(st.unit_count):
+					if st.unit_active[u] == 1 and st.unit_faction[u] == WorldState.FACTION_BLUE:
+						var dom: int = int(sim_server.sim_db_ref.plat_domain_id[st.unit_platform_id[u]]) if (sim_server.sim_db_ref != null and st.unit_platform_id[u] < sim_server.sim_db_ref.plat_domain_id.size()) else -1
+						if dom == 1:
+							air_cnt += 1
+						elif dom == 2 or dom == 3:
+							sea_cnt += 1
+				_wrist_label_3d.text = "C4ISR SITREP // BLUE C2: %.0f%% | SATCOM: %.0f%%\nACTIVE AIR: %d SQRNS | MARITIME: %d VESSELS\nDEFCON: %d | INTEL ACCURACY: HIGH" % [st.blue_c2_integrity * 100.0, st.blue_satcom_factor * 100.0, air_cnt, sea_cnt, st.defcon_level]
+			return "C4ISR_SITREP_OK"
+		"btn_defcon":
+			if sim_server != null and _wrist_label_3d != null:
+				var st: WorldState = sim_server.world_state
+				var def_names := ["", "COCKED PISTOL", "FAST PACE", "ROUND HOUSE", "DOUBLE TAKE", "FADE OUT"]
+				var d_name: String = def_names[clamp(st.defcon_level, 1, 5)]
+				_wrist_label_3d.text = "DEFCON STATUS // ALERT LEVEL %d [%s]\nESCALATION: %.1f%% | STRATEGIC RETALIATION: AUTHORIZED\nINTERCEPTORS READY | SILOS SPOOLING" % [st.defcon_level, d_name, st.global_escalation_score]
+			return "DEFCON_STATUS_OK"
+		"btn_theater":
+			if war_table != null and war_table.has_method("toggle_display_mode"):
+				war_table.toggle_display_mode()
+				var is_tree: bool = war_table.is_story_tree_active()
+				if _wrist_buttons.has("btn_theater"):
+					_wrist_buttons["btn_theater"]["label"].text = "THEATER\nTREE" if is_tree else "THEATER\nMAP"
+				return "THEATER_MODE_" + ("STORY_TREE" if is_tree else "TACTICAL_MAP")
+			return "THEATER_TOGGLED"
 	return ""
 
 

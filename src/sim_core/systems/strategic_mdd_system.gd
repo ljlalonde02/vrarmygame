@@ -232,6 +232,76 @@ static func execute_asat_strike(state: WorldState, faction: int, focus_xz: Vecto
 	return 1
 
 
+## [7B] US-11.2: Launches a Direct-Ascent Kinetic ASAT Interceptor (SM-3 Block IIA / Nudol) physically destroying an enemy satellite
+static func execute_counter_space_kinetic_asat(state: WorldState, faction: int, focus_xz: Vector2) -> Dictionary:
+	var best_sat := -1
+	var best_dist_sq := 1e12
+	for s in range(state.sat_count):
+		if state.sat_active[s] == 1 and state.sat_faction[s] != faction:
+			var sp := state.sat_pos_km[s]
+			var d_sq := (sp.x - focus_xz.x) * (sp.x - focus_xz.x) + (sp.z - focus_xz.y) * (sp.z - focus_xz.y)
+			if d_sq < best_dist_sq:
+				best_dist_sq = d_sq
+				best_sat = s
+
+	if best_sat < 0:
+		return {"success": false, "reason": "No active enemy satellite in orbital engagement range"}
+
+	var shooter_pos := Vector3(focus_xz.x, 100.0, focus_xz.y)
+	for uid in range(state.unit_count):
+		if state.unit_active[uid] == 1 and state.unit_faction[uid] == faction and state.unit_echelon[uid] == WorldState.ECHELON_COMPANY:
+			shooter_pos = state.unit_pos[uid]
+			break
+
+	var sat_pos := state.sat_pos_km[best_sat]
+	var role: int = state.sat_role[best_sat]
+	var enemy_fac: int = state.sat_faction[best_sat]
+
+	# Physically destroy the satellite
+	state.sat_active[best_sat] = 0
+	state.asat_intercepts_count += 1
+
+	state.active_beams.append({
+		"shooter_pos": shooter_pos,
+		"target_pos": sat_pos,
+		"is_hpm_cone": false,
+		"cone_deg": 0.0,
+		"faction": faction,
+		"ttl": 3.0,
+	})
+	state.recent_impacts.append({
+		"pos_km": sat_pos,
+		"radius_km": 25.0,
+		"cost_musd": 350.0,
+		"is_intercept": true,
+		"is_kinetic_asat": true,
+		"ttl": 4.0,
+	})
+
+	# Recalculate degraded C4ISR / SATCOM / PNT factors
+	_update_satellite_positions_and_factors(state, 0.0)
+
+	state.sim_events_queue.append({
+		"type": "KINETIC_ASAT_DESTROYED_SATELLITE",
+		"sat_id": best_sat,
+		"role": role,
+		"enemy_faction": enemy_fac,
+		"pos_km": sat_pos,
+		"shooter_faction": faction
+	})
+
+	return {
+		"success": true,
+		"destroyed_sat_id": best_sat,
+		"sat_role": role,
+		"enemy_faction": enemy_fac,
+		"blue_satcom_factor": state.blue_satcom_factor,
+		"red_satcom_factor": state.red_satcom_factor,
+		"blue_pnt_factor": state.blue_pnt_factor,
+		"red_pnt_factor": state.red_pnt_factor,
+	}
+
+
 ## [8] Launches an Offensive Cyber CNO Strike against enemy IADS radars & C2 nodes in the sector
 static func execute_cyber_cno_strike(state: WorldState, sim_db: Node, faction: int, target_xz: Vector2, radius_km: float = 110.0) -> int:
 	var affected := 0

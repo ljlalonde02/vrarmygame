@@ -108,3 +108,76 @@ static func execute_undersea_operation(state: WorldState, sim_db: Node, op_code:
 		}
 
 	return {"ok": false, "reason": "Unknown undersea op_code"}
+
+
+## US-11.1: Deploys a linear acoustic sonobuoy barrier field from an ASW maritime patrol aircraft (P-8A Poseidon / Tu-142)
+static func deploy_asw_sonobuoy_field(
+	state: WorldState,
+	sim_db: Node,
+	patrol_origin: Vector3,
+	patrol_heading_rad: float,
+	buoy_count: int = 5,
+	spacing_km: float = 6.0,
+	friendly_faction: int = WorldState.FACTION_BLUE
+) -> Dictionary:
+	var enemy_fac: int = WorldState.FACTION_RED if friendly_faction == WorldState.FACTION_BLUE else WorldState.FACTION_BLUE
+	var fwd_dir := Vector2(cos(patrol_heading_rad), sin(patrol_heading_rad))
+	var detected_subs: Array[int] = []
+	var buoy_positions: Array[Vector3] = []
+
+	var flag_sub: int = int(sim_db.FLAG_UUV_SUB) if (sim_db != null and "FLAG_UUV_SUB" in sim_db) else 1
+
+	for i in range(buoy_count):
+		var offset_km := fwd_dir * (float(i) * spacing_km)
+		var b_pos := Vector3(patrol_origin.x + offset_km.x, 0.0, patrol_origin.z + offset_km.y)
+		buoy_positions.append(b_pos)
+
+		if state.has_method("spawn_sonar_ping"):
+			state.spawn_sonar_ping(-1, b_pos, friendly_faction, 12.0)
+
+		# Sonobuoy acoustic detection zone (12 km radius)
+		for uid in range(state.unit_count):
+			if state.unit_active[uid] == 0 or state.unit_faction[uid] != enemy_fac:
+				continue
+			var pid: int = state.unit_platform_id[uid]
+			var dom: int = sim_db.plat_domain_id[pid] if (sim_db != null and pid > 0 and pid < sim_db.plat_domain_id.size()) else -1
+			var flags: int = sim_db.plat_class_flags[pid] if (sim_db != null and pid > 0 and pid < sim_db.plat_class_flags.size()) else 0
+
+			if dom == 2 or (flags & flag_sub) != 0:
+				var u_pos := state.unit_pos[uid]
+				var d := Vector2(u_pos.x - b_pos.x, u_pos.z - b_pos.z).length()
+				if d <= 12.0:
+					state.unit_detected_mask[uid] |= (1 if friendly_faction == WorldState.FACTION_BLUE else 2)
+					if uid not in detected_subs:
+						detected_subs.append(uid)
+
+	# If hostile submarines detected, trigger air-dropped lightweight homing torpedo
+	var torpedoes_dropped := 0
+	for sub_uid in detected_subs:
+		if torpedoes_dropped >= 2:
+			break
+		state.unit_hp[sub_uid] = maxf(0.0, state.unit_hp[sub_uid] - 120.0)
+		torpedoes_dropped += 1
+		if state.unit_hp[sub_uid] <= 0.0:
+			state.unit_active[sub_uid] = 0
+			if enemy_fac == WorldState.FACTION_RED:
+				state.red_ships_lost += 1
+			else:
+				state.blue_ships_lost += 1
+
+	state.sim_events_queue.append({
+		"type": "ASW_SONOBUOY_BARRIER_DEPLOYED",
+		"origin": patrol_origin,
+		"buoys_count": buoy_count,
+		"subs_localized": detected_subs.size(),
+		"torpedoes_dropped": torpedoes_dropped,
+		"faction": friendly_faction
+	})
+
+	return {
+		"status": "SONOBUOY_BARRIER_ACTIVE",
+		"buoy_positions": buoy_positions,
+		"subs_localized": detected_subs.size(),
+		"detected_subs": detected_subs,
+		"torpedoes_dropped": torpedoes_dropped
+	}
