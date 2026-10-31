@@ -228,3 +228,52 @@ static func execute_tunnel_operation(state: WorldState, sim_db: Node, op_code: S
 		"captured": true,
 		"tunnels_captured_count": state.tunnels_captured_count,
 	}
+
+
+## US-10.2: Evaluates hardened subterranean damage mitigation (85% kinetic mitigation vs 100% MOP penetration)
+static func apply_subterranean_bunker_strike(
+	state: WorldState,
+	target_complex_id: int,
+	is_bunker_buster: bool,
+	raw_damage: float
+) -> Dictionary:
+	if target_complex_id < 0 or target_complex_id >= state.tunnel_complexes.size():
+		return {"error": "Invalid complex ID"}
+
+	var tc: Dictionary = state.tunnel_complexes[target_complex_id]
+	var effective_damage := raw_damage
+	var mitigation_pct := 0.0
+
+	if not is_bunker_buster:
+		mitigation_pct = 85.0
+		effective_damage = raw_damage * 0.15 # 85% kinetic shielding mitigation
+	else:
+		state.bunker_shock_tremor = maxf(state.bunker_shock_tremor, 0.65)
+
+	var cur_integrity: float = float(tc.get("integrity_pct", 100.0))
+	var new_integrity: float = maxf(0.0, cur_integrity - effective_damage)
+	tc["integrity_pct"] = new_integrity
+
+	var collapsed := false
+	if new_integrity <= 0.0 and not bool(tc.get("collapsed", false)):
+		tc["collapsed"] = true
+		collapsed = true
+		state.tunnels_collapsed_count += 1
+
+	state.sim_events_queue.append({
+		"type": "SUBTERRANEAN_STRIKE_RESOLVED",
+		"complex_id": target_complex_id,
+		"is_bunker_buster": is_bunker_buster,
+		"effective_damage": effective_damage,
+		"integrity_pct": new_integrity,
+		"collapsed": collapsed
+	})
+
+	return {
+		"complex_id": target_complex_id,
+		"is_bunker_buster": is_bunker_buster,
+		"effective_damage": effective_damage,
+		"mitigation_pct": mitigation_pct,
+		"integrity_pct": new_integrity,
+		"collapsed": collapsed
+	}

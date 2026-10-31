@@ -171,3 +171,50 @@ static func execute_cema_operation(state: WorldState, sim_db: Node, op_code: Str
 static func trigger_rwr_warning(state: WorldState, sim_db: Node, target_uid: int, attacker_uid: int = -1) -> void:
 	UnitTacticalAISystem.trigger_rwr_warning(state, sim_db, target_uid, attacker_uid)
 
+
+## US-10.1: Deploys a directional Electronic Warfare jamming corridor along an ingress heading
+static func deploy_directional_jamming_corridor(
+	state: WorldState,
+	sim_db: Node,
+	origin_pos: Vector3,
+	heading_rad: float,
+	beam_width_deg: float = 45.0,
+	range_km: float = 90.0,
+	friendly_faction: int = WorldState.FACTION_BLUE
+) -> Dictionary:
+	var enemy_fac: int = WorldState.FACTION_RED if friendly_faction == WorldState.FACTION_BLUE else WorldState.FACTION_BLUE
+	var half_angle_rad := deg_to_rad(beam_width_deg * 0.5)
+	var forward_dir := Vector2(cos(heading_rad), sin(heading_rad))
+	var jammed_nodes: Array[int] = []
+
+	for uid in range(state.unit_count):
+		if state.unit_active[uid] == 0 or state.unit_faction[uid] != enemy_fac:
+			continue
+		var u_pos := state.unit_pos[uid]
+		var delta := Vector2(u_pos.x - origin_pos.x, u_pos.z - origin_pos.z)
+		var dist := delta.length()
+		if dist > 0.1 and dist <= range_km:
+			var dot_prod := delta.normalized().dot(forward_dir)
+			var angle_to_target := acos(clampf(dot_prod, -1.0, 1.0))
+			if angle_to_target <= half_angle_rad:
+				state.unit_jammed[uid] = 1
+				jammed_nodes.append(uid)
+
+	state.sim_events_queue.append({
+		"type": "CEMA_JAMMING_CORRIDOR_ACTIVE",
+		"origin": origin_pos,
+		"heading_rad": heading_rad,
+		"beam_width_deg": beam_width_deg,
+		"range_km": range_km,
+		"nodes_jammed": jammed_nodes.size(),
+		"faction": friendly_faction
+	})
+
+	return {
+		"jammed_count": jammed_nodes.size(),
+		"jammed_uids": jammed_nodes,
+		"corridor_heading": heading_rad,
+		"range_km": range_km,
+		"status": "JAMMING_CORRIDOR_PROJECTED"
+	}
+
