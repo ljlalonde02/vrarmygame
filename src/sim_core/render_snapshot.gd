@@ -74,10 +74,14 @@ class SnapshotData extends RefCounted:
 	var mun_weapon_id: PackedInt32Array = PackedInt32Array()
 	var mun_flight_progress: PackedFloat32Array = PackedFloat32Array()
 	var mun_apex_alt_m: PackedFloat32Array = PackedFloat32Array()
+	var mun_heading_rad: PackedFloat32Array = PackedFloat32Array()
+	var mun_pitch_rad: PackedFloat32Array = PackedFloat32Array()
+	var mun_class_id: PackedByteArray = PackedByteArray()
 
 	var active_beams: Array[Dictionary] = []
 	var recent_impacts: Array[Dictionary] = []
 	var queued_strikes: Array[Dictionary] = []
+	var active_cbrn_hazards: Array[Dictionary] = []
 	var blue_lost_musd: float = 0.0
 	var red_lost_musd: float = 0.0
 	var lod_tier0_count: int = 0
@@ -165,10 +169,14 @@ class SnapshotData extends RefCounted:
 		mun_weapon_id = state.mun_weapon_id.duplicate()
 		mun_flight_progress = state.mun_flight_progress.duplicate()
 		mun_apex_alt_m = state.mun_apex_alt_m.duplicate()
+		mun_heading_rad = state.mun_heading_rad.duplicate()
+		mun_pitch_rad = state.mun_pitch_rad.duplicate()
+		mun_class_id = state.mun_class_id.duplicate()
 
 		active_beams = state.active_beams.duplicate(true)
 		recent_impacts = state.recent_impacts.duplicate(true)
 		queued_strikes = state.queued_strikes.duplicate(true)
+		active_cbrn_hazards = state.active_cbrn_hazards.duplicate(true)
 		blue_lost_musd = state.blue_lost_musd
 		red_lost_musd = state.red_lost_musd
 		lod_tier0_count = state.lod_tier0_count

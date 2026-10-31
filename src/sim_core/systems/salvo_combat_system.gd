@@ -446,7 +446,8 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 		var x_km := lerpf(start_p.x, end_p.x, clamped_t)
 		var z_km := lerpf(start_p.z, end_p.z, clamped_t)
 		var base_alt := lerpf(start_p.y, end_p.y, clamped_t)
-		var arc_boost := 4.0 * clamped_t * (1.0 - clamped_t) * maxf(0.0, m_apex_arr[mid] - maxf(start_p.y, end_p.y))
+		var apex_diff := maxf(0.0, m_apex_arr[mid] - maxf(start_p.y, end_p.y))
+		var arc_boost := 4.0 * clamped_t * (1.0 - clamped_t) * apex_diff
 		# Authentic Cold/Hot Vertical SAM Launch Profile: Rockets vertically out of canister before pitching over
 		var vert_boost := sin(clamped_t * (PI / 0.22)) * 1400.0 if (start_p.y <= 120.0 and clamped_t < 0.22) else 0.0
 		var cur_pos := Vector3(x_km, base_alt + arc_boost + vert_boost, z_km)
@@ -458,6 +459,21 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 		)
 		m_pos_arr[mid] = cur_pos
 		m_prog_arr[mid] = next_prog
+
+		# Sprint 16: Analytical tangent velocity calculation for parabolic and terrain-following munitions
+		var d_x := (end_p.x - start_p.x)
+		var d_z := (end_p.z - start_p.z)
+		var horiz_d := sqrt(d_x * d_x + d_z * d_z)
+		# Derivative of altitude with respect to normalized progress t:
+		var dy_dt := (end_p.y - start_p.y) + 4.0 * (1.0 - 2.0 * clamped_t) * apex_diff
+		if start_p.y <= 120.0 and clamped_t < 0.22:
+			dy_dt += cos(clamped_t * (PI / 0.22)) * (PI / 0.22) * 1400.0
+
+		var m_hdg := atan2(d_x, d_z)
+		var m_pitch := atan2(dy_dt * 0.001, maxf(0.001, horiz_d))
+		if mid < state.mun_heading_rad.size():
+			state.mun_heading_rad[mid] = m_hdg
+			state.mun_pitch_rad[mid] = m_pitch
 
 		if next_prog >= 1.0:
 			m_active[mid] = 0
@@ -504,6 +520,41 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 
 	state.blue_munitions_in_flight = b_in_flight
 	state.red_munitions_in_flight = r_in_flight
+
+	# Sprint 16: Step Active CBRN & Special Weapons Hazards
+	var i_cbrn := 0
+	while i_cbrn < state.active_cbrn_hazards.size():
+		var hz: Dictionary = state.active_cbrn_hazards[i_cbrn]
+		hz["ttl_sec"] = float(hz.get("ttl_sec", 60.0)) - dt
+		if float(hz["ttl_sec"]) <= 0.0:
+			state.active_cbrn_hazards.remove_at(i_cbrn)
+			continue
+
+		var hz_type: String = String(hz.get("type", "CHEMICAL"))
+		var hz_pos: Vector3 = hz.get("pos_km", Vector3.ZERO)
+		var hz_rad: float = float(hz.get("radius_km", 14.0))
+
+		if hz_type == "BIOLOGICAL":
+			hz["radius_km"] = minf(35.0, hz_rad + dt * 0.08)
+
+		var rad_sq := hz_rad * hz_rad
+		for u in range(n_units):
+			if u_active[u] == 0:
+				continue
+			var upos: Vector3 = u_pos[u]
+			var d_sq := (upos.x - hz_pos.x) * (upos.x - hz_pos.x) + (upos.z - hz_pos.z) * (upos.z - hz_pos.z)
+			if d_sq <= rad_sq:
+				if hz_type == "CHEMICAL":
+					if u < state.unit_cbrn_mopp.size() and state.unit_cbrn_mopp[u] == 0:
+						if u < state.unit_suppression_level.size():
+							state.unit_suppression_level[u] = clampf(state.unit_suppression_level[u] + dt * 0.12, 0.0, 1.0)
+						state.unit_hp[u] = maxf(10.0, state.unit_hp[u] - dt * 2.5)
+				elif hz_type == "ELECTROMAGNETIC":
+					u_rad_act[u] = 0
+					if u < state.unit_jammed.size():
+						state.unit_jammed[u] = 1
+
+		i_cbrn += 1
 
 
 static func _apply_damage_to_unit(state: WorldState, sim_db: Node, uid: int, raw_damage: float) -> void:

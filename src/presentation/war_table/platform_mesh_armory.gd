@@ -403,3 +403,178 @@ static func create_vision60_mesh(mat: Material) -> ArrayMesh:
 	var mesh := st.commit()
 	mesh.surface_set_material(0, mat)
 	return mesh
+
+
+# ====================================================================
+# SPRINT 16: PROCEDURAL 3D MUNITION MESH PACK
+# ====================================================================
+
+## 9. 155mm Artillery Shell (Obus d'artillerie):
+## Ogive conical tip pointing -Z, cylindrical rotating band body, tapered boat-tail.
+static func create_artillery_shell_mesh(mat: Material) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+
+	var nose := Vector3(0.0, 0.0, -0.010)
+	var shoulder_t := Vector3(0.0, 0.0022, -0.004)
+	var shoulder_b := Vector3(0.0, -0.0022, -0.004)
+	var shoulder_l := Vector3(-0.0022, 0.0, -0.004)
+	var shoulder_r := Vector3(0.0022, 0.0, -0.004)
+	var base_t := Vector3(0.0, 0.0020, 0.005)
+	var base_b := Vector3(0.0, -0.0020, 0.005)
+	var base_l := Vector3(-0.0020, 0.0, 0.005)
+	var base_r := Vector3(0.0020, 0.0, 0.005)
+	var tail := Vector3(0.0, 0.0, 0.008)
+
+	# Conical Ogive Nose
+	st.add_vertex(nose); st.add_vertex(shoulder_l); st.add_vertex(shoulder_t)
+	st.add_vertex(nose); st.add_vertex(shoulder_t); st.add_vertex(shoulder_r)
+	st.add_vertex(nose); st.add_vertex(shoulder_r); st.add_vertex(shoulder_b)
+	st.add_vertex(nose); st.add_vertex(shoulder_b); st.add_vertex(shoulder_l)
+
+	# Cylindrical Casing
+	st.add_vertex(shoulder_t); st.add_vertex(shoulder_l); st.add_vertex(base_t)
+	st.add_vertex(shoulder_l); st.add_vertex(base_l); st.add_vertex(base_t)
+	st.add_vertex(shoulder_r); st.add_vertex(shoulder_t); st.add_vertex(base_r)
+	st.add_vertex(shoulder_t); st.add_vertex(base_t); st.add_vertex(base_r)
+
+	# Boat-Tail Taper
+	st.add_vertex(base_t); st.add_vertex(tail); st.add_vertex(base_r)
+	st.add_vertex(base_r); st.add_vertex(tail); st.add_vertex(base_b)
+	st.add_vertex(base_b); st.add_vertex(tail); st.add_vertex(base_l)
+	st.add_vertex(base_l); st.add_vertex(tail); st.add_vertex(base_t)
+
+	st.generate_normals()
+	var m := st.commit()
+	m.surface_set_material(0, mat)
+	return m
+
+
+## 10. Cruise Missile (Tomahawk / Kalibr):
+## Needle radome nose, slender cylindrical fuselage, deployed swept mid-wings, cruciform tail.
+static func create_cruise_missile_mesh(mat: Material) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+
+	var nose := Vector3(0.0, 0.0, -0.016)
+	var body_mid := Vector3(0.0, 0.0016, -0.002)
+	var wing_l := Vector3(-0.011, 0.0, 0.001)
+	var wing_r := Vector3(0.011, 0.0, 0.001)
+	var tail_top := Vector3(0.0, 0.0055, 0.012)
+	var tail_l := Vector3(-0.0045, 0.0, 0.012)
+	var tail_r := Vector3(0.0045, 0.0, 0.012)
+	var exhaust := Vector3(0.0, 0.0, 0.014)
+
+	# Fuselage
+	st.add_vertex(nose); st.add_vertex(body_mid); st.add_vertex(exhaust)
+	st.add_vertex(nose); st.add_vertex(exhaust); st.add_vertex(body_mid * Vector3(-1, 1, 1))
+
+	# Swept Mid-Wings
+	st.add_vertex(body_mid); st.add_vertex(wing_l); st.add_vertex(exhaust * 0.7)
+	st.add_vertex(body_mid); st.add_vertex(exhaust * 0.7); st.add_vertex(wing_r)
+
+	# Cruciform Tail Fins
+	st.add_vertex(exhaust); st.add_vertex(tail_top); st.add_vertex(exhaust * 0.85)
+	st.add_vertex(exhaust); st.add_vertex(tail_l); st.add_vertex(exhaust * 0.85)
+	st.add_vertex(exhaust); st.add_vertex(exhaust * 0.85); st.add_vertex(tail_r)
+
+	st.generate_normals()
+	var m := st.commit()
+	m.surface_set_material(0, mat)
+	return m
+
+
+## 11. Ballistic Missile / MRBM (DF-21D / ATACMS / Minuteman):
+## High fineness ratio booster cylinder, conical nose shroud / MIRV re-entry cone, 4 base grid fins.
+static func create_ballistic_missile_mesh(mat: Material) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+
+	var nose := Vector3(0.0, 0.0, -0.026)
+	var shroud := Vector3(0.0, 0.0028, -0.016)
+	var b_t := Vector3(0.0, 0.0028, 0.016)
+	var b_b := Vector3(0.0, -0.0028, 0.016)
+	var b_l := Vector3(-0.0028, 0.0, 0.016)
+	var b_r := Vector3(0.0028, 0.0, 0.016)
+	var fin_t := Vector3(0.0, 0.0065, 0.018)
+	var fin_b := Vector3(0.0, -0.0065, 0.018)
+	var fin_l := Vector3(-0.0065, 0.0, 0.018)
+	var fin_r := Vector3(0.0065, 0.0, 0.018)
+	var rocket_plume := Vector3(0.0, 0.0, 0.024)
+
+	# Conical RV Warhead
+	st.add_vertex(nose); st.add_vertex(shroud); st.add_vertex(shroud * Vector3(-1, 1, 1))
+
+	# Booster Body
+	st.add_vertex(shroud); st.add_vertex(b_t); st.add_vertex(b_r)
+	st.add_vertex(shroud); st.add_vertex(b_l); st.add_vertex(b_b)
+
+	# 4 Base Stabilizer / Grid Fins
+	st.add_vertex(b_t); st.add_vertex(fin_t); st.add_vertex(rocket_plume)
+	st.add_vertex(b_b); st.add_vertex(rocket_plume); st.add_vertex(fin_b)
+	st.add_vertex(b_l); st.add_vertex(fin_l); st.add_vertex(rocket_plume)
+	st.add_vertex(b_r); st.add_vertex(rocket_plume); st.add_vertex(fin_r)
+
+	st.generate_normals()
+	var m := st.commit()
+	m.surface_set_material(0, mat)
+	return m
+
+
+## 12. Loitering Suicide Drone (Shahed-136 / Switchblade 600):
+## Delta wing planform, clipped wingtips, vertical endplate fins, pusher prop tail.
+static func create_loitering_drone_mesh(mat: Material) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+
+	var nose := Vector3(0.0, 0.001, -0.012)
+	var tip_l := Vector3(-0.012, 0.0, 0.008)
+	var tip_r := Vector3(0.012, 0.0, 0.008)
+	var fin_l := Vector3(-0.012, 0.005, 0.008)
+	var fin_r := Vector3(0.012, 0.005, 0.008)
+	var prop_tail := Vector3(0.0, 0.002, 0.010)
+
+	# Delta Wing Planform
+	st.add_vertex(nose); st.add_vertex(tip_l); st.add_vertex(prop_tail)
+	st.add_vertex(nose); st.add_vertex(prop_tail); st.add_vertex(tip_r)
+
+	# Wingtip Canted Stabilizers
+	st.add_vertex(tip_l); st.add_vertex(fin_l); st.add_vertex(prop_tail)
+	st.add_vertex(tip_r); st.add_vertex(prop_tail); st.add_vertex(fin_r)
+
+	st.generate_normals()
+	var m := st.commit()
+	m.surface_set_material(0, mat)
+	return m
+
+
+## 13. Hypersonic Glide Vehicle (DF-17 / Avangard Waverider):
+## Sharp triangular waverider wedge body, faceted belly compression ramp, twin canted dorsal fins.
+static func create_hypersonic_glide_mesh(mat: Material) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+
+	var needle_tip := Vector3(0.0, 0.0, -0.022)
+	var belly_keel := Vector3(0.0, -0.0025, 0.002)
+	var upper_ridge := Vector3(0.0, 0.0022, 0.004)
+	var flank_l := Vector3(-0.009, 0.0, 0.012)
+	var flank_r := Vector3(0.009, 0.0, 0.012)
+	var dorsal_l := Vector3(-0.004, 0.0055, 0.014)
+	var dorsal_r := Vector3(0.004, 0.0055, 0.014)
+
+	# Compression Waverider Belly
+	st.add_vertex(needle_tip); st.add_vertex(flank_l); st.add_vertex(belly_keel)
+	st.add_vertex(needle_tip); st.add_vertex(belly_keel); st.add_vertex(flank_r)
+
+	# Upper Aerodynamic Shroud
+	st.add_vertex(needle_tip); st.add_vertex(upper_ridge); st.add_vertex(flank_l)
+	st.add_vertex(needle_tip); st.add_vertex(flank_r); st.add_vertex(upper_ridge)
+
+	# Twin Canted Dorsal Stabilizers
+	st.add_vertex(upper_ridge); st.add_vertex(dorsal_l); st.add_vertex(flank_l)
+	st.add_vertex(upper_ridge); st.add_vertex(flank_r); st.add_vertex(dorsal_r)
+
+	st.generate_normals()
+	var m := st.commit()
+	m.surface_set_material(0, mat)
+	return m

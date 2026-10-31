@@ -52,6 +52,13 @@ var m1a2_mmi: MultiMeshInstance3D = null
 var robot_dog_mmi: MultiMeshInstance3D = null
 var flares_mmi: MultiMeshInstance3D = null
 
+# Sprint 16: Specialized 3D Munition MultiMesh Layers
+var artillery_mmi: MultiMeshInstance3D = null
+var cruise_mmi: MultiMeshInstance3D = null
+var ballistic_mmi: MultiMeshInstance3D = null
+var drone_mmi: MultiMeshInstance3D = null
+var hypersonic_mmi: MultiMeshInstance3D = null
+
 var last_visible_f35_count: int = 0
 var last_visible_j20_count: int = 0
 var last_visible_su57_count: int = 0
@@ -61,6 +68,11 @@ var last_visible_type055_count: int = 0
 var last_visible_m1a2_count: int = 0
 var last_visible_dog_count: int = 0
 var last_visible_flare_count: int = 0
+var last_visible_artillery_count: int = 0
+var last_visible_cruise_count: int = 0
+var last_visible_ballistic_count: int = 0
+var last_visible_drone_count: int = 0
+var last_visible_hypersonic_count: int = 0
 
 var _city_labels_root: Node3D = null
 var _city_labels: Array[Label3D] = []
@@ -570,6 +582,7 @@ func _setup_multimesh_layers() -> void:
 	# 10. ThermonuclearDetonationFX (3D Volumetric Mesh Explosion: Core, Stem, Toroidal Cap, Shockwave)
 	_setup_nuke_detonation_meshes()
 	_setup_flagship_multimeshes()
+	_setup_munition_multimeshes()
 
 
 
@@ -687,6 +700,39 @@ func _setup_flagship_multimeshes() -> void:
 	flare_mm.instance_count = MAX_VISIBLE_FLARES
 	flare_mm.visible_instance_count = 0
 	flares_mmi.multimesh = flare_mm
+
+
+func _setup_munition_multimeshes() -> void:
+	var unshaded_mat := StandardMaterial3D.new()
+	unshaded_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	unshaded_mat.vertex_color_use_as_albedo = true
+	unshaded_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+	var mun_configs: Array[Dictionary] = [
+		{"name": "ArtilleryMultiMesh", "prop": "artillery_mmi", "mesh": PlatformMeshArmoryScript.create_artillery_shell_mesh(unshaded_mat)},
+		{"name": "CruiseMissileMultiMesh", "prop": "cruise_mmi", "mesh": PlatformMeshArmoryScript.create_cruise_missile_mesh(unshaded_mat)},
+		{"name": "BallisticMissileMultiMesh", "prop": "ballistic_mmi", "mesh": PlatformMeshArmoryScript.create_ballistic_missile_mesh(unshaded_mat)},
+		{"name": "LoiteringDroneMultiMesh", "prop": "drone_mmi", "mesh": PlatformMeshArmoryScript.create_loitering_drone_mesh(unshaded_mat)},
+		{"name": "HypersonicGlideMultiMesh", "prop": "hypersonic_mmi", "mesh": PlatformMeshArmoryScript.create_hypersonic_glide_mesh(unshaded_mat)},
+	]
+
+	for cfg in mun_configs:
+		var node_name: String = cfg["name"]
+		var prop_name: String = cfg["prop"]
+		var mmi: MultiMeshInstance3D = get_node_or_null(node_name) as MultiMeshInstance3D
+		if mmi == null:
+			mmi = MultiMeshInstance3D.new()
+			mmi.name = node_name
+			add_child(mmi)
+		set(prop_name, mmi)
+
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_colors = true
+		mm.mesh = cfg["mesh"]
+		mm.instance_count = MAX_VISIBLE_MUNITIONS
+		mm.visible_instance_count = 0
+		mmi.multimesh = mm
 
 
 func _setup_real_city_labels() -> void:
@@ -1366,6 +1412,12 @@ func sync_visuals() -> void:
 
 	# Update Active Munitions MultiMesh + 3D Tacview Parabolic Smoke Ribbons
 	var mun_idx := 0
+	var art_idx := 0
+	var crm_idx := 0
+	var bal_idx := 0
+	var drn_idx := 0
+	var hyp_idx := 0
+
 	if not is_globe_mode:
 		for mid in range(curr_snap.mun_count):
 			if curr_snap.mun_active[mid] == 0:
@@ -1381,38 +1433,87 @@ func sync_visuals() -> void:
 			var m_col := TacticalTheme.COL_NATO_BLUE if m_fac == WorldState.FACTION_BLUE else TacticalTheme.COL_OPFOR_RED
 			m_col = m_col.lerp(TacticalTheme.COL_UNMANNED_GOLD, 0.35)
 
-			if mun_idx < MAX_VISIBLE_MUNITIONS:
-				var m_end_local: Vector3 = war_table.theater_km_to_table_local(curr_snap.mun_target_pos[mid])
-				var basis := Basis()
-				if m_local.distance_squared_to(m_end_local) > 0.0001:
-					basis = Basis.looking_at((m_end_local - m_local).normalized(), Vector3.UP)
-				mun_mm.set_instance_transform(mun_idx, Transform3D(basis, m_local))
-				mun_mm.set_instance_color(mun_idx, m_col)
-				mun_idx += 1
+			# Sprint 16: Analytical tangent velocity orientation basis
+			var m_hdg: float = curr_snap.mun_heading_rad[mid] if mid < curr_snap.mun_heading_rad.size() else 0.0
+			var m_pitch: float = curr_snap.mun_pitch_rad[mid] if mid < curr_snap.mun_pitch_rad.size() else 0.0
+			var cls_id: int = curr_snap.mun_class_id[mid] if mid < curr_snap.mun_class_id.size() else 0
 
-				var s_pos := curr_snap.mun_start_pos[mid]
-				var e_pos := curr_snap.mun_target_pos[mid]
-				var prog := curr_snap.mun_flight_progress[mid]
-				var tail_t := maxf(0.0, prog - 0.22)
-				var tail_base_y := lerpf(s_pos.y, e_pos.y, tail_t)
-				var tail_arc := 4.0 * tail_t * (1.0 - tail_t) * maxf(0.0, curr_snap.mun_apex_alt_m[mid] - maxf(s_pos.y, e_pos.y))
-				var tail_km := Vector3(lerpf(s_pos.x, e_pos.x, tail_t), tail_base_y + tail_arc, lerpf(s_pos.z, e_pos.z, tail_t))
-				var tail_local: Vector3 = war_table.theater_km_to_table_local(tail_km)
-				var m_right := basis.x * 0.0045
-				ribbons_immediate.surface_set_color(Color(m_col.r, m_col.g, m_col.b, 0.72))
-				ribbons_immediate.surface_add_vertex(m_local - m_right)
-				ribbons_immediate.surface_add_vertex(m_local + m_right)
-				ribbons_immediate.surface_add_vertex(tail_local)
-				drew_any_ribbon = true
+			var m_basis := Basis()
+			m_basis = m_basis.rotated(Vector3.UP, m_hdg)
+			m_basis = m_basis.rotated(m_basis.x, m_pitch)
+			var m_xform := Transform3D(m_basis, m_local)
 
-				beams_immediate.surface_set_color(Color(m_col.r, m_col.g, m_col.b, 0.88))
-				beams_immediate.surface_add_vertex(tail_local)
-				beams_immediate.surface_add_vertex(m_local)
-				drew_any_line = true
+			match cls_id:
+				1: # 155mm Artillery Shell
+					if artillery_mmi != null and art_idx < MAX_VISIBLE_MUNITIONS:
+						artillery_mmi.multimesh.set_instance_transform(art_idx, m_xform)
+						artillery_mmi.multimesh.set_instance_color(art_idx, m_col)
+						art_idx += 1
+				2: # Cruise Missile
+					if cruise_mmi != null and crm_idx < MAX_VISIBLE_MUNITIONS:
+						cruise_mmi.multimesh.set_instance_transform(crm_idx, m_xform)
+						cruise_mmi.multimesh.set_instance_color(crm_idx, m_col)
+						crm_idx += 1
+				3: # Ballistic Missile / MRBM
+					if ballistic_mmi != null and bal_idx < MAX_VISIBLE_MUNITIONS:
+						ballistic_mmi.multimesh.set_instance_transform(bal_idx, m_xform)
+						ballistic_mmi.multimesh.set_instance_color(bal_idx, m_col)
+						bal_idx += 1
+				4: # Loitering Drone
+					if drone_mmi != null and drn_idx < MAX_VISIBLE_MUNITIONS:
+						drone_mmi.multimesh.set_instance_transform(drn_idx, m_xform)
+						drone_mmi.multimesh.set_instance_color(drn_idx, m_col)
+						drn_idx += 1
+				5: # Hypersonic Glide Vehicle
+					if hypersonic_mmi != null and hyp_idx < MAX_VISIBLE_MUNITIONS:
+						hypersonic_mmi.multimesh.set_instance_transform(hyp_idx, m_xform)
+						hypersonic_mmi.multimesh.set_instance_color(hyp_idx, m_col)
+						hyp_idx += 1
+				_: # Generic fallback
+					if mun_idx < MAX_VISIBLE_MUNITIONS:
+						mun_mm.set_instance_transform(mun_idx, m_xform)
+						mun_mm.set_instance_color(mun_idx, m_col)
+						mun_idx += 1
+
+			var s_pos := curr_snap.mun_start_pos[mid]
+			var e_pos := curr_snap.mun_target_pos[mid]
+			var prog := curr_snap.mun_flight_progress[mid]
+			var tail_t := maxf(0.0, prog - 0.22)
+			var tail_base_y := lerpf(s_pos.y, e_pos.y, tail_t)
+			var tail_arc := 4.0 * tail_t * (1.0 - tail_t) * maxf(0.0, curr_snap.mun_apex_alt_m[mid] - maxf(s_pos.y, e_pos.y))
+			var tail_km := Vector3(lerpf(s_pos.x, e_pos.x, tail_t), tail_base_y + tail_arc, lerpf(s_pos.z, e_pos.z, tail_t))
+			var tail_local: Vector3 = war_table.theater_km_to_table_local(tail_km)
+			var m_right := m_basis.x * 0.0045
+			ribbons_immediate.surface_set_color(Color(m_col.r, m_col.g, m_col.b, 0.72))
+			ribbons_immediate.surface_add_vertex(m_local - m_right)
+			ribbons_immediate.surface_add_vertex(m_local + m_right)
+			ribbons_immediate.surface_add_vertex(tail_local)
+			drew_any_ribbon = true
+
+			beams_immediate.surface_set_color(Color(m_col.r, m_col.g, m_col.b, 0.88))
+			beams_immediate.surface_add_vertex(tail_local)
+			beams_immediate.surface_add_vertex(m_local)
+			drew_any_line = true
 
 	mun_mm.visible_instance_count = mun_idx
+	if artillery_mmi != null and artillery_mmi.multimesh != null:
+		artillery_mmi.multimesh.visible_instance_count = art_idx
+		last_visible_artillery_count = art_idx
+	if cruise_mmi != null and cruise_mmi.multimesh != null:
+		cruise_mmi.multimesh.visible_instance_count = crm_idx
+		last_visible_cruise_count = crm_idx
+	if ballistic_mmi != null and ballistic_mmi.multimesh != null:
+		ballistic_mmi.multimesh.visible_instance_count = bal_idx
+		last_visible_ballistic_count = bal_idx
+	if drone_mmi != null and drone_mmi.multimesh != null:
+		drone_mmi.multimesh.visible_instance_count = drn_idx
+		last_visible_drone_count = drn_idx
+	if hypersonic_mmi != null and hypersonic_mmi.multimesh != null:
+		hypersonic_mmi.multimesh.visible_instance_count = hyp_idx
+		last_visible_hypersonic_count = hyp_idx
+
 	stem_mm.visible_instance_count = stem_idx
-	last_visible_munition_count = mun_idx
+	last_visible_munition_count = mun_idx + art_idx + crm_idx + bal_idx + drn_idx + hyp_idx
 
 	# ====================================================================
 	# 4. 3D ORBITING SPACE FORCE SATELLITE CONSTELLATION (PLANETARY GLOBE & CONTINENTAL DOME)
@@ -1791,6 +1892,58 @@ func sync_visuals() -> void:
 			beams_immediate.surface_add_vertex(imp_loc + Vector3(cos(a0) * ring_r, 0.0, sin(a0) * ring_r))
 			beams_immediate.surface_add_vertex(imp_loc + Vector3(cos(a1) * ring_r, 0.0, sin(a1) * ring_r))
 		drew_any_line = true
+
+	# Draw Sprint 16 Special Weapons CBRN & Electromagnetic Hazards
+	for hz in curr_snap.active_cbrn_hazards:
+		var hz_type: String = String(hz.get("type", "CHEMICAL"))
+		var hz_pos: Vector3 = hz.get("pos_km", Vector3.ZERO)
+		var hz_rad: float = float(hz.get("radius_km", 14.0))
+		var hz_loc: Vector3 = war_table.theater_km_to_table_local(hz_pos)
+		if absf(hz_loc.x) > 0.92 or absf(hz_loc.z) > 0.92:
+			continue
+
+		var tbl_r := (hz_rad / WarTable.THEATER_SIZE_KM) * WarTable.TABLE_SIZE_M * zoom
+		match hz_type:
+			"CHEMICAL":
+				beams_immediate.surface_set_color(Color(0.72, 0.88, 0.15, 0.65))
+				for seg in range(16):
+					var a0 := float(seg) * TAU / 16.0
+					var a1 := float(seg + 1) * TAU / 16.0
+					var p0 := hz_loc + Vector3(cos(a0) * tbl_r, 0.003, sin(a0) * tbl_r)
+					var p1 := hz_loc + Vector3(cos(a1) * tbl_r, 0.003, sin(a1) * tbl_r)
+					beams_immediate.surface_add_vertex(p0)
+					beams_immediate.surface_add_vertex(p1)
+					var p0_in := hz_loc + Vector3(cos(a0) * tbl_r * 0.55, 0.004, sin(a0) * tbl_r * 0.55)
+					var p1_in := hz_loc + Vector3(cos(a1) * tbl_r * 0.55, 0.004, sin(a1) * tbl_r * 0.55)
+					beams_immediate.surface_add_vertex(p0_in)
+					beams_immediate.surface_add_vertex(p1_in)
+				drew_any_line = true
+
+			"BIOLOGICAL":
+				beams_immediate.surface_set_color(Color(0.75, 0.40, 0.95, 0.70))
+				for seg in range(24):
+					var a0 := float(seg) * TAU / 24.0
+					var a1 := float(seg + 1) * TAU / 24.0
+					var p0 := hz_loc + Vector3(cos(a0) * tbl_r, 0.006, sin(a0) * tbl_r)
+					var p1 := hz_loc + Vector3(cos(a1) * tbl_r, 0.006, sin(a1) * tbl_r)
+					beams_immediate.surface_add_vertex(p0)
+					beams_immediate.surface_add_vertex(p1)
+				drew_any_line = true
+
+			"ELECTROMAGNETIC":
+				beams_immediate.surface_set_color(Color(0.20, 0.85, 1.0, 0.90))
+				for seg in range(20):
+					var a0 := float(seg) * TAU / 20.0
+					var a1 := float(seg + 1) * TAU / 20.0
+					var p0 := hz_loc + Vector3(cos(a0) * tbl_r, 0.008, sin(a0) * tbl_r)
+					var p1 := hz_loc + Vector3(cos(a1) * tbl_r, 0.008, sin(a1) * tbl_r)
+					beams_immediate.surface_add_vertex(p0)
+					beams_immediate.surface_add_vertex(p1)
+					var p0_m := hz_loc + Vector3(cos(a0) * tbl_r, sin(a0) * tbl_r * 0.65, sin(a0) * tbl_r * 0.35)
+					var p1_m := hz_loc + Vector3(cos(a1) * tbl_r, sin(a1) * tbl_r * 0.65, sin(a1) * tbl_r * 0.35)
+					beams_immediate.surface_add_vertex(p0_m)
+					beams_immediate.surface_add_vertex(p1_m)
+				drew_any_line = true
 
 	# Draw Sprint 6 Active Countermeasure Flares (blooming decoy stars behind aircraft)
 	if not is_globe_mode and sim_server != null:

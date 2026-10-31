@@ -29,6 +29,7 @@ const UnitTacticalTrialsSystemScript := preload("res://src/sim_core/systems/unit
 const ReplayRecorderScript := preload("res://src/sim_core/replay_recorder.gd")
 const DefconEscalationSystemScript := preload("res://src/sim_core/systems/defcon_escalation_system.gd")
 const CoordinatedStrikeSystemScript := preload("res://src/sim_core/systems/coordinated_strike_system.gd")
+const TacticalDoctrineFormationSystemScript := preload("res://src/sim_core/systems/tactical_doctrine_formation_system.gd")
 
 const BASE_TICK_DT := 0.10 # 10 Hz simulation tick (100 ms)
 
@@ -439,15 +440,36 @@ func _spawn_symmetric_theater_forces(
 			var bn_slug := String(blue_slugs[bn_idx % blue_slugs.size()])
 			var bn_pid: int = sim_db_ref.get_platform_id(bn_slug)
 			var bn_def: Dictionary = sim_db_ref.get_platform(bn_pid)
-			var bn_pos := bde_pos + Vector3(float(bn_idx - 1) * 7.5, 0.0, float(bn_idx) * 5.5)
+			var bn_hdg := atan2(blue_advance_xz.x, blue_advance_xz.y)
+			var bn_off := TacticalDoctrineFormationSystemScript.compute_formation_offset(
+				TacticalDoctrineFormationSystemScript.FormationType.WEDGE,
+				bn_idx,
+				bns_per_bde,
+				bn_hdg,
+				2.2
+			)
+			var bn_pos := bde_pos + bn_off
 			var bn_uid := world_state.spawn_unit(WorldState.FACTION_BLUE, bn_pid, bn_pos, WorldState.ECHELON_BATTALION, bde_uid, bn_def)
+
+			var bn_dom := int(bn_def.get("domain_id", 0))
+			var is_cvn := bn_slug.contains("cvn") or bn_slug.contains("carrier")
+			var elev_m := world_state.get_terrain_elevation_m(bn_pos.x, bn_pos.z)
+			var form_type := TacticalDoctrineFormationSystemScript.select_formation_for_group(bn_dom, WorldState.TACTICAL_POSTURE_AGGRESSIVE_PURSUIT, is_cvn, elev_m, 0.0)
 
 			for co_idx in range(cos_per_bn):
 				var co_slug := String(blue_slugs[(bn_idx + co_idx) % blue_slugs.size()])
 				var co_pid: int = sim_db_ref.get_platform_id(co_slug)
 				var co_def: Dictionary = sim_db_ref.get_platform(co_pid)
-				var co_pos := bn_pos + Vector3(float(co_idx % 3) * 2.8, 0.0, float(co_idx / 3) * 2.8)
+				var co_off := TacticalDoctrineFormationSystemScript.compute_formation_offset(
+					form_type,
+					co_idx,
+					cos_per_bn,
+					bn_hdg,
+					1.0
+				)
+				var co_pos := bn_pos + co_off
 				var uid := world_state.spawn_unit(WorldState.FACTION_BLUE, co_pid, co_pos, WorldState.ECHELON_COMPANY, bn_uid, co_def)
+				world_state.unit_heading_rad[uid] = bn_hdg
 				world_state.unit_target_pos[uid] = Vector3(co_pos.x + blue_advance_xz.x, world_state.unit_pos[uid].y, co_pos.z + blue_advance_xz.y)
 				world_state.unit_has_waypoint[uid] = 1
 
@@ -461,16 +483,38 @@ func _spawn_symmetric_theater_forces(
 			var bn_slug := String(red_slugs[bn_idx % red_slugs.size()])
 			var bn_pid: int = sim_db_ref.get_platform_id(bn_slug)
 			var bn_def: Dictionary = sim_db_ref.get_platform(bn_pid)
-			var bn_pos := bde_pos + Vector3(float(bn_idx - 1) * 7.5, 0.0, float(bn_idx) * 5.5)
+			var red_adv := -blue_advance_xz
+			var bn_hdg := atan2(red_adv.x, red_adv.y)
+			var bn_off := TacticalDoctrineFormationSystemScript.compute_formation_offset(
+				TacticalDoctrineFormationSystemScript.FormationType.WEDGE,
+				bn_idx,
+				bns_per_bde,
+				bn_hdg,
+				2.2
+			)
+			var bn_pos := bde_pos + bn_off
 			var bn_uid := world_state.spawn_unit(WorldState.FACTION_RED, bn_pid, bn_pos, WorldState.ECHELON_BATTALION, bde_uid, bn_def)
+
+			var bn_dom := int(bn_def.get("domain_id", 0))
+			var is_cvn := bn_slug.contains("cvn") or bn_slug.contains("fujian")
+			var elev_m := world_state.get_terrain_elevation_m(bn_pos.x, bn_pos.z)
+			var form_type := TacticalDoctrineFormationSystemScript.select_formation_for_group(bn_dom, WorldState.TACTICAL_POSTURE_AGGRESSIVE_PURSUIT, is_cvn, elev_m, 0.0)
 
 			for co_idx in range(cos_per_bn):
 				var co_slug := String(red_slugs[(bn_idx + co_idx) % red_slugs.size()])
 				var co_pid: int = sim_db_ref.get_platform_id(co_slug)
 				var co_def: Dictionary = sim_db_ref.get_platform(co_pid)
-				var co_pos := bn_pos + Vector3(float(co_idx % 3) * 2.8, 0.0, float(co_idx / 3) * 2.8)
+				var co_off := TacticalDoctrineFormationSystemScript.compute_formation_offset(
+					form_type,
+					co_idx,
+					cos_per_bn,
+					bn_hdg,
+					1.0
+				)
+				var co_pos := bn_pos + co_off
 				var uid := world_state.spawn_unit(WorldState.FACTION_RED, co_pid, co_pos, WorldState.ECHELON_COMPANY, bn_uid, co_def)
-				world_state.unit_target_pos[uid] = Vector3(co_pos.x - blue_advance_xz.x, world_state.unit_pos[uid].y, co_pos.z - blue_advance_xz.y)
+				world_state.unit_heading_rad[uid] = bn_hdg
+				world_state.unit_target_pos[uid] = Vector3(co_pos.x + red_adv.x, world_state.unit_pos[uid].y, co_pos.z + red_adv.y)
 				world_state.unit_has_waypoint[uid] = 1
 
 

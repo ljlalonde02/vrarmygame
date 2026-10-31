@@ -215,6 +215,10 @@ var mun_flight_progress: PackedFloat32Array = PackedFloat32Array()
 var mun_total_dist_km: PackedFloat32Array = PackedFloat32Array()
 var mun_apex_alt_m: PackedFloat32Array = PackedFloat32Array()
 var mun_jammed: PackedByteArray = PackedByteArray()
+# Sprint 16: Munition Ballistic Tangent Attitude & Class IDs (0: Generic, 1: Artillery Shell, 2: Cruise Missile, 3: Ballistic Missile, 4: Loitering Drone, 5: Hypersonic Glide)
+var mun_heading_rad: PackedFloat32Array = PackedFloat32Array()
+var mun_pitch_rad: PackedFloat32Array = PackedFloat32Array()
+var mun_class_id: PackedByteArray = PackedByteArray()
 
 # --- Queued Alpha Strike Packages & Transient Directed Energy / Shockwave Events ---
 var queued_strikes: Array[Dictionary] = []
@@ -224,6 +228,7 @@ var sim_events_queue: Array[Dictionary] = []   # Drained on main thread to emit 
 var active_countermeasures: Array[Dictionary] = [] # Sprint 6: {unit_id, pos_km, vel_km_s, ttl_sec, max_ttl_sec, faction}
 var active_radar_tracks: Array[Dictionary] = []    # Sprint 6: {radar_uid, target_uid, radar_pos, target_pos, cone_deg, ttl_sec, faction}
 var active_nuke_effects: Array[Dictionary] = []    # Sprint 6: Multi-stage physical nuclear explosion simulation
+var active_cbrn_hazards: Array[Dictionary] = []    # Sprint 16: {type, pos_km, radius_km, ttl_sec, max_ttl_sec, faction}
 
 # --- Theater Heightmap RAM Grid (512x512 floats in meters) & Active Strategic Sites ---
 var active_theater_slug: String = "strait_theater"
@@ -698,6 +703,12 @@ func reset() -> void:
 	mun_apex_alt_m.resize(MAX_MUNITIONS)
 	mun_jammed.resize(MAX_MUNITIONS)
 	mun_jammed.fill(0)
+	mun_heading_rad.resize(MAX_MUNITIONS)
+	mun_heading_rad.fill(0.0)
+	mun_pitch_rad.resize(MAX_MUNITIONS)
+	mun_pitch_rad.fill(0.0)
+	mun_class_id.resize(MAX_MUNITIONS)
+	mun_class_id.fill(0)
 
 	queued_strikes.clear()
 	active_beams.clear()
@@ -708,6 +719,7 @@ func reset() -> void:
 	active_radar_tracks.clear()
 	active_nuke_effects.clear()
 	active_sonar_pings.clear()
+	active_cbrn_hazards.clear()
 	tactical_match_active = false
 	match_outcome = "IN_PROGRESS"
 	match_objectives.clear()
@@ -1507,7 +1519,87 @@ func spawn_munition(faction: int, weapon_id: int, shooter_id: int, target_unit_i
 	mun_total_dist_km[mid] = dist_km
 	mun_apex_alt_m[mid] = apex_m
 	mun_jammed[mid] = 0
+
+	# Sprint 16: Deduce munition class ID
+	# 0: Generic, 1: Artillery Shell, 2: Cruise Missile, 3: Ballistic Missile, 4: Loitering Drone, 5: Hypersonic Glide
+	var cls_id: int = 0
+	if flight_profile == "ORBITAL_KINETIC_ROD" or (dist_km > 120.0 and flight_profile == "LOFTED_BALLISTIC"):
+		cls_id = 3
+	elif flight_profile == "SEA_SKIM_TERCOM":
+		cls_id = 2
+	elif flight_profile == "DIRECT":
+		cls_id = 4
+	elif flight_profile == "LOFTED_BALLISTIC" and dist_km <= 50.0:
+		cls_id = 1
+	else:
+		cls_id = 2
+
+	mun_class_id[mid] = cls_id
+
+	var init_dx := target_pos.x - actual_start.x
+	var init_dz := target_pos.z - actual_start.z
+	var init_hdg := atan2(init_dx, init_dz)
+	var init_pitch := deg_to_rad(55.0) if cls_id in [1, 3] else (deg_to_rad(-8.0) if flight_profile == "ORBITAL_KINETIC_ROD" else deg_to_rad(12.0))
+	mun_heading_rad[mid] = init_hdg
+	mun_pitch_rad[mid] = init_pitch
 	return mid
+
+
+## Sprint 16 Special Weapons: Chemical Weapon Persistent Toxic Plume
+func spawn_chemical_hazard(pos_km: Vector3, radius_km: float = 14.0, duration_sec: float = 120.0, faction: int = 0) -> void:
+	active_cbrn_hazards.append({
+		"type": "CHEMICAL",
+		"pos_km": pos_km,
+		"radius_km": radius_km,
+		"ttl_sec": duration_sec,
+		"max_ttl_sec": duration_sec,
+		"faction": faction
+	})
+	sim_events_queue.append({
+		"type": "cbrn_strike",
+		"hazard_type": "CHEMICAL",
+		"pos_km": pos_km,
+		"radius_km": radius_km,
+		"faction": faction
+	})
+
+
+## Sprint 16 Special Weapons: Biological Weapon Pathogen Mist & Quarantine Zone
+func spawn_biological_hazard(pos_km: Vector3, radius_km: float = 18.0, duration_sec: float = 180.0, faction: int = 0) -> void:
+	active_cbrn_hazards.append({
+		"type": "BIOLOGICAL",
+		"pos_km": pos_km,
+		"radius_km": radius_km,
+		"ttl_sec": duration_sec,
+		"max_ttl_sec": duration_sec,
+		"faction": faction
+	})
+	sim_events_queue.append({
+		"type": "cbrn_strike",
+		"hazard_type": "BIOLOGICAL",
+		"pos_km": pos_km,
+		"radius_km": radius_km,
+		"faction": faction
+	})
+
+
+## Sprint 16 Special Weapons: High-Power Magnetic / HEMP Flux Field
+func spawn_electromagnetic_hazard(pos_km: Vector3, radius_km: float = 45.0, duration_sec: float = 45.0, faction: int = 0) -> void:
+	active_cbrn_hazards.append({
+		"type": "ELECTROMAGNETIC",
+		"pos_km": pos_km,
+		"radius_km": radius_km,
+		"ttl_sec": duration_sec,
+		"max_ttl_sec": duration_sec,
+		"faction": faction
+	})
+	sim_events_queue.append({
+		"type": "cbrn_strike",
+		"hazard_type": "ELECTROMAGNETIC",
+		"pos_km": pos_km,
+		"radius_km": radius_km,
+		"faction": faction
+	})
 
 
 func get_active_unit_count() -> int:
