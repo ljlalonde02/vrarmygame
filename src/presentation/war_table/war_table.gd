@@ -664,12 +664,18 @@ func theater_km_to_table_local(pos_km: Vector3) -> Vector3:
 	var curve_factor := clampf((1.0 - zoom_scale) / 0.65, 0.0, 1.0)
 	var r2 := local_x * local_x + local_z * local_z
 	var planet_dome_y := maxf(0.0, 0.145 * (1.0 - r2 / 1.65)) * curve_factor
-	var agl_m := maxf(0.0, pos_km.y - terrain_elev_m)
-	var eff_alt_m := agl_m
-	if agl_m > 16000.0:
-		# Smooth logarithmic compression for mesospheric ballistic missiles (35-85 km) & LEO/MEO satellites/rods (525-20,200 km)
-		eff_alt_m = 16000.0 + log(1.0 + (agl_m - 16000.0) / 10000.0) * 1850.0
-	var air_offset_y := eff_alt_m * ALTITUDE_M_TO_TABLE_M * minf(zoom_scale, 2.5)
+	var air_offset_y := 0.0
+	if pos_km.y < -1.0:
+		# Submerged submarine / underwater drone: render with realistic negative table offset under the sea surface
+		var immersion_depth_m := clampf(pos_km.y, -450.0, 0.0)
+		air_offset_y = immersion_depth_m * ALTITUDE_M_TO_TABLE_M * 0.55 * minf(zoom_scale, 2.5)
+	else:
+		var agl_m := maxf(0.0, pos_km.y - terrain_elev_m)
+		var eff_alt_m := agl_m
+		if agl_m > 16000.0:
+			# Smooth logarithmic compression for mesospheric ballistic missiles (35-85 km) & LEO/MEO satellites/rods (525-20,200 km)
+			eff_alt_m = 16000.0 + log(1.0 + (agl_m - 16000.0) / 10000.0) * 1850.0
+		air_offset_y = eff_alt_m * ALTITUDE_M_TO_TABLE_M * minf(zoom_scale, 2.5)
 	return Vector3(local_x, terrain_disp_y + planet_dome_y + air_offset_y, local_z)
 
 

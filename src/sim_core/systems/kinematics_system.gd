@@ -90,12 +90,14 @@ static func step(state: WorldState, sim_db: Node, dt: float) -> void:
 				var ny := pos.y
 				if lod_tier == WorldState.LOD_TIER_0_MICRO:
 					var terrain_below := maxf(0.0, state.get_terrain_elevation_m(nx, nz))
+					var is_heli: bool = (pid < p_op_alt.size() and p_op_alt[pid] <= 250.0 and p_op_alt[pid] > 20.0)
 					var target_alt := u_des_alt[uid]
-					if target_alt < 150.0:
-						target_alt = p_op_alt[pid] if (pid < p_op_alt.size() and p_op_alt[pid] > 200.0) else clampf(p_max_alt[pid] * 0.75, 2400.0, 14800.0)
+					if target_alt < 20.0:
+						target_alt = p_op_alt[pid] if (pid < p_op_alt.size() and p_op_alt[pid] > 20.0) else clampf(p_max_alt[pid] * 0.75, 2400.0, 14800.0)
 						u_des_alt[uid] = target_alt
-					var loop_wave := sin(state.sim_time_sec * 0.75 + float(uid) * 0.9) * (480.0 if is_ftr else 140.0)
-					var desired_y := maxf(target_alt + loop_wave, terrain_below + 250.0)
+					var loop_wave := 0.0 if is_heli else (sin(state.sim_time_sec * 0.75 + float(uid) * 0.9) * (480.0 if is_ftr else 140.0))
+					var min_clearance := 45.0 if is_heli else 250.0
+					var desired_y := maxf(target_alt + loop_wave, terrain_below + min_clearance)
 					ny = lerpf(pos.y, desired_y, clampf(dt * 2.5, 0.0, 1.0))
 					var dy_m := (ny - pos.y) * inv_dt
 					u_pitch[uid] = lerpf(u_pitch[uid], clampf(dy_m * 0.0012, -0.65, 0.65), clampf(dt * 4.0, 0.0, 1.0))
@@ -123,7 +125,7 @@ static func step(state: WorldState, sim_db: Node, dt: float) -> void:
 		var target: Vector3 = u_tpos[uid]
 		var to_target_xz := Vector2(target.x - pos.x, target.z - pos.z)
 		var dist_km := to_target_xz.length()
-		var arrive_thresh := maxf(0.35, speed_km_s * dt * 1.15)
+		var arrive_thresh := maxf(0.08 if dom_id == 0 else 0.35, speed_km_s * dt * 1.15)
 
 		if dist_km < arrive_thresh:
 			if state.unit_waypoint_queues.has(uid) and state.unit_waypoint_queues[uid].size() > 0:
@@ -140,9 +142,7 @@ static func step(state: WorldState, sim_db: Node, dt: float) -> void:
 
 		# Terrain slope mobility physics, Roads/Rivers/Bridges/Rubble/Forests & Civilian Density congestion for LAND units
 		if dom_id == 0:
-			if (flg & flag_mobile_ground) != 0:
-				# Tactical visual ground stride pace so Infantry, Snipers, Commandos & Armor visibly march on the 3D War Table at 1x speed
-				speed_km_s = maxf(speed_km_s, 0.088)
+			# Realistic kinematic pace: Infantry @ ~10-18 km/h, Tanks/IFVs @ ~50-70 km/h, scaling with terrain and infrastructure
 			var is_foot_or_dog: bool = (flg & flag_climb) != 0
 			if not is_foot_or_dog and lod_tier != WorldState.LOD_TIER_2_MACRO:
 				var slope_deg := state.get_terrain_slope_deg(pos.x, pos.z)
@@ -185,17 +185,23 @@ static func step(state: WorldState, sim_db: Node, dt: float) -> void:
 			var dy_land := new_y - pos.y
 			u_pitch[uid] = clampf(atan2(dy_land, maxf(step_km * 1000.0, 1.0)), -0.45, 0.45)
 		elif dom_id == 2:
-			new_y = 0.0
+			if (flg & int(sim_db.FLAG_UUV_SUB)) != 0:
+				var sub_depth := p_op_alt[pid] if (pid < p_op_alt.size() and p_op_alt[pid] < -5.0) else -180.0
+				new_y = clampf(u_des_alt[uid] if u_des_alt[uid] < -5.0 else sub_depth, -450.0, -15.0)
+			else:
+				new_y = 0.0
 			u_pitch[uid] = 0.0
 		elif dom_id == 1:
 			var terrain_below := maxf(0.0, state.get_terrain_elevation_m(new_x, new_z))
+			var is_heli: bool = (pid < p_op_alt.size() and p_op_alt[pid] <= 250.0 and p_op_alt[pid] > 20.0)
 			var pref_alt := u_des_alt[uid]
-			if pref_alt < 150.0:
-				pref_alt = p_op_alt[pid] if (pid < p_op_alt.size() and p_op_alt[pid] > 200.0) else maxf(target.y, 8500.0)
+			if pref_alt < 20.0:
+				pref_alt = p_op_alt[pid] if (pid < p_op_alt.size() and p_op_alt[pid] > 20.0) else maxf(target.y, 8500.0)
 			var loop_offset := 0.0
-			if (flg & flag_fighter) != 0 and u_ai[uid] in [WorldState.AI_BVR_INTERCEPT, WorldState.AI_EVASIVE_DEFENSIVE]:
+			if (flg & flag_fighter) != 0 and not is_heli and u_ai[uid] in [WorldState.AI_BVR_INTERCEPT, WorldState.AI_EVASIVE_DEFENSIVE]:
 				loop_offset = sin(state.sim_time_sec * 1.8 + float(uid)) * 650.0
-			var desired_alt := maxf(pref_alt + loop_offset, terrain_below + 250.0)
+			var min_clearance := 45.0 if is_heli else 250.0
+			var desired_alt := maxf(pref_alt + loop_offset, terrain_below + min_clearance)
 			new_y = lerpf(pos.y, desired_alt, clampf(dt * 2.8, 0.0, 1.0))
 			var dy_air := (new_y - pos.y) * inv_dt
 			u_pitch[uid] = lerpf(u_pitch[uid], clampf(dy_air * 0.0014, -0.75, 0.75), clampf(dt * 4.5, 0.0, 1.0))

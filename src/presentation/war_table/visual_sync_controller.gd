@@ -87,7 +87,9 @@ func _ready() -> void:
 		sig_bus.unit_selected.connect(func(uid: int, _pid: int, _fac: int):
 			selected_unit_id = uid
 			if selected_unit_ids.is_empty() or not selected_unit_ids.has(uid):
-				selected_unit_ids = [uid] if uid >= 0 else []
+				selected_unit_ids.clear()
+				if uid >= 0:
+					selected_unit_ids.append(uid)
 		)
 
 
@@ -123,12 +125,12 @@ func _create_warship_mesh(mat: Material) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 
-	var bow := Vector3(0.0, 0.003, -0.020)
-	var stern_l := Vector3(-0.0055, 0.003, 0.016)
-	var stern_r := Vector3(0.0055, 0.003, 0.016)
-	var mid_l := Vector3(-0.0065, 0.003, -0.004)
-	var mid_r := Vector3(0.0065, 0.003, -0.004)
-	var mast_top := Vector3(0.0, 0.011, -0.002)
+	var bow := Vector3(0.0, 0.003, -0.026)
+	var stern_l := Vector3(-0.0055, 0.003, 0.022)
+	var stern_r := Vector3(0.0055, 0.003, 0.022)
+	var mid_l := Vector3(-0.0065, 0.003, -0.005)
+	var mid_r := Vector3(0.0065, 0.003, -0.005)
+	var mast_top := Vector3(0.0, 0.012, -0.002)
 
 	# Deck
 	st.add_vertex(bow); st.add_vertex(mid_l); st.add_vertex(mid_r)
@@ -147,19 +149,20 @@ func _create_warship_mesh(mat: Material) -> ArrayMesh:
 
 
 ## Builds a 3D miniature tactical soldier / sniper / commando with helmet, armored torso, striding legs, and forward rifle barrel (-Z forward).
+## Realistic miniature scale: ~3.6mm height, ~1.6mm shoulder width (realistic proportion to 5.5mm tall, 11mm long armored tanks).
 func _create_tactical_soldier_mesh(mat: Material) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 
 	# Boots / Striding Legs base -> Torso -> Helmet peak
-	var foot_l := Vector3(-0.0022, 0.0, 0.0018)
-	var foot_r := Vector3(0.0022, 0.0, -0.0018)
-	var sh_fl := Vector3(-0.0028, 0.0085, -0.0020)
-	var sh_fr := Vector3(0.0028, 0.0085, -0.0020)
-	var sh_bl := Vector3(-0.0028, 0.0085, 0.0025)
-	var sh_br := Vector3(0.0028, 0.0085, 0.0025)
-	var helmet_top := Vector3(0.0, 0.0128, -0.0004)
-	var rifle_tip := Vector3(0.0010, 0.0078, -0.0115)
+	var foot_l := Vector3(-0.0006, 0.0, 0.0005)
+	var foot_r := Vector3(0.0006, 0.0, -0.0005)
+	var sh_fl := Vector3(-0.0008, 0.0024, -0.0006)
+	var sh_fr := Vector3(0.0008, 0.0024, -0.0006)
+	var sh_bl := Vector3(-0.0008, 0.0024, 0.0007)
+	var sh_br := Vector3(0.0008, 0.0024, 0.0007)
+	var helmet_top := Vector3(0.0, 0.0036, -0.0001)
+	var rifle_tip := Vector3(0.0003, 0.0022, -0.0032)
 
 	# Lower body & torso facets
 	st.add_vertex(foot_l); st.add_vertex(foot_r); st.add_vertex(sh_fl)
@@ -186,16 +189,17 @@ func _create_tactical_soldier_mesh(mat: Material) -> ArrayMesh:
 
 
 ## Builds a 3D miniature armored vehicle / tank with turret & forward gun barrel (-Z forward).
+## Realistic miniature scale: ~5.5mm height, ~5.6mm width, ~11mm length (comfortably fitting on road segments and next to village houses).
 func _create_tank_turret_mesh(mat: Material) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 
-	var fl := Vector3(-0.0035, 0.0025, -0.0065)
-	var fr := Vector3(0.0035, 0.0025, -0.0065)
-	var bl := Vector3(-0.0035, 0.0025, 0.0065)
-	var br := Vector3(0.0035, 0.0025, 0.0065)
-	var turret_top := Vector3(0.0, 0.0062, 0.0005)
-	var gun_tip := Vector3(0.0, 0.0045, -0.0115)
+	var fl := Vector3(-0.0028, 0.0022, -0.0055)
+	var fr := Vector3(0.0028, 0.0022, -0.0055)
+	var bl := Vector3(-0.0028, 0.0022, 0.0055)
+	var br := Vector3(0.0028, 0.0022, 0.0055)
+	var turret_top := Vector3(0.0, 0.0055, 0.0005)
+	var gun_tip := Vector3(0.0, 0.0038, -0.0095)
 
 	st.add_vertex(fl); st.add_vertex(bl); st.add_vertex(turret_top)
 	st.add_vertex(fr); st.add_vertex(turret_top); st.add_vertex(br)
@@ -747,15 +751,15 @@ func sync_visuals() -> void:
 					if is_sniper_or_commando:
 						# High-contrast SpecOps Emerald-Lime for BLUE Snipers/SEALs, SpecOps Amber-Crimson for RED Spetsnaz
 						soldier_col = Color(0.18, 1.0, 0.62, 1.0) if fac == WorldState.FACTION_BLUE else Color(1.0, 0.56, 0.14, 1.0)
-					var s_scale := clampf(unit_scale * (1.28 if is_sniper_or_commando else 1.10), 1.05, 2.25)
+					var s_scale := clampf(unit_scale * (1.10 if is_sniper_or_commando else 0.95), 0.75, 1.45)
 					for s_i in range(num_soldiers):
 						if soldier_idx >= MAX_VISIBLE_SOLDIERS:
 							break
 						var row := int(s_i / 4)
 						var col_i := (s_i % 4) - 1.5
-						var stride_z := sin(march_phase + float(s_i) * 1.1) * 0.0022
-						var stride_bob := absf(cos(march_phase + float(s_i) * 1.1)) * 0.0014
-						var s_off := Vector3(col_i * 0.0058 * threat_disp, 0.0012 + stride_bob, (float(row) * 0.0058 + absf(col_i) * 0.0024) * threat_disp + stride_z)
+						var stride_z := sin(march_phase + float(s_i) * 1.1) * 0.0012
+						var stride_bob := absf(cos(march_phase + float(s_i) * 1.1)) * 0.0006
+						var s_off := Vector3(col_i * 0.0030 * threat_disp, 0.0008 + stride_bob, (float(row) * 0.0032 + absf(col_i) * 0.0012) * threat_disp + stride_z)
 						var s_pos := local_pos + (attitude_basis * s_off)
 						var s_basis := attitude_basis.scaled(Vector3.ONE * s_scale)
 						soldier_mm.set_instance_transform(soldier_idx, Transform3D(s_basis, s_pos))
@@ -805,10 +809,10 @@ func sync_visuals() -> void:
 							break
 						var d_row := int(d_i / 4)
 						var d_col := (d_i % 4) - 1.5
-						var bound_y := absf(sin(march_phase * 1.4 + float(d_i))) * 0.0018
-						var d_off := Vector3(d_col * 0.0055 * threat_disp, 0.0022 + bound_y, float(d_row) * 0.0060 * threat_disp)
+						var bound_y := absf(sin(march_phase * 1.4 + float(d_i))) * 0.0010
+						var d_off := Vector3(d_col * 0.0036 * threat_disp, 0.0010 + bound_y, float(d_row) * 0.0040 * threat_disp)
 						var d_pos := local_pos + (attitude_basis * d_off)
-						var dog_basis := attitude_basis.scaled(Vector3(0.65, 0.65, 0.75) * unit_scale)
+						var dog_basis := attitude_basis.scaled(Vector3(0.45, 0.45, 0.55) * unit_scale)
 						veh_mm.set_instance_transform(veh_idx, Transform3D(dog_basis, d_pos))
 						veh_mm.set_instance_color(veh_idx, TacticalTheme.COL_UNMANNED_GOLD if fac == WorldState.FACTION_BLUE else col.lerp(TacticalTheme.COL_UNMANNED_GOLD, 0.5))
 						veh_idx += 1
@@ -819,9 +823,9 @@ func sync_visuals() -> void:
 					for v_i in range(num_vehs):
 						if veh_idx >= MAX_VISIBLE_VEHICLES:
 							break
-						var vx := (float(v_i) - 1.5) * 0.0072 * threat_disp
-						var vz := absf(float(v_i) - 1.5) * 0.0052 * threat_disp
-						var v_pos := local_pos + (attitude_basis * Vector3(vx, 0.0018, vz))
+						var vx := (float(v_i) - 1.5) * 0.0065 * threat_disp
+						var vz := absf(float(v_i) - 1.5) * 0.0045 * threat_disp
+						var v_pos := local_pos + (attitude_basis * Vector3(vx, 0.0014, vz))
 						veh_mm.set_instance_transform(veh_idx, Transform3D(attitude_basis.scaled(Vector3.ONE * unit_scale), v_pos))
 						veh_mm.set_instance_color(veh_idx, col)
 						veh_idx += 1

@@ -391,8 +391,8 @@ static func _generate_procedural_3d_buildings(state: WorldState, g: int) -> void
 			var is_city := (state.infra_biome[idx] == WorldState.BIOME_URBAN_CITY or urb >= 0.48)
 			# Add 3D Intersecting Urban Boulevards (N-S and E-W avenues separating the 4 city blocks)
 			if is_city and state.bldg_count < max_bldg_cap and not is_mobile_vr:
-				_add_bldg(state, Vector3(x_km, base_elev + 0.5, z_km), Vector3(0.0014, 0.0005, 0.0135), 0.0, WorldState.BLDG_ROAD_AVENUE, idx)
-				_add_bldg(state, Vector3(x_km, base_elev + 0.5, z_km), Vector3(0.0135, 0.0005, 0.0014), 0.0, WorldState.BLDG_ROAD_AVENUE, idx)
+				_add_bldg(state, Vector3(x_km, base_elev + 0.5, z_km), Vector3(0.0035, 0.0005, 0.0160), 0.0, WorldState.BLDG_ROAD_AVENUE, idx)
+				_add_bldg(state, Vector3(x_km, base_elev + 0.5, z_km), Vector3(0.0160, 0.0005, 0.0035), 0.0, WorldState.BLDG_ROAD_AVENUE, idx)
 
 			var cubes_in_cell := (2 if is_city else 1) if is_mobile_vr else (4 if is_city else 2)
 			for c_i in range(cubes_in_cell):
@@ -407,9 +407,11 @@ static func _generate_procedural_3d_buildings(state: WorldState, g: int) -> void
 				var bx := x_km + ox
 				var bz := z_km + oz
 				var b_elev := maxf(2.0, state.get_terrain_elevation_m(bx, bz))
-				var w_m := 0.0024 + h_seed * 0.0016
-				var d_m := 0.0024 + fmod(h_seed * 1.7, 1.0) * 0.0016
-				var h_m := (0.0075 + h_seed * 0.0165 * urb) if is_city else (0.0028 + h_seed * 0.0042)
+				# Realistic spatial scale: Village houses (6.5-10mm wide, 5.5-10mm tall), Skyscrapers (9-15mm wide, 16-55mm tall)
+				# Compared to tanks (~5.6mm wide, ~11mm long) and soldiers (~1.6mm wide, ~3.6mm tall)
+				var w_m := (0.0090 + h_seed * 0.0060) if is_city else (0.0065 + h_seed * 0.0035)
+				var d_m := (0.0090 + fmod(h_seed * 1.7, 1.0) * 0.0060) if is_city else (0.0065 + fmod(h_seed * 1.7, 1.0) * 0.0035)
+				var h_m := (0.0160 + h_seed * 0.0380 * urb) if is_city else (0.0055 + h_seed * 0.0045)
 				var b_type := WorldState.BLDG_URBAN_TOWER if (is_city and h_seed > 0.32) else WorldState.BLDG_VILLAGE_HOUSE
 				# Align city buildings to the orthogonal urban street grid!
 				var yaw := 0.0 if is_city else fmod(h_seed * 1.57, 0.78)
