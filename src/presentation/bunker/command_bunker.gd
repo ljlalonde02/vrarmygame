@@ -60,6 +60,7 @@ var _beacon_right_piv: Node3D = null
 var _beacon_left_light: OmniLight3D = null
 var _beacon_right_light: OmniLight3D = null
 var _bulkhead_board_3d: Node3D = null
+var _bulkhead_match_label_3d: Label3D = null
 var _bulkhead_defcon_label_3d: Label3D = null
 var _bulkhead_bunker_label_3d: Label3D = null
 var _bulkhead_officer_label_3d: Label3D = null
@@ -347,6 +348,16 @@ func _build_bunker_architecture() -> void:
 	wall_panel.mesh = wp_box
 	_bulkhead_board_3d.add_child(wall_panel)
 
+	_bulkhead_match_label_3d = Label3D.new()
+	_bulkhead_match_label_3d.name = "BulkheadMatchLabel3D"
+	_bulkhead_match_label_3d.position = Vector3(0.0, 0.28, 0.02)
+	_bulkhead_match_label_3d.pixel_size = 0.0012
+	_bulkhead_match_label_3d.font_size = 34
+	_bulkhead_match_label_3d.modulate = Color(0.20, 1.0, 0.55)
+	_bulkhead_match_label_3d.text = ""
+	_bulkhead_match_label_3d.visible = false
+	_bulkhead_board_3d.add_child(_bulkhead_match_label_3d)
+
 	_bulkhead_defcon_label_3d = Label3D.new()
 	_bulkhead_defcon_label_3d.name = "BulkheadDefconLabel3D"
 	_bulkhead_defcon_label_3d.position = Vector3(0.0, 0.14, 0.02)
@@ -479,6 +490,19 @@ func update_bunker_defcon_and_integrity_atmosphere(delta: float) -> void:
 		_beacon_right_light.visible = beacon_energy > 0.01
 		_beacon_left_piv.rotation.y = _beacon_spin_angle
 		_beacon_right_piv.rotation.y = -_beacon_spin_angle
+
+	# Sprint 7: Display End-of-Match Tactical Victory / Defeat Banner on Bulkhead
+	if _bulkhead_match_label_3d != null:
+		if st.match_outcome == "VICTORY":
+			_bulkhead_match_label_3d.visible = true
+			_bulkhead_match_label_3d.modulate = Color(0.20, 1.0, 0.55, 0.95)
+			_bulkhead_match_label_3d.text = "★ TACTICAL VICTORY // ALL THEATER OBJECTIVES SECURED ★"
+		elif st.match_outcome == "DEFEAT":
+			_bulkhead_match_label_3d.visible = true
+			_bulkhead_match_label_3d.modulate = Color(1.0, 0.20, 0.25, 0.95)
+			_bulkhead_match_label_3d.text = "✖ TACTICAL DEFEAT // HQ COMMAND PERIMETER OVERRUN ✖"
+		else:
+			_bulkhead_match_label_3d.visible = false
 
 	if _bulkhead_defcon_label_3d != null:
 		var hl_tag: String = " [RED PHONE RINGING!]" if st.hotline_is_ringing else ""

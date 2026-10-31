@@ -39,6 +39,9 @@ class SnapshotData extends RefCounted:
 	var unit_cyber_timer: PackedFloat32Array = PackedFloat32Array()
 	var unit_cbrn_mopp: PackedByteArray = PackedByteArray()
 	var unit_delegated_ai: PackedByteArray = PackedByteArray()
+	var unit_posture: PackedByteArray = PackedByteArray()
+	var unit_turret_hdg_rad: PackedFloat32Array = PackedFloat32Array()
+	var unit_suppression_level: PackedFloat32Array = PackedFloat32Array()
 	var blue_c2_integrity: float = 1.0
 	var red_c2_integrity: float = 1.0
 
@@ -127,6 +130,9 @@ class SnapshotData extends RefCounted:
 		unit_cyber_timer = state.unit_cyber_timer.duplicate()
 		unit_cbrn_mopp = state.unit_cbrn_mopp.duplicate()
 		unit_delegated_ai = state.unit_delegated_ai.duplicate()
+		unit_posture = state.unit_posture.duplicate()
+		unit_turret_hdg_rad = state.unit_turret_hdg_rad.duplicate()
+		unit_suppression_level = state.unit_suppression_level.duplicate()
 		blue_c2_integrity = state.blue_c2_integrity
 		red_c2_integrity = state.red_c2_integrity
 

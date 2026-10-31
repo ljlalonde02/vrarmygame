@@ -81,6 +81,21 @@ static func launch_strike_salvo(
 		})
 		if target_uid >= 0 and target_uid < state.unit_count and state.unit_active[target_uid] == 1:
 			UnitTacticalAISystem.trigger_rwr_warning(state, sim_db, target_uid, attacker_uid)
+
+		# Sprint 7: Unit interaction & weapon effects
+		if sim_db:
+			var att_pid: int = state.unit_platform_id[attacker_uid] if attacker_uid < state.unit_platform_id.size() else 0
+			var att_flg: int = sim_db.plat_class_flags[att_pid] if (att_pid > 0 and att_pid < sim_db.plat_class_flags.size()) else 0
+			if (att_flg & int(sim_db.FLAG_UUV_SUB)) != 0:
+				state.spawn_sonar_ping(attacker_uid, start_pos, state.unit_faction[attacker_uid], 45.0)
+			if (att_flg & int(sim_db.FLAG_ARMOR)) != 0:
+				state.sim_events_queue.append({
+					"type": "tank_muzzle_flash",
+					"attacker_id": attacker_uid,
+					"pos_km": start_pos,
+					"target_pos_km": final_target_pos,
+					"faction": state.unit_faction[attacker_uid],
+				})
 	return launched
 
 
@@ -151,6 +166,20 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 		state.active_radar_tracks[i]["ttl_sec"] = float(state.active_radar_tracks[i]["ttl_sec"]) - dt
 		if float(state.active_radar_tracks[i]["ttl_sec"]) <= 0.0:
 			state.active_radar_tracks.remove_at(i)
+
+	# Sprint 7: Age and expand underwater active sonar acoustic pings
+	for i in range(state.active_sonar_pings.size() - 1, -1, -1):
+		state.active_sonar_pings[i]["ttl_sec"] = float(state.active_sonar_pings[i]["ttl_sec"]) - dt
+		var cur_r: float = float(state.active_sonar_pings[i]["current_radius_km"])
+		var max_r: float = float(state.active_sonar_pings[i]["max_radius_km"])
+		var dur: float = maxf(0.01, float(state.active_sonar_pings[i]["duration_sec"]))
+		state.active_sonar_pings[i]["current_radius_km"] = minf(max_r, cur_r + (max_r / dur) * dt)
+		if float(state.active_sonar_pings[i]["ttl_sec"]) <= 0.0:
+			state.active_sonar_pings.remove_at(i)
+
+	# Sprint 7: Evaluate tactical match objectives and win/loss state periodically
+	if (state.tick_id % 10) == 0:
+		state.evaluate_match_conditions()
 
 	var u_active := state.unit_active
 	var u_ech := state.unit_echelon
@@ -465,6 +494,9 @@ static func _apply_damage_to_unit(state: WorldState, sim_db: Node, uid: int, raw
 		return
 	var pid := state.unit_platform_id[uid]
 	var mitigation: float = sim_db.plat_armor_mitigation[pid] if (pid > 0 and pid < sim_db.plat_armor_mitigation.size()) else 0.85
+	# Sprint 7: Fortified ambush entrenchment gives 40% damage reduction
+	if uid < state.unit_posture.size() and state.unit_posture[uid] == WorldState.TACTICAL_POSTURE_HOLD_AMBUSH:
+		mitigation *= 0.60
 	var cover_mult := 1.0
 	if pid > 0 and pid < sim_db.plat_domain_id.size() and sim_db.plat_domain_id[pid] == 0:
 		var is_foot_or_dog: bool = (sim_db.plat_class_flags[pid] & int(sim_db.FLAG_CLIMB_SLOPES | sim_db.FLAG_INFANTRY | sim_db.FLAG_ROBOT_DOG)) != 0
@@ -473,6 +505,9 @@ static func _apply_damage_to_unit(state: WorldState, sim_db: Node, uid: int, raw
 	var final_dmg := maxf(5.0, raw_damage * mitigation * cover_mult)
 
 	state.unit_hp[uid] -= final_dmg
+	# Sprint 7: Unit suppression accumulation under fire
+	if uid < state.unit_suppression_level.size():
+		state.unit_suppression_level[uid] = clampf(state.unit_suppression_level[uid] + 0.35, 0.0, 1.0)
 	var unit_cost: float = sim_db.plat_cost_musd[pid] if (pid > 0 and pid < sim_db.plat_cost_musd.size()) else 10.0
 	var max_hp := maxf(1.0, state.unit_max_hp[uid])
 	var dmg_ratio := clampf(final_dmg / max_hp, 0.0, 1.0)

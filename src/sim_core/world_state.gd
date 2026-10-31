@@ -32,11 +32,16 @@ const TACTICAL_POSTURE_AUTO := 0
 const TACTICAL_POSTURE_BVR_STANDOFF := 1
 const TACTICAL_POSTURE_AGGRESSIVE_PURSUIT := 2
 const TACTICAL_POSTURE_DEFENSIVE_BREAK := 3
+const TACTICAL_POSTURE_HOLD_AMBUSH := 4
+const TACTICAL_POSTURE_RETREAT := 5
 
 # --- Unit SoA Pools (Coordinate convention: x = East/West km [-250..250], y = Altitude meters, z = North/South km [-250..250]) ---
 var unit_count: int = 0
 var unit_active: PackedByteArray = PackedByteArray()
 var unit_tactical_posture: PackedByteArray = PackedByteArray()
+var unit_posture: PackedByteArray:
+	get: return unit_tactical_posture
+	set(val): unit_tactical_posture = val
 var unit_pos: PackedVector3Array = PackedVector3Array()
 var unit_vel: PackedVector3Array = PackedVector3Array()
 var unit_target_pos: PackedVector3Array = PackedVector3Array()
@@ -66,11 +71,25 @@ var unit_player_override_timer: PackedFloat32Array = PackedFloat32Array()
 var unit_heading_rad: PackedFloat32Array = PackedFloat32Array()
 var unit_pitch_rad: PackedFloat32Array = PackedFloat32Array()
 var unit_roll_rad: PackedFloat32Array = PackedFloat32Array()
+var unit_turret_hdg_rad: PackedFloat32Array = PackedFloat32Array()
+var unit_suppression_level: PackedFloat32Array = PackedFloat32Array()
 var unit_sim_lod: PackedByteArray = PackedByteArray()
 var unit_morale: PackedFloat32Array = PackedFloat32Array()
 var unit_cyber_timer: PackedFloat32Array = PackedFloat32Array()
 var unit_cbrn_mopp: PackedByteArray = PackedByteArray()
 var unit_delegated_ai: PackedByteArray = PackedByteArray() # 1 = DELEGATED_TO_PARENT (Subordinate AI), 0 = DIRECT_PLAYER_CONTROL
+
+# --- Sprint 7: Tactical Match Loop & Sonar Pings ---
+var active_sonar_pings: Array[Dictionary] = []
+var tactical_match_active: bool = false
+var match_outcome: String = "IN_PROGRESS" # "IN_PROGRESS", "VICTORY", "DEFEAT"
+var match_objectives: Array[Dictionary] = []
+var match_stats: Dictionary = {
+	"blue_lost": 0,
+	"red_lost": 0,
+	"objectives_done": 0,
+	"elapsed_sec": 0.0
+}
 
 # --- 4-Tier Hierarchical AI C2 Integrity (Command Bunkers + AWACS + SATCOM) ---
 var blue_c2_integrity: float = 1.0
@@ -559,6 +578,10 @@ func reset() -> void:
 	unit_pitch_rad.fill(0.0)
 	unit_roll_rad.resize(MAX_UNITS)
 	unit_roll_rad.fill(0.0)
+	unit_turret_hdg_rad.resize(MAX_UNITS)
+	unit_turret_hdg_rad.fill(0.0)
+	unit_suppression_level.resize(MAX_UNITS)
+	unit_suppression_level.fill(0.0)
 	unit_sim_lod.resize(MAX_UNITS)
 	unit_sim_lod.fill(LOD_TIER_0_MICRO)
 	unit_morale.resize(MAX_UNITS)
@@ -684,6 +707,10 @@ func reset() -> void:
 	active_countermeasures.clear()
 	active_radar_tracks.clear()
 	active_nuke_effects.clear()
+	active_sonar_pings.clear()
+	tactical_match_active = false
+	match_outcome = "IN_PROGRESS"
+	match_objectives.clear()
 
 	tick_id = 0
 	sim_time_sec = 0.0
@@ -988,6 +1015,84 @@ func trigger_thermonuclear_detonation(pos_km: Vector3, faction: int = 1, yield_k
 	return nuke_entry
 
 
+## Spawns an underwater acoustic active sonar pulse expanding from a submarine or ASW platform
+func spawn_sonar_ping(unit_id: int, pos_km: Vector3, faction: int, max_radius_km: float = 28.0) -> void:
+	active_sonar_pings.append({
+		"unit_id": unit_id,
+		"pos_km": pos_km,
+		"radius_km": 1.0,
+		"current_radius_km": 1.0,
+		"max_radius_km": max_radius_km,
+		"timer_sec": 4.5,
+		"ttl_sec": 4.5,
+		"duration_sec": 4.5,
+		"max_ttl_sec": 4.5,
+		"faction": faction
+	})
+
+
+## Initializes a playable tactical match with objectives and outcome tracking
+func init_tactical_match(scenario_name: String, primary_enemy_uids: Array = []) -> void:
+	tactical_match_active = true
+	match_outcome = "IN_PROGRESS"
+	match_stats = {
+		"blue_lost": 0,
+		"red_lost": 0,
+		"objectives_done": 0,
+		"elapsed_sec": 0.0
+	}
+	match_objectives.clear()
+	match_objectives.append({
+		"id": "OBJ_DEFEND_BEACHHEAD",
+		"title": "DEFEND TAOYUAN BEACHHEAD",
+		"desc": "Repel hostile amphibious invasion armor columns and robot dogs",
+		"completed": false,
+		"required_uids": primary_enemy_uids.duplicate()
+	})
+	match_objectives.append({
+		"id": "OBJ_PROTECT_BUNKER",
+		"title": "SECURE HQ COMMAND CITADEL",
+		"desc": "Keep HQ Command Bunker operational above 20% hull integrity",
+		"completed": false
+	})
+
+
+## Evaluates real-time tactical match victory / defeat conditions
+func evaluate_match_conditions() -> String:
+	if not tactical_match_active:
+		return match_outcome
+	
+	if bunker_is_lost or bunker_hp <= 0.0 or bunker_status_code == "LOST":
+		match_outcome = "DEFEAT"
+		tactical_match_active = false
+		return match_outcome
+
+	var obj_all_done := true
+	for obj in match_objectives:
+		if String(obj.get("id", "")) == "OBJ_DEFEND_BEACHHEAD":
+			var req_uids: Array = obj.get("required_uids", [])
+			var any_alive := false
+			for r in req_uids:
+				var r_uid := int(r)
+				if r_uid >= 0 and r_uid < unit_count and unit_active[r_uid] == 1:
+					any_alive = true
+					break
+			if not any_alive and not req_uids.is_empty():
+				obj["completed"] = true
+			elif not bool(obj.get("completed", false)):
+				obj_all_done = false
+		elif String(obj.get("id", "")) == "OBJ_PROTECT_BUNKER":
+			if bunker_hp > 50.0:
+				obj["completed"] = true
+			else:
+				obj_all_done = false
+
+	if obj_all_done:
+		match_outcome = "VICTORY"
+		tactical_match_active = false
+	return match_outcome
+
+
 func load_heightmap(res_path: String) -> void:
 	active_heightmap_path = res_path
 	var img: Image = null
@@ -1111,6 +1216,8 @@ func spawn_unit(faction: int, platform_id: int, pos_km: Vector3, echelon: int = 
 	unit_heading_rad[uid] = PI if faction == FACTION_BLUE else 0.0
 	unit_pitch_rad[uid] = 0.0
 	unit_roll_rad[uid] = 0.0
+	unit_turret_hdg_rad[uid] = unit_heading_rad[uid]
+	unit_suppression_level[uid] = 0.0
 	unit_sim_lod[uid] = LOD_TIER_0_MICRO
 	unit_morale[uid] = 1.0
 	unit_cyber_timer[uid] = 0.0

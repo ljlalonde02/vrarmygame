@@ -68,6 +68,12 @@ var _photo_cards_root: Node3D = null
 var _photo_card_sprites: Array[Sprite3D] = []
 var _photo_card_labels: Array[Label3D] = []
 
+# Sprint 7: Diegetic 3D Radial Command Menu & Hostile Target Reticle
+var _command_radial_root: Node3D = null
+var _radial_posture_labels: Array[Label3D] = []
+var _target_reticle_root: Node3D = null
+var _target_reticle_label: Label3D = null
+
 # Tacview 3D Ribbon History: uid -> Array of {pos_km: Vector3, right_vec: Vector3}
 var _ribbon_history: Dictionary = {}
 var _trail_frame_counter: int = 0
@@ -85,6 +91,8 @@ func _ready() -> void:
 		_setup_multimesh_layers()
 	if _photo_cards_root == null:
 		_setup_floating_photo_cards()
+	if _command_radial_root == null:
+		_setup_command_radial_menu()
 	var sig_bus: Node = get_node_or_null("/root/SignalBus") if is_inside_tree() else null
 	if sig_bus != null:
 		sig_bus.recon_photo_mode_toggled.connect(func(enabled: bool): recon_photo_mode = enabled)
@@ -615,6 +623,56 @@ func _setup_floating_photo_cards() -> void:
 		_photo_card_labels.append(lbl)
 
 
+func _setup_command_radial_menu() -> void:
+	_command_radial_root = Node3D.new()
+	_command_radial_root.name = "DiegeticCommandRadial"
+	_command_radial_root.visible = false
+	add_child(_command_radial_root)
+
+	var posture_names := [
+		"MOVE",           # 0
+		"ATTACK",         # 1
+		"PATROL",         # 2
+		"RECON",          # 3
+		"HOLD / AMBUSH",  # 4
+		"RETREAT"         # 5
+	]
+
+	var angles_deg := [90.0, 30.0, 330.0, 270.0, 210.0, 150.0]
+	var radius_m := 0.052
+
+	for i in range(posture_names.size()):
+		var lbl := Label3D.new()
+		lbl.font_size = 20
+		lbl.pixel_size = 0.00062
+		lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		var rad := deg_to_rad(angles_deg[i])
+		lbl.position = Vector3(cos(rad) * radius_m, 0.006, -sin(rad) * radius_m)
+		lbl.text = "[ " + posture_names[i] + " ]"
+		lbl.modulate = TacticalTheme.COL_NATO_BLUE
+		lbl.outline_size = 3
+		lbl.outline_modulate = Color.BLACK
+		_command_radial_root.add_child(lbl)
+		_radial_posture_labels.append(lbl)
+
+	# Setup 3D Target Reticle for Hostile Designated Target
+	_target_reticle_root = Node3D.new()
+	_target_reticle_root.name = "DiegeticTargetReticle"
+	_target_reticle_root.visible = false
+	add_child(_target_reticle_root)
+
+	_target_reticle_label = Label3D.new()
+	_target_reticle_label.font_size = 18
+	_target_reticle_label.pixel_size = 0.0006
+	_target_reticle_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_target_reticle_label.position = Vector3(0.0, 0.038, 0.0)
+	_target_reticle_label.modulate = Color(1.0, 0.22, 0.25, 0.98)
+	_target_reticle_label.outline_size = 3
+	_target_reticle_label.outline_modulate = Color.BLACK
+	_target_reticle_label.text = "TARGET LOCK"
+	_target_reticle_root.add_child(_target_reticle_label)
+
+
 func _process(_delta: float) -> void:
 	sync_visuals()
 
@@ -888,6 +946,12 @@ func sync_visuals() -> void:
 
 				# C) Tanks / IFVs / Artillery / SAM TELs / Logistics -> 1 vehicle at macro zoom, 4 vehicles when zoomed in!
 				elif (flg & int(sim_db.FLAG_INFANTRY)) == 0:
+					var is_armor: bool = (flg & int(sim_db.FLAG_ARMOR)) != 0
+					var turret_basis := attitude_basis
+					if is_armor and uid < curr_snap.unit_turret_hdg_rad.size():
+						var t_hdg: float = curr_snap.unit_turret_hdg_rad[uid]
+						turret_basis = Basis.from_euler(Vector3(0.0, -t_hdg - PI * 0.5, 0.0))
+
 					var num_vehs := 4 if (expand_squads or uid == selected_unit_id) else (2 if zoom >= 2.2 else 1)
 					for v_i in range(num_vehs):
 						if veh_idx >= MAX_VISIBLE_VEHICLES:
@@ -895,13 +959,15 @@ func sync_visuals() -> void:
 						var vx := (float(v_i) - 1.5) * 0.0065 * threat_disp
 						var vz := absf(float(v_i) - 1.5) * 0.0045 * threat_disp
 						var v_pos := local_pos + (attitude_basis * Vector3(vx, 0.0014, vz))
-						veh_mm.set_instance_transform(veh_idx, Transform3D(attitude_basis.scaled(Vector3.ONE * unit_scale), v_pos))
+						# Lead tank uses turret-tracking orientation, wingmen follow hull heading
+						var v_basis := turret_basis if (is_armor and v_i == 0) else attitude_basis
+						veh_mm.set_instance_transform(veh_idx, Transform3D(v_basis.scaled(Vector3.ONE * unit_scale), v_pos))
 						veh_mm.set_instance_color(veh_idx, col)
 						veh_idx += 1
 
-					# Combined arms tank 120mm cannon fire tracer bursts & bounding overwatch when zoomed in
-					if zoom >= 2.0 and (flg & int(sim_db.FLAG_ARMOR)) != 0 and ((int(curr_snap.timestamp_sec * 2.5) + uid) % 4) == 0:
-						var fwd := (-attitude_basis.z).normalized()
+					# Combined arms tank 120mm APFSDS cannon fire tracer bursts along turret azimuth
+					if zoom >= 2.0 and is_armor and ((int(curr_snap.timestamp_sec * 2.5) + uid) % 4) == 0:
+						var fwd := (-turret_basis.z).normalized()
 						var canon_orig := local_pos + Vector3(0.0, 0.006, 0.0) + fwd * 0.012
 						var canon_end := canon_orig + fwd * clampf(0.05 * zoom, 0.03, 0.15)
 						var pulse_t := fmod(float(curr_snap.timestamp_sec) * 4.0 + float(uid) * 0.5, 1.0)
@@ -1618,6 +1684,48 @@ func sync_visuals() -> void:
 
 			drew_any_line = true
 
+	# Draw Sprint 7 Underwater Acoustic Sonar Waves
+	if not is_globe_mode and sim_server != null:
+		for ping in sim_server.world_state.active_sonar_pings:
+			var p_loc: Vector3 = war_table.theater_km_to_table_local(ping.get("pos_km", Vector3.ZERO))
+			if absf(p_loc.x) > 0.95 or absf(p_loc.z) > 0.95:
+				continue
+			var cur_r: float = float(ping.get("current_radius_km", 10.0))
+			var ttl: float = float(ping.get("ttl_sec", 1.0))
+			var dur: float = maxf(0.01, float(ping.get("duration_sec", 3.0)))
+			var alpha_ping: float = clampf(ttl / dur, 0.05, 0.9)
+			var r_table: float = clampf((cur_r / 60.0) * 0.16, 0.015, 0.38)
+			var ping_col := Color(0.08, 0.82, 1.0, alpha_ping * 0.75) if int(ping.get("faction", 1)) == WorldState.FACTION_BLUE else Color(1.0, 0.30, 0.15, alpha_ping * 0.75)
+			beams_immediate.surface_set_color(ping_col)
+			for ring in range(2):
+				var r_sub := r_table * (1.0 - float(ring) * 0.25)
+				if r_sub <= 0.005:
+					continue
+				for seg in range(16):
+					var a0 := float(seg) * TAU / 16.0
+					var a1 := float(seg + 1) * TAU / 16.0
+					beams_immediate.surface_add_vertex(p_loc + Vector3(cos(a0) * r_sub, -0.001, sin(a0) * r_sub))
+					beams_immediate.surface_add_vertex(p_loc + Vector3(cos(a1) * r_sub, -0.001, sin(a1) * r_sub))
+			drew_any_line = true
+
+		# Draw Sprint 7 Tank Cannon APFSDS Kinetic Tracers & Muzzle Flashes
+		for evt in sim_server.world_state.sim_events_queue:
+			if evt.get("type", "") == "tank_muzzle_flash":
+				var m_from: Vector3 = war_table.theater_km_to_table_local(evt.get("pos_km", Vector3.ZERO)) + Vector3(0.0, 0.004, 0.0)
+				var m_to: Vector3 = war_table.theater_km_to_table_local(evt.get("target_pos_km", Vector3.ZERO)) + Vector3(0.0, 0.004, 0.0)
+				if absf(m_from.x) <= 0.92 and absf(m_from.z) <= 0.92:
+					beams_immediate.surface_set_color(Color(1.0, 0.95, 0.40, 0.95))
+					beams_immediate.surface_add_vertex(m_from)
+					beams_immediate.surface_add_vertex(m_to)
+					var mf_r := 0.008
+					beams_immediate.surface_set_color(Color(1.0, 0.65, 0.15, 0.98))
+					for mfs in range(8):
+						var mfa0 := float(mfs) * TAU / 8.0
+						var mfa1 := float(mfs + 1) * TAU / 8.0
+						beams_immediate.surface_add_vertex(m_from + Vector3(cos(mfa0) * mf_r, 0.002, sin(mfa0) * mf_r))
+						beams_immediate.surface_add_vertex(m_from + Vector3(cos(mfa1) * mf_r, 0.002, sin(mfa1) * mf_r))
+					drew_any_line = true
+
 	if not active_nuke_found and _nuke_mesh_root != null:
 		_nuke_mesh_root.visible = false
 
@@ -1626,6 +1734,43 @@ func sync_visuals() -> void:
 	# ====================================================================
 	if not is_globe_mode and sim_server != null:
 		var ws_sel: WorldState = sim_server.world_state
+
+		# Sprint 7: Position and update Diegetic 3D Command Radial Menu
+		var radial_active := false
+		if selected_unit_id >= 0 and selected_unit_id < ws_sel.unit_count and ws_sel.unit_active[selected_unit_id] == 1:
+			var sel_loc: Vector3 = war_table.theater_km_to_table_local(ws_sel.unit_pos[selected_unit_id]) + Vector3(0.0, 0.024, 0.0)
+			if absf(sel_loc.x) <= 0.92 and absf(sel_loc.z) <= 0.92:
+				radial_active = true
+				if _command_radial_root != null:
+					_command_radial_root.visible = true
+					_command_radial_root.position = sel_loc
+					var active_posture: int = ws_sel.unit_posture[selected_unit_id] if selected_unit_id < ws_sel.unit_posture.size() else 0
+					var p_names := ["MOVE", "ATTACK", "PATROL", "RECON", "HOLD / AMBUSH", "RETREAT"]
+					for pi in range(_radial_posture_labels.size()):
+						var plbl := _radial_posture_labels[pi]
+						if pi == active_posture:
+							plbl.modulate = Color(1.0, 0.92, 0.22, 1.0)
+							plbl.text = "> " + p_names[pi] + " <"
+						else:
+							plbl.modulate = Color(0.20, 0.85, 1.0, 0.70)
+							plbl.text = "[ " + p_names[pi] + " ]"
+				var rad_r := 0.052
+				beams_immediate.surface_set_color(Color(0.20, 0.88, 1.0, 0.82))
+				for seg in range(24):
+					var sa0 := float(seg) * TAU / 24.0
+					var sa1 := float(seg + 1) * TAU / 24.0
+					beams_immediate.surface_add_vertex(sel_loc + Vector3(cos(sa0) * rad_r, 0.002, sin(sa0) * rad_r))
+					beams_immediate.surface_add_vertex(sel_loc + Vector3(cos(sa1) * rad_r, 0.002, sin(sa1) * rad_r))
+				var sp_angles_deg := [90.0, 30.0, 330.0, 270.0, 210.0, 150.0]
+				for sp_deg in sp_angles_deg:
+					var sp_rad := deg_to_rad(sp_deg)
+					beams_immediate.surface_add_vertex(sel_loc + Vector3(0.0, 0.002, 0.0))
+					beams_immediate.surface_add_vertex(sel_loc + Vector3(cos(sp_rad) * rad_r, 0.002, -sin(sp_rad) * rad_r))
+				drew_any_line = true
+
+		if not radial_active and _command_radial_root != null:
+			_command_radial_root.visible = false
+
 		var draw_uids: Array[int] = selected_unit_ids.duplicate()
 		if draw_uids.is_empty() and selected_unit_id >= 0:
 			draw_uids.append(selected_unit_id)
@@ -1683,9 +1828,19 @@ func sync_visuals() -> void:
 						drew_any_line = true
 
 		# Draw Hostile Designated Target Reticle
+		var reticle_active := false
 		if designated_target_uid >= 0 and designated_target_uid < ws_sel.unit_count and ws_sel.unit_active[designated_target_uid] == 1:
 			var t_loc: Vector3 = war_table.theater_km_to_table_local(ws_sel.unit_pos[designated_target_uid]) + Vector3(0.0, 0.008, 0.0)
 			if absf(t_loc.x) <= 0.92 and absf(t_loc.z) <= 0.92:
+				reticle_active = true
+				if _target_reticle_root != null:
+					_target_reticle_root.visible = true
+					_target_reticle_root.position = t_loc
+					if _target_reticle_label != null:
+						var t_pid: int = ws_sel.unit_platform_id[designated_target_uid]
+						var t_hp: int = int(ws_sel.unit_hp[designated_target_uid])
+						var p_name: String = String(platforms[t_pid].get("name", "TARGET")) if t_pid < platforms.size() else "TARGET"
+						_target_reticle_label.text = "LOCK: " + p_name + "\nHP: " + str(t_hp)
 				var ret_r := 0.022
 				beams_immediate.surface_set_color(Color(1.0, 0.15, 0.20, 0.95))
 				for rs in range(8):
@@ -1698,6 +1853,9 @@ func sync_visuals() -> void:
 				beams_immediate.surface_add_vertex(t_loc + Vector3(0.0, 0.0, -ret_r * 1.4))
 				beams_immediate.surface_add_vertex(t_loc + Vector3(0.0, 0.0, ret_r * 1.4))
 				drew_any_line = true
+
+		if not reticle_active and _target_reticle_root != null:
+			_target_reticle_root.visible = false
 
 		# Render 3D HQ Command Bunker Citadel Pyramid & Perimeter Security Ring at `ws_sel.bunker_pos_km`
 		var b_loc_hq: Vector3 = war_table.theater_km_to_table_local(ws_sel.bunker_pos_km)

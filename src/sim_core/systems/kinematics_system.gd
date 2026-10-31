@@ -71,6 +71,19 @@ static func step(state: WorldState, sim_db: Node, dt: float) -> void:
 		if dom_id == 2 and (flg & int(sim_db.FLAG_UUV_SUB)) == 0 and (flg & int(sim_db.FLAG_SWARM)) != 0:
 			speed_km_s *= state.weather_usv_speed_mult
 
+		# Sprint 7: Tactical Posture Overrides (HOLD/AMBUSH & RETREAT)
+		var post_val: int = state.unit_tactical_posture[uid] if uid < state.unit_tactical_posture.size() else 0
+		if post_val == WorldState.TACTICAL_POSTURE_HOLD_AMBUSH:
+			u_vel[uid] = Vector3.ZERO
+			u_pitch[uid] = 0.0
+			u_roll[uid] = 0.0
+			continue
+		elif post_val == WorldState.TACTICAL_POSTURE_RETREAT:
+			var home_dir := -1.0 if u_fac_k == WorldState.FACTION_BLUE else 1.0
+			var ret_x := clampf(pos.x + home_dir * 35.0, -235.0, 235.0)
+			u_tpos[uid] = Vector3(ret_x, pos.y, pos.z)
+			u_has_wp[uid] = 1
+
 		if u_has_wp[uid] == 0:
 			if dom_id == 1:
 				if lod_tier == WorldState.LOD_TIER_2_MACRO and ((state.tick_id + uid) & 1) == 1:
@@ -158,6 +171,11 @@ static func step(state: WorldState, sim_db: Node, dt: float) -> void:
 				if civ_rho > 0.004:
 					speed_km_s *= clampf(1.0 - (civ_rho / 0.045) * 0.35, 0.65, 1.0)
 
+			# Sprint 7: Pinned infantry & mechanized units slow down under suppressive fire
+			if uid < state.unit_suppression_level.size() and state.unit_suppression_level[uid] > 0.05:
+				speed_km_s *= clampf(1.0 - state.unit_suppression_level[uid] * 0.60, 0.25, 1.0)
+				state.unit_suppression_level[uid] = maxf(0.0, state.unit_suppression_level[uid] - dt * 0.12)
+
 		var desired_hdg := atan2(to_target_xz.y, to_target_xz.x)
 		var hdg_diff := wrapf(desired_hdg - u_hdg[uid], -PI, PI)
 
@@ -173,6 +191,9 @@ static func step(state: WorldState, sim_db: Node, dt: float) -> void:
 		else:
 			u_hdg[uid] = desired_hdg
 			u_roll[uid] = 0.0
+			# Sprint 7: Tank Turret Azimuth Tracking
+			if (flg & int(sim_db.FLAG_ARMOR)) != 0 and uid < state.unit_turret_hdg_rad.size():
+				state.unit_turret_hdg_rad[uid] = lerp_angle(state.unit_turret_hdg_rad[uid], desired_hdg, clampf(dt * 4.0, 0.0, 1.0))
 
 		var step_km := minf(dist_km, speed_km_s * dt)
 		var dir_xz := to_target_xz / maxf(dist_km, 0.0001)
