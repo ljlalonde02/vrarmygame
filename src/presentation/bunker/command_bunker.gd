@@ -259,9 +259,9 @@ func initialize_bunker(p_sim_db: Node = null, p_cmd_bus: Node = null, p_sig_bus:
 	sim_server.load_scenario("op_pacific_shield_2028")
 	war_table.bind_sim_server(sim_server)
 
-	# Commencer dans le poste de commandement Sous-Marin SSBN (User requirement: "Sous-Marin SSBN")
+	# Default to Deep Granite Bunker Command Room with holographic War Table in full view
 	if submarine_conn != null:
-		submarine_conn.set_sub_sim_active(true)
+		submarine_conn.set_sub_sim_active(false)
 
 	# Select a friendly F-35A or Bradley unit by default so the Wikipedia Recon Dossier is live immediately
 	for uid in range(sim_server.world_state.unit_count):
