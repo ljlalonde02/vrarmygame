@@ -359,6 +359,33 @@ static func _generate_procedural_3d_buildings(state: WorldState, g: int) -> void
 				var hz := sz - 3.5 + float(h_i) * 1.4
 				_add_bldg(state, Vector3(sx + 2.6, elev, hz), Vector3(0.0038, 0.0036, 0.0048), 0.35, WorldState.BLDG_AIRPORT_HANGAR, c_idx)
 
+	# 1b. Generate Recognizable Real-World Metropolitan Landmarks & Container Port Quays
+	var real_cities: Array[Dictionary] = CivilianDensitySystemScript.get_theater_real_cities(state.active_theater_slug)
+	for rc in real_cities:
+		var rcx := float(rc.get("x_km", 0.0))
+		var rcz := float(rc.get("z_km", 0.0))
+		var r_name := String(rc.get("name", ""))
+		var r_elev := maxf(2.0, state.get_terrain_elevation_m(rcx, rcz))
+		var rc_idx := state.get_infra_cell_index(rcx, rcz)
+
+		# Distinct Landmark Skyscraper for major capitals/metropolises
+		if r_name.find("TAIPEI") != -1:
+			_add_bldg(state, Vector3(rcx, r_elev, rcz), Vector3(0.0035, 0.0360, 0.0035), 0.0, WorldState.BLDG_LANDMARK_SKYSCRAPER, rc_idx)
+		elif r_name.find("KAOHSIUNG") != -1:
+			_add_bldg(state, Vector3(rcx, r_elev, rcz), Vector3(0.0032, 0.0260, 0.0032), 0.0, WorldState.BLDG_LANDMARK_SKYSCRAPER, rc_idx)
+		elif r_name.find("XIAMEN") != -1 or r_name.find("SEOUL") != -1 or r_name.find("DUBAI") != -1:
+			_add_bldg(state, Vector3(rcx, r_elev, rcz), Vector3(0.0030, 0.0280, 0.0030), 0.0, WorldState.BLDG_LANDMARK_SKYSCRAPER, rc_idx)
+		else:
+			_add_bldg(state, Vector3(rcx, r_elev, rcz), Vector3(0.0028, 0.0210, 0.0028), 0.0, WorldState.BLDG_URBAN_TOWER, rc_idx)
+
+		# Container Port Cranes & Harbor Pier Quays for coastal port cities
+		if r_name.find("PORT") != -1 or r_name.find("KAOHSIUNG") != -1 or r_name.find("XIAMEN") != -1 or r_name.find("INCHEON") != -1 or r_name.find("FUZHOU") != -1:
+			for crane_i in range(3):
+				var c_off_x := rcx + (float(crane_i) - 1.0) * 1.8
+				var c_off_z := rcz - 2.2
+				var c_elev := maxf(1.0, state.get_terrain_elevation_m(c_off_x, c_off_z))
+				_add_bldg(state, Vector3(c_off_x, c_elev, c_off_z), Vector3(0.0018, 0.0085, 0.0024), 0.78, WorldState.BLDG_PORT_CONTAINER_CRANE, rc_idx)
+
 	# 2. Generate 3D Bridge Spans wherever a Highway/Rail Bridge crosses a River
 	for y in range(2, g - 2):
 		for x in range(2, g - 2):

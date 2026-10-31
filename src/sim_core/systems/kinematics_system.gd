@@ -213,9 +213,34 @@ static func step(state: WorldState, sim_db: Node, dt: float) -> void:
 			var dest_water_depth: float = state.get_water_depth_m(new_x, new_z)
 
 			# Ships cannot enter dry land or water shallower than their required draft
+			# If shallow water is encountered, steer along deep-water bathymetric contour:
 			if dest_water_depth < req_draft:
-				new_x = pos.x
-				new_z = pos.z
+				var probe_dist := 1.5
+				var d_east := state.get_water_depth_m(pos.x + probe_dist, pos.z)
+				var d_west := state.get_water_depth_m(pos.x - probe_dist, pos.z)
+				var d_north := state.get_water_depth_m(pos.x, pos.z + probe_dist)
+				var d_south := state.get_water_depth_m(pos.x, pos.z - probe_dist)
+				var grad_x := (d_east - d_west) / (probe_dist * 2.0)
+				var grad_z := (d_north - d_south) / (probe_dist * 2.0)
+				var deep_dir := Vector2(grad_x, grad_z).normalized()
+				if deep_dir.length_squared() > 0.01:
+					var move_vec := Vector2(dir_xz.x, dir_xz.y)
+					var tangent := Vector2(-deep_dir.y, deep_dir.x)
+					if tangent.dot(move_vec) < 0.0:
+						tangent = -tangent
+					var deflect_dir := (tangent * 0.75 + deep_dir * 0.45).normalized()
+					var alt_x := clampf(pos.x + deflect_dir.x * step_km, -248.0, 248.0)
+					var alt_z := clampf(pos.z + deflect_dir.y * step_km, -248.0, 248.0)
+					if state.get_water_depth_m(alt_x, alt_z) >= req_draft:
+						new_x = alt_x
+						new_z = alt_z
+						u_hdg[uid] = atan2(deflect_dir.x, deflect_dir.y)
+					else:
+						new_x = pos.x
+						new_z = pos.z
+				else:
+					new_x = pos.x
+					new_z = pos.z
 				dest_water_depth = state.get_water_depth_m(new_x, new_z)
 
 			if (flg & int(sim_db.FLAG_UUV_SUB)) != 0:

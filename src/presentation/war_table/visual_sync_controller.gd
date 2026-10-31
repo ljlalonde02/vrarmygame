@@ -1636,7 +1636,11 @@ func sync_visuals() -> void:
 				var pitch_tilt := 0.0
 				var b_col := Color(0.12, 0.68, 0.72, 1.0)
 
-				if b_type == WorldState.BLDG_URBAN_TOWER:
+				if b_type == WorldState.BLDG_LANDMARK_SKYSCRAPER:
+					b_col = Color(0.25, 1.0, 0.65, 1.0) # Radiant Emerald / Iconic City Spire
+				elif b_type == WorldState.BLDG_PORT_CONTAINER_CRANE:
+					b_col = Color(1.0, 0.58, 0.18, 1.0) # High-visibility Industrial Maritime Crane
+				elif b_type == WorldState.BLDG_URBAN_TOWER:
 					b_col = Color(0.18, 0.82, 0.95, 1.0)
 				elif b_type == WorldState.BLDG_VILLAGE_HOUSE:
 					b_col = Color(0.85, 0.68, 0.28, 1.0)
