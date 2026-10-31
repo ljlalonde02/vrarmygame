@@ -79,6 +79,8 @@ static func launch_strike_salvo(
 			"weapon_id": wid,
 			"pos_km": start_pos,
 		})
+		if target_uid >= 0 and target_uid < state.unit_count and state.unit_active[target_uid] == 1:
+			UnitTacticalAISystem.trigger_rwr_warning(state, sim_db, target_uid, attacker_uid)
 	return launched
 
 

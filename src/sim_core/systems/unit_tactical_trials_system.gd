@@ -855,6 +855,54 @@ const TRIALS_DATA: Dictionary = {
 		"defend": "Radar 4D AESA MF-STAR, bouclier CIWS AK-630 et systèmes de leurres torpilles Kavach.",
 		"special_trick": "Tremplin STOBAR Ski-Jump : Décollage sur pont incliné à 14° permettant la projection rapide de patrouilles aériennes.",
 		"friendly_integration": "Centre de commandement C4ISR flottant coordonnant la bulle aéro-maritime de l'océan Indien."
+	},
+	"ah_64e_apache_guardian": {
+		"title": "AH-64E Apache Guardian : Vol NOE & Embuscade Antichar Hellfire",
+		"domain": "AIR",
+		"enemy_category": "Blindés Lourds & T-90M / Tor-M2",
+		"opposing_threat": "t_90m_platoon",
+		"friendly_partner": "vision_60_q_ugv",
+		"move_act": "Vol NOE (Nap-of-the-Earth) à 120m sol à 140 kts, masquage derrière les crêtes et les lisières de forêt.",
+		"fight": "Acquisition optique IRST/Longbow, tir plongeant de missiles AGM-114 Hellfire guidés laser à 8 km puis strafe canon 30mm M230.",
+		"defend": "Alerte départ missile optique, largage de leurres thermiques et rupture évasive sous le couvert des arbres.",
+		"special_trick": "Embuscade Défilée de Crête : Surgit brièvement au-dessus de la ligne de crête, tire une salve Hellfire, et replonge instantanément à l'abri.",
+		"friendly_integration": "Datalink Manned-Unmanned Teaming (MUM-T) avec les chiens robots Vision 60 pour la désignation laser déportée d'objectifs."
+	},
+	"ka_52_alligator": {
+		"title": "Ka-52 Alligator : Tir Antichar Vikhr Stand-Off & Rotor Coaxial",
+		"domain": "AIR",
+		"enemy_category": "Colonnes Blindées M1A2 SEPv3 Abrams & Blindés Bradley",
+		"opposing_threat": "m1a2_sepv3_platoon",
+		"friendly_partner": "su_57_felon",
+		"move_act": "Vol tactique TBA à 145 kts grâce à la portance des doubles rotors coaxiaux à haute agilité en vent de travers.",
+		"fight": "Tir guidé faisceau laser de missiles antichars 9K121 Vikhr jusqu'à 10 km et tirs de saturation canon 30mm 2A42.",
+		"defend": "Suite de contre-mesures intégrée Vitebsk DIRCM avec brouillage laser des autodirecteurs infrarouges.",
+		"special_trick": "Vol Stationnaire Décalé Coaxial : Effectue des pivotements à 360° sur place pour engager des cibles sous n'importe quel angle sans dérive.",
+		"friendly_integration": "Partage de données tactiques avec les patrouilles de Su-57 pour l'interdiction de couloirs de progression ennemis."
+	},
+	"columbia_class_ssbn": {
+		"title": "Columbia-Class SSBN : Dissuasion Nucléaire Sous-Marine Indétectable",
+		"domain": "SEA",
+		"enemy_category": "Sous-Marins Nucléaires d'Attaque Chasseurs (Type 093B / Yasen-M)",
+		"opposing_threat": "type_093b_shang_ssn",
+		"friendly_partner": "ssn_688i_los_angeles",
+		"move_act": "Patrouille silencieuse à 20-22 kts à -180m sous la thermocline, propulsion turbo-électrique sans boîte de vitesse (signature quasi-nulle).",
+		"fight": "VLS pour 16 missiles balistiques stratégiques Trident II D5 LE et 4 tubes lance-torpilles Mk 48 ADCAP d'auto-défense.",
+		"defend": "Revêtement anéchoïque absorbant le sonar actif, manœuvres sous la couche thermique et largage de leurres acoustiques MOSS.",
+		"special_trick": "Silence Acoustique Absolu : Réduit le bruit de coque en dessous du bruit de fond de l'océan, rendant la détection passive impossible.",
+		"friendly_integration": "Liaison satellite ELF/VLF sécurisée avec le bunker de commandement pour transmission des codes PAL de tir DEFCON 1."
+	},
+	"type_094_jin_ssbn": {
+		"title": "Type 094 Jin-Class SSBN : Bastion Sous-Marin de Seconde Frappe",
+		"domain": "SEA",
+		"enemy_category": "Sous-marins d'attaque occidentaux (SSN-688I / Virginia / Astute)",
+		"opposing_threat": "ssn_688i_los_angeles",
+		"friendly_partner": "type_093b_shang_ssn",
+		"move_act": "Immersion opérationnelle à -150m dans les fosses océaniques protégées de la mer de Chine méridionale à 18-20 kts.",
+		"fight": "12 tubes verticaux pour missiles balistiques intercontinentaux JL-3 et torpilles lourdes filoguidées Yu-6.",
+		"defend": "Emménagement dans le sanctuaire anti-sous-marin bastionné sous protection des destroyers Type 055.",
+		"special_trick": "Frappe Balistique en Plongée : Capacité de tir de missiles balistiques en séquence rapide depuis l'immersion sans faire surface.",
+		"friendly_integration": "Datalink acoustique et bouées relais avec les sous-marins d'escorte Type 093B formant écran de protection."
 	}
 }
 

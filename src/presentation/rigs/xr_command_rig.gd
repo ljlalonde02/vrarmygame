@@ -66,6 +66,7 @@ var _r_trig_press_world: Vector3 = Vector3.ZERO
 var _r_trig_dragging_sphere: bool = false
 var _echelon_cycle_stage: int = 0
 var haptic_pulses_triggered: int = 0
+var designated_target_uid: int = -1
 var _wrist_update_accum: float = 99.0
 var _laser_hover_frame: int = 0
 
@@ -526,6 +527,19 @@ func vr_laser_select_or_actuate(hand: String = "right", additive: bool = false) 
 			picked_uid = war_table.pick_unit_at_theater_km(hit_km.x, hit_km.z, 25.0)
 
 	if picked_uid >= 0:
+		var st: WorldState = sim_server.world_state
+		if st.unit_faction[picked_uid] != WorldState.FACTION_BLUE:
+			designated_target_uid = picked_uid
+			if desktop_rig != null:
+				desktop_rig.designated_target_uid = picked_uid
+				if desktop_rig.has_signal("designated_target_changed"):
+					desktop_rig.designated_target_changed.emit(picked_uid)
+			if war_table != null and war_table.visual_sync != null and "designated_target_uid" in war_table.visual_sync:
+				war_table.visual_sync.designated_target_uid = picked_uid
+			if signal_bus != null and signal_bus.has_signal("target_designated"):
+				signal_bus.emit_signal("target_designated", picked_uid)
+			trigger_haptic_click(hand, 0.75, 0.05)
+			return {"type": "ENEMY_TARGET", "unit_id": picked_uid}
 		if desktop_rig != null:
 			if additive and not desktop_rig.selected_unit_ids.is_empty():
 				var list: Array[int] = desktop_rig.selected_unit_ids.duplicate()
@@ -542,19 +556,31 @@ func vr_laser_select_or_actuate(hand: String = "right", additive: bool = false) 
 
 ## VR 3D Sphere Volume Group Selection: selects all friendly leaf units inside a 3D sphere on the War Table.
 func vr_sphere_volume_select(center_world: Vector3, radius_m: float, additive: bool = false) -> int:
-	if war_table == null or desktop_rig == null:
+	if war_table == null or desktop_rig == null or sim_server == null:
 		return 0
 	var inside: Array[int] = war_table.pick_units_in_sphere_world(center_world, maxf(0.06, radius_m))
 	if inside.is_empty():
 		return 0
+	var st: WorldState = sim_server.world_state
+	var friendly_inside: Array[int] = []
+	for u in inside:
+		if u >= 0 and u < st.unit_count and st.unit_active[u] == 1:
+			if st.unit_faction[u] == WorldState.FACTION_BLUE:
+				friendly_inside.append(u)
+			else:
+				designated_target_uid = u
+				if desktop_rig != null:
+					desktop_rig.designated_target_uid = u
+	if friendly_inside.is_empty():
+		return 0
 	if additive and not desktop_rig.selected_unit_ids.is_empty():
 		var combined: Array[int] = desktop_rig.selected_unit_ids.duplicate()
-		for uid in inside:
+		for uid in friendly_inside:
 			if not combined.has(uid):
 				combined.append(uid)
-		desktop_rig.select_unit_group(combined, inside[0])
+		desktop_rig.select_unit_group(combined, friendly_inside[0])
 	else:
-		desktop_rig.select_unit_group(inside, inside[0])
+		desktop_rig.select_unit_group(friendly_inside, friendly_inside[0])
 	trigger_haptic_click("right", 0.70, 0.06)
 	return desktop_rig.selected_unit_ids.size()
 
@@ -586,6 +612,15 @@ func vr_laser_issue_order(hand: String = "right", append_waypoint: bool = false)
 
 	var st: WorldState = sim_server.world_state
 	if target_uid >= 0 and st.unit_faction[target_uid] != st.unit_faction[lead_uid]:
+		designated_target_uid = target_uid
+		if desktop_rig != null:
+			desktop_rig.designated_target_uid = target_uid
+			if desktop_rig.has_signal("designated_target_changed"):
+				desktop_rig.designated_target_changed.emit(target_uid)
+		if war_table != null and war_table.visual_sync != null and "designated_target_uid" in war_table.visual_sync:
+			war_table.visual_sync.designated_target_uid = target_uid
+		if signal_bus != null and signal_bus.has_signal("target_designated"):
+			signal_bus.emit_signal("target_designated", target_uid)
 		command_bus.enqueue_strike(sel_list, target_uid, st.unit_pos[target_uid], 1, 2)
 		war_table.strike_preview.show_strike_preview(st.unit_pos[lead_uid], st.unit_pos[target_uid], 3.8, "VR STRIKE ORDER (%d UNITS)" % sel_list.size())
 		trigger_haptic_click(hand, 0.90, 0.08)

@@ -65,6 +65,8 @@ const HUD_LAYOUT_NAMES: Array[String] = [
 
 var selected_unit_id: int = -1
 var selected_unit_ids: Array[int] = []
+var designated_target_uid: int = -1
+signal designated_target_changed(target_uid: int)
 var control_groups: Dictionary = {1: [], 2: [], 3: []}
 var follow_selected_unit_cam: bool = false
 var _orbit_yaw_deg: float = 0.0
@@ -1431,14 +1433,29 @@ func select_and_focus_snipers_and_commandos() -> int:
 func select_unit_group(uids: Array[int], primary_uid: int = -1) -> void:
 	if sim_server == null or uids.is_empty():
 		return
-	selected_unit_ids = uids.duplicate()
-	var lead := primary_uid if primary_uid >= 0 else uids[0]
+	var st: WorldState = sim_server.world_state
+	var friendly_uids: Array[int] = []
+	for u in uids:
+		if u >= 0 and u < st.unit_count and st.unit_active[u] == 1:
+			if st.unit_faction[u] == WorldState.FACTION_BLUE:
+				friendly_uids.append(u)
+			else:
+				designated_target_uid = u
+				designated_target_changed.emit(u)
+				if war_table != null and war_table.visual_sync != null and "designated_target_uid" in war_table.visual_sync:
+					war_table.visual_sync.designated_target_uid = u
+				if signal_bus != null and signal_bus.has_signal("target_designated"):
+					signal_bus.emit_signal("target_designated", u)
+	if friendly_uids.is_empty():
+		return
+	selected_unit_ids = friendly_uids.duplicate()
+	var lead := primary_uid if (primary_uid >= 0 and friendly_uids.has(primary_uid)) else friendly_uids[0]
 	selected_unit_id = lead
 	if war_table != null and war_table.visual_sync != null:
 		war_table.visual_sync.selected_unit_ids = selected_unit_ids.duplicate()
 		war_table.visual_sync.selected_unit_id = lead
-	var pid: int = sim_server.world_state.unit_platform_id[lead]
-	var fac: int = sim_server.world_state.unit_faction[lead]
+	var pid: int = st.unit_platform_id[lead]
+	var fac: int = st.unit_faction[lead]
 	if fpv_pod_ref != null and fpv_pod_ref.has_method("attach_to_unit"):
 		fpv_pod_ref.call("attach_to_unit", lead)
 	if signal_bus != null:
@@ -1489,6 +1506,15 @@ func _handle_table_mouse_click(screen_pos: Vector2, is_right_click: bool, shift_
 		# 3. Try true 3D ray picking (hits 3D jets in the air & miniatures on mountains!)
 		var picked_3d: int = war_table.pick_unit_by_ray(ray_orig, ray_dir)
 		if picked_3d >= 0:
+			var st: WorldState = sim_server.world_state
+			if st.unit_faction[picked_3d] != WorldState.FACTION_BLUE:
+				designated_target_uid = picked_3d
+				designated_target_changed.emit(picked_3d)
+				if war_table != null and war_table.visual_sync != null and "designated_target_uid" in war_table.visual_sync:
+					war_table.visual_sync.designated_target_uid = picked_3d
+				if signal_bus != null and signal_bus.has_signal("target_designated"):
+					signal_bus.emit_signal("target_designated", picked_3d)
+				return
 			if shift_held and not selected_unit_ids.is_empty():
 				if not selected_unit_ids.has(picked_3d):
 					selected_unit_ids.append(picked_3d)
@@ -1512,6 +1538,15 @@ func _handle_table_mouse_click(screen_pos: Vector2, is_right_click: bool, shift_
 	if not is_right_click:
 		var picked_uid: int = war_table.pick_unit_at_theater_km(hit_km.x, hit_km.z, 25.0)
 		if picked_uid >= 0:
+			var st: WorldState = sim_server.world_state
+			if st.unit_faction[picked_uid] != WorldState.FACTION_BLUE:
+				designated_target_uid = picked_uid
+				designated_target_changed.emit(picked_uid)
+				if war_table != null and war_table.visual_sync != null and "designated_target_uid" in war_table.visual_sync:
+					war_table.visual_sync.designated_target_uid = picked_uid
+				if signal_bus != null and signal_bus.has_signal("target_designated"):
+					signal_bus.emit_signal("target_designated", picked_uid)
+				return
 			if shift_held and not selected_unit_ids.is_empty():
 				if not selected_unit_ids.has(picked_uid):
 					selected_unit_ids.append(picked_uid)
@@ -1525,6 +1560,12 @@ func _handle_table_mouse_click(screen_pos: Vector2, is_right_click: bool, shift_
 			if target_uid < 0:
 				target_uid = war_table.pick_unit_at_theater_km(hit_km.x, hit_km.z, 25.0)
 			if target_uid >= 0 and sim_server.world_state.unit_faction[target_uid] != sim_server.world_state.unit_faction[selected_unit_id]:
+				designated_target_uid = target_uid
+				designated_target_changed.emit(target_uid)
+				if war_table != null and war_table.visual_sync != null and "designated_target_uid" in war_table.visual_sync:
+					war_table.visual_sync.designated_target_uid = target_uid
+				if signal_bus != null and signal_bus.has_signal("target_designated"):
+					signal_bus.emit_signal("target_designated", target_uid)
 				command_bus.enqueue_strike(sel_list, target_uid, sim_server.world_state.unit_pos[target_uid], 1, 2)
 				war_table.strike_preview.show_strike_preview(sim_server.world_state.unit_pos[selected_unit_id], sim_server.world_state.unit_pos[target_uid], 3.8, "ENGAGING TARGET (%d UNITS)" % sel_list.size())
 			else:
@@ -1541,9 +1582,21 @@ func select_unit(uid: int) -> void:
 	if sim_server == null or uid < 0 or uid >= sim_server.world_state.unit_count:
 		return
 	var st: WorldState = sim_server.world_state
+	if st.unit_faction[uid] != WorldState.FACTION_BLUE:
+		designated_target_uid = uid
+		designated_target_changed.emit(uid)
+		if war_table != null and war_table.visual_sync != null and "designated_target_uid" in war_table.visual_sync:
+			war_table.visual_sync.designated_target_uid = uid
+		if signal_bus != null and signal_bus.has_signal("target_designated"):
+			signal_bus.emit_signal("target_designated", uid)
+		return
 	if st.unit_echelon[uid] > WorldState.ECHELON_COMPANY:
 		var leaves := EchelonClusterSystem.get_subordinate_leaf_units(st, uid)
-		selected_unit_ids = leaves if not leaves.is_empty() else [uid]
+		var friendly_leaves: Array[int] = []
+		for l in leaves:
+			if st.unit_faction[l] == WorldState.FACTION_BLUE:
+				friendly_leaves.append(l)
+		selected_unit_ids = friendly_leaves if not friendly_leaves.is_empty() else [uid]
 	else:
 		selected_unit_ids = [uid]
 	selected_unit_id = uid

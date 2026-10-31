@@ -40,6 +40,7 @@ var ribbons_immediate: ImmediateMesh = null
 
 var selected_unit_id: int = -1
 var selected_unit_ids: Array[int] = []
+var designated_target_uid: int = -1
 var force_all_tokens: bool = false
 var true_sight_enabled: bool = false
 var recon_photo_mode: bool = false
@@ -1468,6 +1469,23 @@ func sync_visuals() -> void:
 						beams_immediate.surface_add_vertex(to_loc + Vector3(0.0, 0.0, -d_sz))
 						beams_immediate.surface_add_vertex(to_loc + Vector3(0.0, 0.0, d_sz))
 						drew_any_line = true
+
+		# Draw Hostile Designated Target Reticle
+		if designated_target_uid >= 0 and designated_target_uid < ws_sel.unit_count and ws_sel.unit_active[designated_target_uid] == 1:
+			var t_loc: Vector3 = war_table.theater_km_to_table_local(ws_sel.unit_pos[designated_target_uid]) + Vector3(0.0, 0.008, 0.0)
+			if absf(t_loc.x) <= 0.92 and absf(t_loc.z) <= 0.92:
+				var ret_r := 0.022
+				beams_immediate.surface_set_color(Color(1.0, 0.15, 0.20, 0.95))
+				for rs in range(8):
+					var ra0 := float(rs) * TAU / 8.0
+					var ra1 := float(rs + 1) * TAU / 8.0
+					beams_immediate.surface_add_vertex(t_loc + Vector3(cos(ra0) * ret_r, 0.0, sin(ra0) * ret_r))
+					beams_immediate.surface_add_vertex(t_loc + Vector3(cos(ra1) * ret_r, 0.0, sin(ra1) * ret_r))
+				beams_immediate.surface_add_vertex(t_loc + Vector3(-ret_r * 1.4, 0.0, 0.0))
+				beams_immediate.surface_add_vertex(t_loc + Vector3(ret_r * 1.4, 0.0, 0.0))
+				beams_immediate.surface_add_vertex(t_loc + Vector3(0.0, 0.0, -ret_r * 1.4))
+				beams_immediate.surface_add_vertex(t_loc + Vector3(0.0, 0.0, ret_r * 1.4))
+				drew_any_line = true
 
 		# Render 3D HQ Command Bunker Citadel Pyramid & Perimeter Security Ring at `ws_sel.bunker_pos_km`
 		var b_loc_hq: Vector3 = war_table.theater_km_to_table_local(ws_sel.bunker_pos_km)

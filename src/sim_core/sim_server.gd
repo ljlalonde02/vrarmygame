@@ -583,13 +583,14 @@ func _apply_command(cmd: Dictionary) -> void:
 		"CMD_MOVE_WAYPOINTS":
 			var uids: Array = cmd.get("unit_ids", [])
 			var wps: Array = cmd.get("waypoints_km", [])
+			var cmd_fac: int = int(cmd.get("faction", WorldState.FACTION_BLUE))
 			if wps.size() > 0 and uids.size() > 0:
 				var first_wp: Vector3 = wps[0]
 				var centroid := Vector3.ZERO
 				var valid_cnt := 0
 				for u in uids:
 					var uid := int(u)
-					if uid >= 0 and uid < world_state.unit_count and world_state.unit_active[uid] == 1:
+					if uid >= 0 and uid < world_state.unit_count and world_state.unit_active[uid] == 1 and world_state.unit_faction[uid] == cmd_fac:
 						centroid += world_state.unit_pos[uid]
 						valid_cnt += 1
 				if valid_cnt > 0:
@@ -597,6 +598,9 @@ func _apply_command(cmd: Dictionary) -> void:
 				for u in uids:
 					var uid := int(u)
 					if uid < 0 or uid >= world_state.unit_count or world_state.unit_active[uid] == 0:
+						continue
+					# Faction filter: ONLY process movement orders for units matching the commanding faction!
+					if world_state.unit_faction[uid] != cmd_fac:
 						continue
 					var dest := first_wp
 					if valid_cnt > 1:

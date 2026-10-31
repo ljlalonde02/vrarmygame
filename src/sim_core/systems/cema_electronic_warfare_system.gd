@@ -165,3 +165,9 @@ static func execute_cema_operation(state: WorldState, sim_db: Node, op_code: Str
 		"blue_power_grid_pct": state.blue_power_grid_pct,
 		"blue_cyber_firewall_pct": state.blue_cyber_firewall_pct,
 	}
+
+
+## Lot 2: Sets an immediate RWR warning spike on target aircraft and forces immediate defensive break & countermeasures.
+static func trigger_rwr_warning(state: WorldState, sim_db: Node, target_uid: int, attacker_uid: int = -1) -> void:
+	UnitTacticalAISystem.trigger_rwr_warning(state, sim_db, target_uid, attacker_uid)
+

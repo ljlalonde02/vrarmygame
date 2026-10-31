@@ -2,6 +2,7 @@ extends Node
 ## SignalBus Autoload: Decoupled event hub for UI panels, Audio synthesizer, and Diegetic Bunker Hardware.
 
 signal unit_selected(unit_id: int, platform_id: int, faction: int)
+signal target_designated(target_unit_id: int)
 signal strike_queued(package_id: int, attacker_count: int, target_unit_id: int)
 signal alpha_strike_committed(faction: int, total_missiles_launched: int)
 signal salvo_launched(attacker_id: int, target_id: int, weapon_id: int, pos_km: Vector3)

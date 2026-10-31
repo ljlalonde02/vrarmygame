@@ -29,7 +29,7 @@ func _init() -> void:
 	var trials_data: Dictionary = UnitTacticalTrialsSystemScript.TRIALS_DATA
 	var plat_cnt: int = sim_db.platforms_by_id.size() - 1
 	print(" -> Platforms in DB: %d | Platforms in TRIALS_DATA: %d" % [plat_cnt, trials_data.size()])
-	assert(trials_data.size() == 67, "Expected exactly 67 platforms in TRIALS_DATA, got %d" % trials_data.size())
+	assert(trials_data.size() == plat_cnt, "Expected TRIALS_DATA size matching SimDB platforms, got %d vs %d" % [trials_data.size(), plat_cnt])
 	assert(plat_cnt >= 67, "Expected >= 67 platforms in SimDB")
 
 	var required_fields := [
@@ -140,7 +140,7 @@ func _init() -> void:
 	main_menu._set_trials_domain_filter("ALL")
 	var all_btn_cnt: int = main_menu._trials_list_vb.get_child_count()
 	print(" -> Filter ALL platforms visible: %d" % all_btn_cnt)
-	assert(all_btn_cnt == 67, "Expected exactly 67 platforms visible under ALL filter")
+	assert(all_btn_cnt == trials_data.size(), "Expected %d platforms visible under ALL filter, got %d" % [trials_data.size(), all_btn_cnt])
 
 	# Test selecting and inspecting a platform
 	main_menu._select_trial("su_57_felon")

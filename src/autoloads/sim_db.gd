@@ -282,7 +282,7 @@ func load_database() -> void:
 		var flags := 0
 		if u_class == "SAM":
 			flags |= FLAG_SAM
-		if u_class in ["FIGHTER", "STEALTH_FIGHTER", "CCA_DRONE", "UCAV"]:
+		if u_class in ["FIGHTER", "STEALTH_FIGHTER", "CCA_DRONE", "UCAV", "HELICOPTER"]:
 			flags |= FLAG_FIGHTER
 		if u_class == "SEAD":
 			flags |= FLAG_SEAD
@@ -306,7 +306,7 @@ func load_database() -> void:
 			flags |= FLAG_SWARM
 		if u_class == "SHIP":
 			flags |= FLAG_SHIP
-		if u_class == "UUV_DRONE":
+		if u_class in ["UUV_DRONE", "SSBN", "SSN"]:
 			flags |= FLAG_UUV_SUB
 		if u_class == "CUAS_GUN":
 			flags |= FLAG_CUAS_GUN
@@ -338,8 +338,12 @@ func load_database() -> void:
 				op_alt_m = 2400.0                                  # Low-altitude turbojet deep-strike OWA drone
 			elif p_slug == "bayraktar_akinci_ucav":
 				op_alt_m = 7200.0                                  # MALE turboprop strike UCAV (23,600 ft)
+			elif u_class == "HELICOPTER" or p_nato.begins_with("AIR_HELICOPTER") or p.has("operational_altitude_m"):
+				op_alt_m = float(p.get("operational_altitude_m", 120.0)) # NOE attack helicopter flight (120m)
 			else:
 				op_alt_m = clampf(ceil_m * 0.72, 8500.0, 10500.0)  # Stealth Loyal Wingman CCA (28,000-34,500 ft)
+		elif dom_str == "SEA" and (u_class in ["SSBN", "UUV_DRONE", "SSN"] or p_nato.begins_with("SEA_SUB")):
+			op_alt_m = float(p.get("operational_altitude_m", ceil_m if ceil_m < 0.0 else -180.0))
 		plat_cruise_alt_m[pid] = op_alt_m
 		p["operational_altitude_m"] = op_alt_m
 
@@ -350,8 +354,8 @@ func load_database() -> void:
 		var ac_factor := 0.85
 		if u_class in ["SWARM_TEAM", "CCA_DRONE", "USV_DRONE"]:
 			ac_factor = 1.25
-		elif u_class == "UUV_DRONE":
-			ac_factor = 0.70
+		elif u_class in ["UUV_DRONE", "SSBN", "SSN"]:
+			ac_factor = 0.25 if u_class == "SSBN" else 0.70
 		elif u_class == "ROBOT_DOG":
 			ac_factor = 0.35
 		plat_acoustic_factor[pid] = ac_factor

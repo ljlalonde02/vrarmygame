@@ -12,6 +12,7 @@ extends RefCounted
 ## - `AI_RTB_RESUPPLY (6)`: Bingo fuel / Winchester ammo return to Tanker, Convoy, or Airbase
 
 const EchelonClusterSystemScript := preload("res://src/sim_core/systems/echelon_cluster_system.gd")
+const SalvoCombatSystemScript := preload("res://src/sim_core/systems/salvo_combat_system.gd")
 
 
 static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: float) -> void:
@@ -120,7 +121,37 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 					nearest_air_d_sq = d_sq
 					nearest_air_uid = tid
 
-		state.unit_threat_level[uid] = threat
+		state.unit_threat_level[uid] = maxf(state.unit_threat_level[uid], threat)
+
+		# Lot 4: Infantry Suppression & Tactical Cover Fallback
+		if (flg & int(sim_db.FLAG_INFANTRY)) != 0 and dom_id == 0:
+			var hostile_armor_near := false
+			var nearest_armor_pos := Vector3.ZERO
+			for tid in range(n_units):
+				if u_active[tid] == 0 or u_fac[tid] == fac:
+					continue
+				var t_pid: int = u_pid[tid]
+				if t_pid > 0 and t_pid < max_pid and (p_flags[t_pid] & int(sim_db.FLAG_ARMOR)) != 0:
+					var a_dx := pos.x - u_pos[tid].x
+					var a_dz := pos.z - u_pos[tid].z
+					if (a_dx * a_dx + a_dz * a_dz) <= 6.25: # <= 2.5 km (2.5^2)
+						hostile_armor_near = true
+						nearest_armor_pos = u_pos[tid]
+						break
+			if hostile_armor_near:
+				state.unit_ai_state[uid] = WorldState.AI_EVASIVE_DEFENSIVE
+				state.unit_threat_level[uid] = maxf(state.unit_threat_level[uid], 0.90)
+				state.unit_afterburner[uid] = 1
+				var away_dir := Vector2(pos.x - nearest_armor_pos.x, pos.z - nearest_armor_pos.z).normalized()
+				if away_dir.length_squared() < 0.01:
+					away_dir = Vector2(-1.0, 0.0)
+				state.unit_target_pos[uid] = Vector3(
+					clampf(pos.x + away_dir.x * 2.5, -245.0, 245.0),
+					pos.y,
+					clampf(pos.z + away_dir.y * 2.5, -245.0, 245.0)
+				)
+				state.unit_has_waypoint[uid] = 1
+				continue
 
 		# 2. Priority 1 Decision: Bingo Fuel / Winchester Ammo -> RTB / Resupply
 		if (dom_id == 1 and state.unit_fuel_km[uid] < state.unit_max_fuel_km[uid] * 0.22) or (state.unit_ammo_1[uid] == 0 and state.unit_ammo_2[uid] == 0 and (flg & flag_awacs_tanker) == 0):
@@ -286,3 +317,35 @@ static func get_ai_state_description(ai_state: int, threat_level: float, afterbu
 	if domain == "AIR":
 		return "AI: %s%s | THREAT: %.0f%% | %s | ALT: %.0fm" % [state_str, post_str, threat_level * 100.0, spd_str, desired_alt_m]
 	return "AI: %s%s | THREAT: %.0f%% | MODE: %s" % [state_str, post_str, threat_level * 100.0, spd_str]
+
+
+## Lot 2: Sets an immediate RWR warning spike on target aircraft, breaks into defensive turn, dives towards terrain deck (350m NOE), engages afterburner and pops countermeasures.
+static func trigger_rwr_warning(state: WorldState, sim_db: Node, target_uid: int, attacker_uid: int = -1) -> void:
+	if state == null or target_uid < 0 or target_uid >= state.unit_count or state.unit_active[target_uid] == 0:
+		return
+	state.unit_threat_level[target_uid] = maxf(state.unit_threat_level[target_uid], 0.85)
+	state.unit_ai_state[target_uid] = WorldState.AI_EVASIVE_DEFENSIVE
+	state.unit_afterburner[target_uid] = 1
+	var t_pos: Vector3 = state.unit_pos[target_uid]
+	var att_pos: Vector3 = state.unit_pos[attacker_uid] if (attacker_uid >= 0 and attacker_uid < state.unit_count) else t_pos + Vector3(0.0, 0.0, 10.0)
+	var away_2d := Vector2(t_pos.x - att_pos.x, t_pos.z - att_pos.z)
+	if away_2d.length_squared() < 0.01:
+		away_2d = Vector2(1.0, 0.0)
+	var orth_2d := Vector2(-away_2d.y, away_2d.x).normalized()
+	var pid: int = state.unit_platform_id[target_uid]
+	var dom_id: int = sim_db.plat_domain_id[pid] if (sim_db != null and pid > 0 and pid < sim_db.plat_domain_id.size()) else 1
+	if dom_id == 1:
+		state.unit_desired_alt_m[target_uid] = 350.0
+		state.unit_target_pos[target_uid] = Vector3(
+			clampf(t_pos.x + orth_2d.x * 12.0, -245.0, 245.0),
+			350.0,
+			clampf(t_pos.z + orth_2d.y * 12.0, -245.0, 245.0)
+		)
+		state.unit_has_waypoint[target_uid] = 1
+		state.sim_events_queue.append({
+			"type": "COUNTERMEASURE_DEPLOYED",
+			"unit_id": target_uid,
+			"pos_km": t_pos,
+			"kind": "CHAFF_FLARES_DIRCM"
+		})
+
