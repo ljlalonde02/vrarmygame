@@ -1535,6 +1535,8 @@ func spawn_munition(faction: int, weapon_id: int, shooter_id: int, target_unit_i
 	var cls_id: int = 0
 	if flight_profile == "ORBITAL_KINETIC_ROD" or (dist_km > 120.0 and flight_profile == "LOFTED_BALLISTIC"):
 		cls_id = 3
+	elif flight_profile == "HYPERSONIC_GLIDE":
+		cls_id = 5
 	elif flight_profile == "SEA_SKIM_TERCOM":
 		cls_id = 2
 	elif flight_profile == "DIRECT":

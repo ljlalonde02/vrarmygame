@@ -1460,6 +1460,8 @@ func select_unit_group(uids: Array[int], primary_uid: int = -1) -> void:
 					war_table.visual_sync.designated_target_uid = u
 				if signal_bus != null and signal_bus.has_signal("target_designated"):
 					signal_bus.emit_signal("target_designated", u)
+				if radio_synth_ref != null and radio_synth_ref.has_method("play_rwr_threat_lock_tone"):
+					radio_synth_ref.call("play_rwr_threat_lock_tone")
 	if friendly_uids.is_empty():
 		return
 	selected_unit_ids = friendly_uids.duplicate()
@@ -1474,6 +1476,8 @@ func select_unit_group(uids: Array[int], primary_uid: int = -1) -> void:
 		fpv_pod_ref.call("attach_to_unit", lead)
 	if signal_bus != null:
 		signal_bus.unit_selected.emit(lead, pid, fac)
+	if radio_synth_ref != null and radio_synth_ref.has_method("play_tactical_posture_actuate"):
+		radio_synth_ref.call("play_tactical_posture_actuate")
 
 
 func save_control_group(group_idx: int) -> void:
@@ -1582,6 +1586,8 @@ func _handle_table_mouse_click(screen_pos: Vector2, is_right_click: bool, shift_
 					signal_bus.emit_signal("target_designated", target_uid)
 				command_bus.enqueue_strike(sel_list, target_uid, sim_server.world_state.unit_pos[target_uid], 1, 2)
 				war_table.strike_preview.show_strike_preview(sim_server.world_state.unit_pos[selected_unit_id], sim_server.world_state.unit_pos[target_uid], 3.8, "ENGAGING TARGET (%d UNITS)" % sel_list.size())
+				if radio_synth_ref != null and radio_synth_ref.has_method("play_tactical_posture_actuate"):
+					radio_synth_ref.call("play_tactical_posture_actuate")
 			else:
 				var sel_pos: Vector3 = sim_server.world_state.unit_pos[selected_unit_id]
 				var wp := Vector3(hit_km.x, sel_pos.y if sel_pos.y > 200.0 else hit_km.y, hit_km.z)
@@ -1590,6 +1596,8 @@ func _handle_table_mouse_click(screen_pos: Vector2, is_right_click: bool, shift_
 					wp_array = [sim_server.world_state.unit_target_pos[selected_unit_id], wp]
 				command_bus.enqueue_move_waypoints(sel_list, wp_array)
 				war_table.strike_preview.show_strike_preview(sel_pos, wp, 1.5, "WAYPOINT ORDER (%d UNITS)" % sel_list.size())
+				if radio_synth_ref != null and radio_synth_ref.has_method("play_tactical_posture_actuate"):
+					radio_synth_ref.call("play_tactical_posture_actuate")
 
 
 func select_unit(uid: int) -> void:
@@ -1603,6 +1611,8 @@ func select_unit(uid: int) -> void:
 			war_table.visual_sync.designated_target_uid = uid
 		if signal_bus != null and signal_bus.has_signal("target_designated"):
 			signal_bus.emit_signal("target_designated", uid)
+		if radio_synth_ref != null and radio_synth_ref.has_method("play_rwr_threat_lock_tone"):
+			radio_synth_ref.call("play_rwr_threat_lock_tone")
 		return
 	if st.unit_echelon[uid] > WorldState.ECHELON_COMPANY:
 		var leaves := EchelonClusterSystem.get_subordinate_leaf_units(st, uid)
@@ -1621,6 +1631,8 @@ func select_unit(uid: int) -> void:
 	var fac: int = st.unit_faction[uid]
 	if signal_bus != null:
 		signal_bus.unit_selected.emit(uid, pid, fac)
+	if radio_synth_ref != null and radio_synth_ref.has_method("play_tactical_posture_actuate"):
+		radio_synth_ref.call("play_tactical_posture_actuate")
 
 
 func _process(delta: float) -> void:

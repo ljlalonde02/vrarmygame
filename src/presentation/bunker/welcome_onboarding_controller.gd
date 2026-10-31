@@ -61,6 +61,29 @@ func is_briefing_open() -> bool:
 	return is_visible
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_visible:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		var vp := get_viewport()
+		match event.keycode:
+			KEY_ESCAPE, KEY_ENTER, KEY_SPACE:
+				set_visible_briefing(false)
+				welcome_dismissed.emit()
+				if vp != null:
+					vp.set_input_as_handled()
+			KEY_H:
+				set_visible_briefing(false)
+				start_tutorial_requested.emit()
+				if vp != null:
+					vp.set_input_as_handled()
+			KEY_P:
+				set_visible_briefing(false)
+				open_campaign_requested.emit()
+				if vp != null:
+					vp.set_input_as_handled()
+
+
 func _build_welcome_ui() -> void:
 	var theme := TacticalTheme.create_theme()
 

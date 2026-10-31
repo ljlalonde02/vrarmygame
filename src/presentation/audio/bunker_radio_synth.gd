@@ -381,6 +381,24 @@ func play_tactical_posture_actuate() -> void:
 	_queue_tone(360.0, 460.0, 0.045, 0.12, false)
 
 
+## Sprint 20: Tactical Radar Warning Receiver (RWR) threat lock alert tone
+func play_rwr_threat_lock_tone() -> void:
+	synth_triggers_count += 1
+	if audio_muted:
+		return
+	_queue_tone(850.0, 920.0, 0.05, 0.16, false)
+	_queue_tone(920.0, 850.0, 0.05, 0.16, false)
+
+
+## Sprint 20: Hypersonic atmospheric wave-rider sonic boom / kinetic crack
+func play_hypersonic_mach_boom() -> void:
+	synth_triggers_count += 1
+	if audio_muted:
+		return
+	_queue_tone(180.0, 42.0, 0.08, 0.28, true)
+	_queue_tone(64.0, 24.0, 0.40, 0.22, true)
+
+
 ## Sprint 9: Visceral low-frequency nuclear EMP rumble & static RF blackout
 func play_nuclear_emp_burst() -> void:
 	synth_triggers_count += 1
