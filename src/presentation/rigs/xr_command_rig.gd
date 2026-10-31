@@ -315,6 +315,13 @@ func actuate_wrist_button(btn_id: String) -> String:
 					_wrist_buttons["btn_hq"]["label"].text = "HQ:\n" + s_name
 				return "HQ_SWITCHED_" + s_name
 			return "HQ_SWITCHED_OK"
+		"btn_story_tree":
+			if war_table != null and war_table.has_method("toggle_display_mode"):
+				war_table.toggle_display_mode()
+				var is_tree: bool = war_table.is_story_tree_active()
+				if _wrist_buttons.has("btn_story_tree"):
+					_wrist_buttons["btn_story_tree"]["label"].text = "TREE:\nON" if is_tree else "TREE:\nOFF"
+				return "STORY_TREE_" + ("ON" if is_tree else "OFF")
 	return ""
 
 
@@ -499,6 +506,13 @@ func vr_laser_select_or_actuate(hand: String = "right", additive: bool = false) 
 			tactile_console.actuate_control(hit_ctrl, sel_uid)
 			trigger_haptic_click(hand, 0.75, 0.06)
 			return {"type": "CONSOLE_CONTROL", "target": hit_ctrl}
+
+	# 1.5. Check 3D War Table Campaign Story Tree Nodes & Nation Flags (when in STORY_TREE mode)
+	if war_table != null and war_table.has_method("is_story_tree_active") and war_table.is_story_tree_active():
+		var hit_tree: Dictionary = war_table.pick_story_tree_node_by_ray(orig, dir)
+		if not hit_tree.is_empty():
+			trigger_haptic_click(hand, 0.75, 0.05)
+			return hit_tree
 
 	if war_table == null or sim_server == null:
 		return {"type": "NONE"}

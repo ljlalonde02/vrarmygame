@@ -10,6 +10,7 @@ extends Node3D
 const VisualSyncScript := preload("res://src/presentation/war_table/visual_sync_controller.gd")
 const StrikePreviewScript := preload("res://src/presentation/war_table/strike_preview_renderer.gd")
 const CivilianDensitySystemScript := preload("res://src/sim_core/systems/civilian_density_system.gd")
+const CampaignStoryTreeSystemScript := preload("res://src/sim_core/systems/campaign_story_tree_system.gd")
 
 const TABLE_SIZE_M := 1.80
 const THEATER_SIZE_KM := 500.0
@@ -41,6 +42,18 @@ var is_floor_mode: bool = false
 var _threat_domes_root: Node3D = null
 var _site_labels_root: Node3D = null
 var _planetary_globe_root: Node3D = null
+
+enum DisplayMode {
+	TACTICAL_MAP,
+	CAMPAIGN_STORY_TREE,
+}
+
+var current_display_mode: DisplayMode = DisplayMode.TACTICAL_MAP
+var story_tree_system: RefCounted = null
+var _story_tree_root: Node3D = null
+var _story_tree_nodes_root: Node3D = null
+var _story_tree_nation_cards_root: Node3D = null
+var _story_tree_info_slate: Label3D = null
 
 
 func set_floor_mode(enabled: bool) -> void:
@@ -314,6 +327,8 @@ func _setup_controllers() -> void:
 
 
 func _rebuild_strategic_site_markers_and_domes() -> void:
+	if _threat_domes_root == null or _site_labels_root == null:
+		return
 	for c in _threat_domes_root.get_children():
 		c.queue_free()
 	for c in _site_labels_root.get_children():
@@ -599,6 +614,19 @@ func _apply_shader_zoom_and_pan() -> void:
 		var sel_id: int = visual_sync.selected_unit_id if visual_sync != null else -1
 		sim_server.set_sim_focus(pan_offset_km, zoom_scale, sel_id)
 
+	if current_display_mode == DisplayMode.CAMPAIGN_STORY_TREE:
+		if _planetary_globe_root != null:
+			_planetary_globe_root.visible = false
+		if terrain_mesh_instance != null:
+			terrain_mesh_instance.visible = false
+		if _site_labels_root != null:
+			_site_labels_root.visible = false
+		if _threat_domes_root != null:
+			_threat_domes_root.visible = false
+		if visual_sync != null:
+			visual_sync.visible = false
+		return
+
 	var globe_mode: bool = (zoom_scale < 0.42)
 	if _planetary_globe_root != null:
 		_planetary_globe_root.visible = globe_mode
@@ -814,3 +842,403 @@ func pick_units_in_sphere_world(center_world: Vector3, radius_world_m: float) ->
 		if world_pos.distance_squared_to(center_world) <= rad_sq:
 			result.append(uid)
 	return result
+
+
+func is_story_tree_active() -> bool:
+	return current_display_mode == DisplayMode.CAMPAIGN_STORY_TREE
+
+
+func set_display_mode(mode: DisplayMode) -> void:
+	current_display_mode = mode
+	if mode == DisplayMode.CAMPAIGN_STORY_TREE:
+		if terrain_mesh_instance != null:
+			terrain_mesh_instance.visible = false
+		if _threat_domes_root != null:
+			_threat_domes_root.visible = false
+		if _site_labels_root != null:
+			_site_labels_root.visible = false
+		if visual_sync != null:
+			visual_sync.visible = false
+		if _planetary_globe_root != null:
+			_planetary_globe_root.visible = false
+		_show_story_tree()
+	else:
+		if terrain_mesh_instance != null:
+			terrain_mesh_instance.visible = true
+		if _threat_domes_root != null:
+			_threat_domes_root.visible = true
+		if _site_labels_root != null:
+			_site_labels_root.visible = true
+		if visual_sync != null:
+			visual_sync.visible = true
+		_hide_story_tree()
+
+
+func toggle_display_mode() -> DisplayMode:
+	if current_display_mode == DisplayMode.TACTICAL_MAP:
+		set_display_mode(DisplayMode.CAMPAIGN_STORY_TREE)
+	else:
+		set_display_mode(DisplayMode.TACTICAL_MAP)
+	return current_display_mode
+
+
+func _ensure_story_tree_system() -> void:
+	if story_tree_system == null:
+		var sdb: Node = sim_server.sim_db_ref if (sim_server != null and "sim_db_ref" in sim_server) else null
+		story_tree_system = CampaignStoryTreeSystemScript.new(sdb, "usa")
+
+
+func _show_story_tree() -> void:
+	_ensure_story_tree_system()
+	if _story_tree_root == null:
+		_story_tree_root = Node3D.new()
+		_story_tree_root.name = "HoloStoryTreeRoot"
+		add_child(_story_tree_root)
+		_story_tree_root.position = Vector3(0.0, 0.15, 0.0)
+	_story_tree_root.visible = true
+	_build_story_tree_hologram()
+
+
+func _hide_story_tree() -> void:
+	if _story_tree_root != null:
+		_story_tree_root.visible = false
+
+
+func _build_story_tree_hologram() -> void:
+	if _story_tree_root == null or story_tree_system == null:
+		return
+
+	for child in _story_tree_root.get_children():
+		child.queue_free()
+
+	var sdb: Node = sim_server.sim_db_ref if (sim_server != null and "sim_db_ref" in sim_server) else null
+	if sdb == null:
+		return
+
+	var current_nat_slug: String = String(story_tree_system.current_nation_slug)
+	var current_node_slug: String = String(story_tree_system.current_node_slug)
+
+	# 0. Holographic Ground Grid Floor
+	var floor_mi := MeshInstance3D.new()
+	floor_mi.name = "StoryTreeHoloFloor"
+	var floor_plane := PlaneMesh.new()
+	floor_plane.size = Vector2(1.86, 1.86)
+	floor_mi.mesh = floor_plane
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	floor_mat.albedo_color = Color(0.015, 0.025, 0.045, 0.96)
+	floor_mi.material_override = floor_mat
+	floor_mi.position = Vector3(0.0, -0.005, 0.0)
+	_story_tree_root.add_child(floor_mi)
+
+	# 1. Header Banner
+	var header := Label3D.new()
+	header.text = "STRATEGIC THEATER COMMAND // SOVEREIGN CAMPAIGN TREE"
+	header.font_size = 20
+	header.pixel_size = 0.00075
+	header.modulate = Color(0.2, 0.85, 1.0, 0.95)
+	header.outline_modulate = Color.BLACK
+	header.outline_size = 4
+	header.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	header.position = Vector3(0.0, 0.52, -0.42)
+	_story_tree_root.add_child(header)
+
+	# 2. Nation Selector Cards in a curved ergonomic arc along front edge
+	_story_tree_nation_cards_root = Node3D.new()
+	_story_tree_nation_cards_root.name = "NationCards"
+	_story_tree_root.add_child(_story_tree_nation_cards_root)
+	_story_tree_nation_cards_root.position = Vector3(0.0, 0.12, 0.48)
+
+	var nations: Array[Dictionary] = sdb.get_campaign_nations()
+	var nat_spacing := 0.25
+	var start_x := -float(nations.size() - 1) * 0.5 * nat_spacing
+
+	for idx in range(nations.size()):
+		var n_dict: Dictionary = nations[idx]
+		var n_slug := String(n_dict.get("slug", ""))
+		var is_active := (n_slug == current_nat_slug)
+
+		var card := Node3D.new()
+		card.name = "NationCard_" + n_slug
+		var x_pos := start_x + float(idx) * nat_spacing
+		var z_curve := absf(x_pos) * 0.08
+		card.position = Vector3(x_pos, 0.0, z_curve)
+		card.rotation.y = -x_pos * 0.25
+		card.rotation.x = deg_to_rad(-20.0)
+		card.set_meta("nation_slug", n_slug)
+		_story_tree_nation_cards_root.add_child(card)
+
+		# Card Body (Frosted Slate Holographic Glass)
+		var body_mi := MeshInstance3D.new()
+		var body_box := BoxMesh.new()
+		body_box.size = Vector3(0.22, 0.28, 0.012)
+		body_mi.mesh = body_box
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.04, 0.14, 0.24, 0.95) if is_active else Color(0.02, 0.04, 0.08, 0.88)
+		mat.roughness = 0.25
+		mat.metallic = 0.45
+		if is_active:
+			mat.emission_enabled = true
+			mat.emission = Color(0.15, 0.75, 1.0)
+			mat.emission_energy_multiplier = 0.8
+		body_mi.material_override = mat
+		card.add_child(body_mi)
+
+		# Flag Texture Quad
+		var flag_path := "res://assets/ui/flags/%s.png" % n_slug
+		var flag_tex: Texture2D = null
+		if ResourceLoader.exists(flag_path):
+			flag_tex = load(flag_path)
+		elif FileAccess.file_exists("c:/dev/vrarmygame/assets/ui/flags/%s.png" % n_slug):
+			var f_img := Image.new()
+			f_img.load("c:/dev/vrarmygame/assets/ui/flags/%s.png" % n_slug)
+			flag_tex = ImageTexture.create_from_image(f_img)
+
+		if flag_tex != null:
+			var flag_mi := MeshInstance3D.new()
+			var flag_quad := QuadMesh.new()
+			flag_quad.size = Vector2(0.18, 0.10)
+			flag_mi.mesh = flag_quad
+			var f_mat := StandardMaterial3D.new()
+			f_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			f_mat.albedo_texture = flag_tex
+			flag_mi.material_override = f_mat
+			flag_mi.position = Vector3(0.0, 0.065, 0.008)
+			card.add_child(flag_mi)
+
+		# Country Name Label
+		var lbl_title := Label3D.new()
+		lbl_title.text = String(n_dict.get("country_name", "")).to_upper()
+		lbl_title.font_size = 11
+		lbl_title.pixel_size = 0.00055
+		lbl_title.modulate = Color(1.0, 0.9, 0.2) if is_active else Color(0.85, 0.9, 0.95)
+		lbl_title.outline_modulate = Color.BLACK
+		lbl_title.outline_size = 3
+		lbl_title.position = Vector3(0.0, -0.005, 0.008)
+		card.add_child(lbl_title)
+
+		# Doctrine & Status Label
+		var lbl_doctrine := Label3D.new()
+		lbl_doctrine.text = "[%s] $%dM\n%s" % [
+			n_dict.get("iso_code", ""),
+			int(n_dict.get("budget_musd", 0)),
+			"★ ACTIVE COMMAND" if is_active else "CLICK TO SELECT"
+		]
+		lbl_doctrine.font_size = 10
+		lbl_doctrine.pixel_size = 0.00050
+		lbl_doctrine.modulate = Color(0.2, 0.95, 0.5) if is_active else Color(0.65, 0.75, 0.85)
+		lbl_doctrine.outline_modulate = Color.BLACK
+		lbl_doctrine.outline_size = 2
+		lbl_doctrine.position = Vector3(0.0, -0.075, 0.008)
+		card.add_child(lbl_doctrine)
+
+	# 3. 3D Story Nodes for active nation
+	_story_tree_nodes_root = Node3D.new()
+	_story_tree_nodes_root.name = "StoryNodes"
+	_story_tree_root.add_child(_story_tree_nodes_root)
+
+	var nodes_data: Array[Dictionary] = sdb.get_campaign_story_nodes_for_nation(current_nat_slug)
+	var node_coords: Dictionary = {
+		1: [Vector3(0.0, 0.08, 0.16)],
+		2: [Vector3(-0.35, 0.18, -0.04), Vector3(0.0, 0.18, -0.04), Vector3(0.35, 0.18, -0.04)],
+		3: [Vector3(-0.48, 0.28, -0.25), Vector3(-0.16, 0.28, -0.25), Vector3(0.16, 0.28, -0.25), Vector3(0.48, 0.28, -0.25)]
+	}
+
+	var act1_nodes: Array[Dictionary] = []
+	var act2_nodes: Array[Dictionary] = []
+	var act3_nodes: Array[Dictionary] = []
+	for nd in nodes_data:
+		var a: int = int(nd.get("act_number", 1))
+		if a == 1:
+			act1_nodes.append(nd)
+		elif a == 2:
+			act2_nodes.append(nd)
+		else:
+			act3_nodes.append(nd)
+
+	var node_instances_by_slug: Dictionary = {}
+
+	# Create Act 1
+	for i in range(mini(act1_nodes.size(), node_coords[1].size())):
+		var nd: Dictionary = act1_nodes[i]
+		var inst = _spawn_story_node_3d(nd, node_coords[1][i], current_node_slug)
+		node_instances_by_slug[String(nd.get("slug", ""))] = inst
+
+	# Create Act 2
+	for i in range(mini(act2_nodes.size(), node_coords[2].size())):
+		var nd: Dictionary = act2_nodes[i]
+		var inst = _spawn_story_node_3d(nd, node_coords[2][i], current_node_slug)
+		node_instances_by_slug[String(nd.get("slug", ""))] = inst
+
+	# Create Act 3
+	for i in range(mini(act3_nodes.size(), node_coords[3].size())):
+		var nd: Dictionary = act3_nodes[i]
+		var inst = _spawn_story_node_3d(nd, node_coords[3][i], current_node_slug)
+		node_instances_by_slug[String(nd.get("slug", ""))] = inst
+
+	# 4. Connecting Laser Lines
+	for nd in nodes_data:
+		var from_slug := String(nd.get("slug", ""))
+		if not node_instances_by_slug.has(from_slug):
+			continue
+		var from_pos: Vector3 = (node_instances_by_slug[from_slug] as Node3D).position
+		var edges: Array = sdb.get_campaign_story_edges_from(from_slug)
+		for e in edges:
+			var to_slug := String(e.get("to_node_slug", ""))
+			if node_instances_by_slug.has(to_slug):
+				var to_pos: Vector3 = (node_instances_by_slug[to_slug] as Node3D).position
+				var edge_col: Color = Color(0.2, 0.8, 1.0, 0.45)
+				if from_slug == current_node_slug:
+					edge_col = Color(1.0, 0.8, 0.2, 0.8)
+				_create_story_line(_story_tree_nodes_root, from_pos, to_pos, edge_col)
+
+	# 5. Information Briefing Slate (OPORD & TV Headline of current node)
+	var active_node: Dictionary = sdb.get_campaign_story_node(current_node_slug)
+	if not active_node.is_empty():
+		_story_tree_info_slate = Label3D.new()
+		_story_tree_info_slate.text = "ACTIVE MISSION: %s\nOPORD: %s\nTV NEWS: %s" % [
+			active_node.get("chapter_title", ""),
+			active_node.get("situation_briefing", ""),
+			active_node.get("chyron_headline", "")
+		]
+		_story_tree_info_slate.font_size = 11
+		_story_tree_info_slate.pixel_size = 0.00055
+		_story_tree_info_slate.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_story_tree_info_slate.width = 1600.0
+		_story_tree_info_slate.modulate = Color(0.9, 0.95, 1.0, 0.95)
+		_story_tree_info_slate.outline_modulate = Color.BLACK
+		_story_tree_info_slate.outline_size = 3
+		_story_tree_info_slate.position = Vector3(0.0, 0.42, -0.38)
+		_story_tree_info_slate.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_story_tree_root.add_child(_story_tree_info_slate)
+
+
+func _spawn_story_node_3d(node_dict: Dictionary, pos: Vector3, active_node_slug: String) -> Node3D:
+	var slug := String(node_dict.get("slug", ""))
+	var is_active := (slug == active_node_slug)
+	var is_climax := int(node_dict.get("is_terminal_climax", 0)) == 1
+
+	var mi := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(0.24, 0.05, 0.10)
+	mi.mesh = box
+
+	var mat := StandardMaterial3D.new()
+	var col := Color(1.0, 0.75, 0.1) if is_active else (Color(0.2, 0.7, 1.0) if is_climax else Color(0.2, 0.8, 0.4))
+	mat.albedo_color = col * 0.7
+	mat.emission_enabled = true
+	mat.emission = col
+	mat.emission_energy_multiplier = 1.2 if is_active else 0.5
+	mi.material_override = mat
+	mi.position = pos
+	mi.set_meta("story_node_slug", slug)
+	_story_tree_nodes_root.add_child(mi)
+
+	var lbl := Label3D.new()
+	lbl.text = "%s\n%s" % [node_dict.get("chapter_title", ""), "★ CURRENT" if is_active else "CLICK TO INSPECT"]
+	lbl.font_size = 10
+	lbl.pixel_size = 0.00060
+	lbl.modulate = Color(1.0, 0.9, 0.3) if is_active else Color.WHITE
+	lbl.outline_modulate = Color.BLACK
+	lbl.outline_size = 3
+	lbl.position = Vector3(0.0, 0.045, 0.0)
+	lbl.rotation.x = deg_to_rad(-25.0)
+	mi.add_child(lbl)
+
+	return mi
+
+
+func _create_story_line(parent: Node3D, from: Vector3, to: Vector3, col: Color) -> void:
+	var im := ImmediateMesh.new()
+	im.surface_begin(Mesh.PRIMITIVE_LINES)
+	im.surface_add_vertex(from)
+	im.surface_add_vertex(to)
+	im.surface_end()
+
+	var mi := MeshInstance3D.new()
+	mi.mesh = im
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = col
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mi.material_override = mat
+	parent.add_child(mi)
+
+
+func select_campaign_nation(nation_slug: String) -> bool:
+	_ensure_story_tree_system()
+	if story_tree_system == null:
+		return false
+	var ok: bool = story_tree_system.select_nation(nation_slug)
+	if ok and is_story_tree_active():
+		_build_story_tree_hologram()
+	return ok
+
+
+func launch_story_node_scenario(node_slug: String) -> bool:
+	var sdb: Node = sim_server.sim_db_ref if (sim_server != null and "sim_db_ref" in sim_server) else null
+	if sdb == null:
+		return false
+	var node_dict: Dictionary = sdb.get_campaign_story_node(node_slug)
+	if node_dict.is_empty():
+		return false
+	var sc_slug := String(node_dict.get("scenario_slug", ""))
+	if sc_slug.is_empty() or sim_server == null:
+		return false
+
+	sim_server.load_scenario(sc_slug)
+	bind_sim_server(sim_server)
+	set_display_mode(DisplayMode.TACTICAL_MAP)
+	return true
+
+
+func _safe_node3d_world_pos(n: Node3D) -> Vector3:
+	if n == null:
+		return Vector3.ZERO
+	if n.is_inside_tree():
+		return n.global_position
+	var pos := n.position
+	var p := n.get_parent()
+	while p != null and p is Node3D:
+		pos += (p as Node3D).position
+		p = p.get_parent()
+	return pos
+
+
+func pick_story_tree_node_by_ray(ray_origin_world: Vector3, ray_dir_world: Vector3) -> Dictionary:
+	if not is_story_tree_active() or _story_tree_root == null:
+		return {}
+
+	var dir_n := ray_dir_world.normalized()
+
+	# 1. Check Nation Selector Cards
+	if _story_tree_nation_cards_root != null:
+		for card in _story_tree_nation_cards_root.get_children():
+			if card is Node3D and card.has_meta("nation_slug"):
+				var wpos: Vector3 = _safe_node3d_world_pos(card as Node3D)
+				var to_pt := wpos - ray_origin_world
+				var proj := to_pt.dot(dir_n)
+				if proj > 0.05:
+					var closest := ray_origin_world + dir_n * proj
+					if wpos.distance_to(closest) < 0.12:
+						var n_slug := String(card.get_meta("nation_slug"))
+						select_campaign_nation(n_slug)
+						return {"type": "NATION_SELECTED", "nation": n_slug}
+
+	# 2. Check 3D Story Tree Nodes
+	if _story_tree_nodes_root != null:
+		for node_mi in _story_tree_nodes_root.get_children():
+			if node_mi is Node3D and node_mi.has_meta("story_node_slug"):
+				var wpos: Vector3 = _safe_node3d_world_pos(node_mi as Node3D)
+				var to_pt := wpos - ray_origin_world
+				var proj := to_pt.dot(dir_n)
+				if proj > 0.05:
+					var closest := ray_origin_world + dir_n * proj
+					if wpos.distance_to(closest) < 0.14:
+						var n_slug := String(node_mi.get_meta("story_node_slug"))
+						var sdb: Node = sim_server.sim_db_ref if (sim_server != null and "sim_db_ref" in sim_server) else null
+						var node_data: Dictionary = sdb.get_campaign_story_node(n_slug) if sdb != null else {}
+						return {"type": "STORY_NODE_SELECTED", "node_slug": n_slug, "node_data": node_data}
+
+	return {}
+

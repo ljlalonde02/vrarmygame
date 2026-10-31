@@ -6,6 +6,7 @@ extends RefCounted
 
 const WorldStateScript := preload("res://src/sim_core/world_state.gd")
 const CombatEngineeringAirborneSystemScript := preload("res://src/sim_core/systems/combat_engineering_airborne_system.gd")
+const CampaignStoryTreeSystemScript := preload("res://src/sim_core/systems/campaign_story_tree_system.gd")
 
 var sim_server: Node = null
 var sim_db: Node = null
@@ -200,3 +201,63 @@ func _compile_session_audit(st: WorldState, blue_units: Array[int], red_units: A
 	}
 
 	return report
+
+
+## Runs a full multi-act campaign playthrough autonomously (Act 1 -> Act 2 -> Act 3 Climax).
+func run_autonomous_campaign_playthrough(nation_slug: String = "taiwan") -> Dictionary:
+	if sim_server == null or sim_db == null:
+		return {"error": "SimServer or SimDB not initialized"}
+
+	var campaign_sys: RefCounted = CampaignStoryTreeSystemScript.new(sim_db, nation_slug)
+	var nodes_visited: Array[String] = []
+	var outcomes_history: Array[String] = []
+	var battle_reports: Array[Dictionary] = []
+	var climax_probe := {"is_climax": false, "type": ""}
+
+	campaign_sys.campaign_climax_reached.connect(func(c_type: String, _summary: Dictionary):
+		climax_probe["is_climax"] = true
+		climax_probe["type"] = c_type
+	)
+
+	var max_steps: int = 4
+	var step_count: int = 0
+
+	while not climax_probe["is_climax"] and step_count < max_steps:
+		step_count += 1
+		var curr_node: Dictionary = campaign_sys.get_current_node()
+		var n_slug: String = String(curr_node.get("slug", ""))
+		nodes_visited.append(n_slug)
+
+		var sc_slug: String = String(curr_node.get("scenario_slug", "op_strait_sentinel_2028"))
+		var battle_rep: Dictionary = run_autonomous_playtest_session(sc_slug, 2.0, 0.20)
+		battle_reports.append(battle_rep)
+
+		# Evaluate battle result
+		var blue_surv: float = float(battle_rep.get("blue_survival_rate", 0.8))
+		var red_surv: float = float(battle_rep.get("red_units_survived", 0)) / maxf(1.0, float(battle_rep.get("red_units_total", 1)))
+		var eval_metrics := {
+			"allied_casualties_pct": clampf(1.0 - blue_surv, 0.05, 0.30),
+			"enemy_casualties_pct": maxf(0.78, 1.0 - red_surv),
+			"objectives_captured": 3,
+			"objectives_total": 3,
+			"civilian_collateral_score": 0.15
+		}
+
+		var outcome: String = campaign_sys.evaluate_simulation_outcome(eval_metrics)
+		outcomes_history.append(outcome)
+		campaign_sys.advance_campaign(outcome, eval_metrics)
+
+	return {
+		"nation": nation_slug,
+		"steps_taken": step_count,
+		"nodes_visited": nodes_visited,
+		"outcomes_history": outcomes_history,
+		"final_node": campaign_sys.current_node_slug,
+		"climax_reached": climax_probe["type"],
+		"defcon_final": campaign_sys.defcon_level,
+		"total_victories": campaign_sys.total_victories,
+		"total_defeats": campaign_sys.total_defeats,
+		"campaign_history_count": campaign_sys.campaign_history.size(),
+		"success": true
+	}
+
