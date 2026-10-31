@@ -82,6 +82,9 @@ class SnapshotData extends RefCounted:
 	var recent_impacts: Array[Dictionary] = []
 	var queued_strikes: Array[Dictionary] = []
 	var active_cbrn_hazards: Array[Dictionary] = []
+	var active_towed_decoys: Array[Dictionary] = []
+	var active_chaff_clouds: Array[Dictionary] = []
+	var active_gps_denial_zones: Array[Dictionary] = []
 	var blue_lost_musd: float = 0.0
 	var red_lost_musd: float = 0.0
 	var lod_tier0_count: int = 0
@@ -177,6 +180,9 @@ class SnapshotData extends RefCounted:
 		recent_impacts = state.recent_impacts.duplicate(true)
 		queued_strikes = state.queued_strikes.duplicate(true)
 		active_cbrn_hazards = state.active_cbrn_hazards.duplicate(true)
+		active_towed_decoys = state.active_towed_decoys.duplicate(true)
+		active_chaff_clouds = state.active_chaff_clouds.duplicate(true)
+		active_gps_denial_zones = state.active_gps_denial_zones.duplicate(true)
 		blue_lost_musd = state.blue_lost_musd
 		red_lost_musd = state.red_lost_musd
 		lod_tier0_count = state.lod_tier0_count

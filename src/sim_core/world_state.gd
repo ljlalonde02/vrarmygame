@@ -27,6 +27,8 @@ const AI_EVASIVE_DEFENSIVE := 3
 const AI_UNMANNED_ASSAULT := 4
 const AI_SHOOT_AND_SCOOT := 5
 const AI_RTB_RESUPPLY := 6
+const AI_BOUNDING_OVERWATCH := 7
+const AI_FLANKING_PINCER := 8
 
 const TACTICAL_POSTURE_AUTO := 0
 const TACTICAL_POSTURE_BVR_STANDOFF := 1
@@ -229,6 +231,9 @@ var active_countermeasures: Array[Dictionary] = [] # Sprint 6: {unit_id, pos_km,
 var active_radar_tracks: Array[Dictionary] = []    # Sprint 6: {radar_uid, target_uid, radar_pos, target_pos, cone_deg, ttl_sec, faction}
 var active_nuke_effects: Array[Dictionary] = []    # Sprint 6: Multi-stage physical nuclear explosion simulation
 var active_cbrn_hazards: Array[Dictionary] = []    # Sprint 16: {type, pos_km, radius_km, ttl_sec, max_ttl_sec, faction}
+var active_towed_decoys: Array[Dictionary] = []    # Sprint 17: {host_uid, pos_km, cable_length_m, rcs_sqm, active, faction}
+var active_chaff_clouds: Array[Dictionary] = []    # Sprint 17: {pos_km, radius_km, ttl_sec, max_ttl_sec, rcs_clutter_sqm, faction}
+var active_gps_denial_zones: Array[Dictionary] = []# Sprint 17: {pos_km, radius_km, ttl_sec, max_ttl_sec, error_drift_m, faction}
 
 # --- Theater Heightmap RAM Grid (512x512 floats in meters) & Active Strategic Sites ---
 var active_theater_slug: String = "strait_theater"
@@ -720,6 +725,9 @@ func reset() -> void:
 	active_nuke_effects.clear()
 	active_sonar_pings.clear()
 	active_cbrn_hazards.clear()
+	active_towed_decoys.clear()
+	active_chaff_clouds.clear()
+	active_gps_denial_zones.clear()
 	tactical_match_active = false
 	match_outcome = "IN_PROGRESS"
 	match_objectives.clear()
@@ -1596,6 +1604,67 @@ func spawn_electromagnetic_hazard(pos_km: Vector3, radius_km: float = 45.0, dura
 	sim_events_queue.append({
 		"type": "cbrn_strike",
 		"hazard_type": "ELECTROMAGNETIC",
+		"pos_km": pos_km,
+		"radius_km": radius_km,
+		"faction": faction
+	})
+
+
+## Sprint 17 EW Countermeasures: Deploy Towed Radar Decoy (AN/ALE-50 / Sky Buzzer)
+func deploy_towed_decoy(host_uid: int, cable_length_m: float = 120.0, rcs_sqm: float = 45.0) -> int:
+	if host_uid < 0 or host_uid >= unit_count or unit_active[host_uid] == 0:
+		return -1
+	var host_pos := unit_pos[host_uid]
+	var hdg := unit_heading_rad[host_uid]
+	var trail_dir := Vector3(-sin(hdg), 0.0, -cos(hdg))
+	var decoy_pos := host_pos + trail_dir * (cable_length_m * 0.001)
+	var decoy_dict := {
+		"host_uid": host_uid,
+		"pos_km": decoy_pos,
+		"cable_length_m": cable_length_m,
+		"rcs_sqm": rcs_sqm,
+		"active": true,
+		"faction": unit_faction[host_uid]
+	}
+	active_towed_decoys.append(decoy_dict)
+	sim_events_queue.append({
+		"type": "towed_decoy_deployed",
+		"host_uid": host_uid,
+		"pos_km": decoy_pos
+	})
+	return active_towed_decoys.size() - 1
+
+
+## Sprint 17 EW Countermeasures: Dispense Chaff Radar Clutter Cloud
+func deploy_chaff_cloud(pos_km: Vector3, radius_km: float = 3.5, duration_sec: float = 45.0, faction: int = 0) -> void:
+	active_chaff_clouds.append({
+		"pos_km": pos_km,
+		"radius_km": radius_km,
+		"ttl_sec": duration_sec,
+		"max_ttl_sec": duration_sec,
+		"rcs_clutter_sqm": 85.0,
+		"faction": faction
+	})
+	sim_events_queue.append({
+		"type": "chaff_deployed",
+		"pos_km": pos_km,
+		"radius_km": radius_km,
+		"faction": faction
+	})
+
+
+## Sprint 17 EW Countermeasures: Deploy GPS Denial Bubble
+func deploy_gps_denial_zone(pos_km: Vector3, radius_km: float = 35.0, duration_sec: float = 300.0, faction: int = 0) -> void:
+	active_gps_denial_zones.append({
+		"pos_km": pos_km,
+		"radius_km": radius_km,
+		"ttl_sec": duration_sec,
+		"max_ttl_sec": duration_sec,
+		"error_drift_m": 450.0,
+		"faction": faction
+	})
+	sim_events_queue.append({
+		"type": "gps_denial_deployed",
 		"pos_km": pos_km,
 		"radius_km": radius_km,
 		"faction": faction

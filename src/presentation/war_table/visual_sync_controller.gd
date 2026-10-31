@@ -1945,6 +1945,55 @@ func sync_visuals() -> void:
 					beams_immediate.surface_add_vertex(p1_m)
 				drew_any_line = true
 
+	# Sprint 17: Draw EW Countermeasures (Towed Decoys, Chaff Clouds, GPS Denial Zones)
+	for dec in curr_snap.active_towed_decoys:
+		if not bool(dec.get("active", false)):
+			continue
+		var h_uid: int = int(dec.get("host_uid", -1))
+		var d_pos: Vector3 = dec.get("pos_km", Vector3.ZERO)
+		var d_loc: Vector3 = war_table.theater_km_to_table_local(d_pos)
+		if absf(d_loc.x) > 0.95 or absf(d_loc.z) > 0.95:
+			continue
+		if h_uid >= 0 and h_uid < curr_snap.unit_count and curr_snap.unit_active[h_uid] == 1:
+			var h_loc: Vector3 = war_table.theater_km_to_table_local(curr_snap.unit_pos[h_uid])
+			# Tether line
+			beams_immediate.surface_set_color(Color(1.0, 0.85, 0.25, 0.70))
+			beams_immediate.surface_add_vertex(h_loc)
+			beams_immediate.surface_add_vertex(d_loc)
+			# Decoy cross-beacon
+			beams_immediate.surface_set_color(Color(0.35, 1.0, 0.85, 0.95))
+			beams_immediate.surface_add_vertex(d_loc + Vector3(-0.006, 0.0, 0.0))
+			beams_immediate.surface_add_vertex(d_loc + Vector3(0.006, 0.0, 0.0))
+			beams_immediate.surface_add_vertex(d_loc + Vector3(0.0, -0.006, 0.0))
+			beams_immediate.surface_add_vertex(d_loc + Vector3(0.0, 0.006, 0.0))
+			drew_any_line = true
+
+	for ch in curr_snap.active_chaff_clouds:
+		var ch_loc: Vector3 = war_table.theater_km_to_table_local(ch.get("pos_km", Vector3.ZERO))
+		if absf(ch_loc.x) > 0.95 or absf(ch_loc.z) > 0.95:
+			continue
+		var ch_r := (float(ch.get("radius_km", 3.5)) / WarTable.THEATER_SIZE_KM) * WarTable.TABLE_SIZE_M * zoom
+		beams_immediate.surface_set_color(Color(0.88, 0.92, 1.0, 0.55))
+		for seg in range(12):
+			var a0 := float(seg) * TAU / 12.0
+			var a1 := float(seg + 1) * TAU / 12.0
+			beams_immediate.surface_add_vertex(ch_loc + Vector3(cos(a0) * ch_r, 0.002, sin(a0) * ch_r))
+			beams_immediate.surface_add_vertex(ch_loc + Vector3(cos(a1) * ch_r, 0.002, sin(a1) * ch_r))
+		drew_any_line = true
+
+	for gz in curr_snap.active_gps_denial_zones:
+		var gz_loc: Vector3 = war_table.theater_km_to_table_local(gz.get("pos_km", Vector3.ZERO))
+		if absf(gz_loc.x) > 0.95 or absf(gz_loc.z) > 0.95:
+			continue
+		var gz_r := (float(gz.get("radius_km", 35.0)) / WarTable.THEATER_SIZE_KM) * WarTable.TABLE_SIZE_M * zoom
+		beams_immediate.surface_set_color(Color(1.0, 0.70, 0.15, 0.75))
+		for seg in range(24):
+			var a0 := float(seg) * TAU / 24.0
+			var a1 := float(seg + 1) * TAU / 24.0
+			beams_immediate.surface_add_vertex(gz_loc + Vector3(cos(a0) * gz_r, 0.004, sin(a0) * gz_r))
+			beams_immediate.surface_add_vertex(gz_loc + Vector3(cos(a1) * gz_r, 0.004, sin(a1) * gz_r))
+		drew_any_line = true
+
 	# Draw Sprint 6 Active Countermeasure Flares (blooming decoy stars behind aircraft)
 	if not is_globe_mode and sim_server != null:
 		for cm in sim_server.world_state.active_countermeasures:

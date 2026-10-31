@@ -556,6 +556,50 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 
 		i_cbrn += 1
 
+	# Sprint 17: Step Active EW Countermeasures (Towed Decoys, Chaff Clouds, GPS Denial Zones)
+	# 1. Update Towed Decoys
+	for dec in state.active_towed_decoys:
+		if not bool(dec.get("active", false)):
+			continue
+		var h_uid: int = int(dec.get("host_uid", -1))
+		if h_uid < 0 or h_uid >= n_units or u_active[h_uid] == 0:
+			dec["active"] = false
+			continue
+		var h_pos: Vector3 = u_pos[h_uid]
+		var h_hdg: float = state.unit_heading_rad[h_uid] if h_uid < state.unit_heading_rad.size() else 0.0
+		var c_len: float = float(dec.get("cable_length_m", 120.0))
+		var trail_v := Vector3(-sin(h_hdg), 0.0, -cos(h_hdg)) * (c_len * 0.001)
+		dec["pos_km"] = h_pos + trail_v
+
+	# 2. Update Chaff Clouds
+	var i_chaff := 0
+	while i_chaff < state.active_chaff_clouds.size():
+		var ch: Dictionary = state.active_chaff_clouds[i_chaff]
+		ch["ttl_sec"] = float(ch.get("ttl_sec", 45.0)) - dt
+		if float(ch["ttl_sec"]) <= 0.0:
+			state.active_chaff_clouds.remove_at(i_chaff)
+		else:
+			i_chaff += 1
+
+	# 3. Update GPS Denial Zones & Apply munition targeting drift
+	var i_gps := 0
+	while i_gps < state.active_gps_denial_zones.size():
+		var gz: Dictionary = state.active_gps_denial_zones[i_gps]
+		gz["ttl_sec"] = float(gz.get("ttl_sec", 300.0)) - dt
+		if float(gz["ttl_sec"]) <= 0.0:
+			state.active_gps_denial_zones.remove_at(i_gps)
+		else:
+			var gz_pos: Vector3 = gz.get("pos_km", Vector3.ZERO)
+			var gz_rad: float = float(gz.get("radius_km", 35.0))
+			var gz_rad_sq := gz_rad * gz_rad
+			for m in range(state.mun_count):
+				if state.mun_active[m] == 1:
+					var mpos := state.mun_pos[m]
+					var dist_sq := (mpos.x - gz_pos.x) * (mpos.x - gz_pos.x) + (mpos.z - gz_pos.z) * (mpos.z - gz_pos.z)
+					if dist_sq <= gz_rad_sq:
+						state.mun_jammed[m] = 1
+			i_gps += 1
+
 
 static func _apply_damage_to_unit(state: WorldState, sim_db: Node, uid: int, raw_damage: float) -> void:
 	if uid < 0 or uid >= state.unit_count or state.unit_active[uid] == 0:

@@ -14,7 +14,9 @@ enum FormationType {
 	DEFILE_COLUMN = 1,
 	RIDGE_HULL_DOWN = 2,
 	CSG_RING = 3,
-	AIR_FINGER_FOUR = 4
+	AIR_FINGER_FOUR = 4,
+	BOUNDING_OVERWATCH = 5,
+	FLANKING_PINCER = 6
 }
 
 
@@ -98,6 +100,24 @@ static func compute_formation_offset(
 					local_offset = Vector3(2.6 * spacing_scale, 450.0, -1.2 * spacing_scale)
 				3: # Element Wingman #4 (Stepped back right, +700m)
 					local_offset = Vector3(4.5 * spacing_scale, 700.0, -3.2 * spacing_scale)
+
+		FormationType.BOUNDING_OVERWATCH:
+			# Alternating Base of Fire (trailing stationary element) and Bounding Element (pushed forward)
+			var is_bounding := (unit_idx % 2 == 1)
+			var side_sign := 1.0 if (unit_idx % 4 < 2) else -1.0
+			var lat := side_sign * (2.4 + float(unit_idx / 2) * 1.8) * spacing_scale
+			var lon := (3.8 if is_bounding else -2.2) * spacing_scale
+			local_offset = Vector3(lat, 0.0, lon)
+
+		FormationType.FLANKING_PINCER:
+			# Unit 0 is pinning center, Unit 1 is left hook, Unit 2 is right hook, subsequent follow flanks
+			if unit_idx == 0:
+				local_offset = Vector3(0.0, 0.0, 0.0)
+			else:
+				var is_right_pincer := (unit_idx % 2 == 0)
+				var hook_x := (5.8 * spacing_scale) if is_right_pincer else (-5.8 * spacing_scale)
+				var hook_z := (2.5 - float(unit_idx / 2) * 1.5) * spacing_scale
+				local_offset = Vector3(hook_x, 0.0, hook_z)
 
 	# Rotate horizontal offset by group facing heading
 	var rotated_x := local_offset.x * cos(facing_heading_rad) + local_offset.z * sin(facing_heading_rad)
