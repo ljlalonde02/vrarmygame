@@ -18,6 +18,7 @@ const SignalBusScript := preload("res://src/autoloads/signal_bus.gd")
 const SimServerScript := preload("res://src/sim_core/sim_server.gd")
 const WarTableScene := preload("res://src/presentation/war_table/war_table.tscn")
 const TactileConsoleScript := preload("res://src/presentation/bunker/hardware/tactile_console.gd")
+const NationSelectorConsoleScript := preload("res://src/presentation/bunker/hardware/nation_selector_console_3d.gd")
 const ReconDossierScript := preload("res://src/presentation/bunker/recon_dossier_panel.gd")
 const BunkerMainMenuScript := preload("res://src/presentation/bunker/bunker_main_menu.gd")
 const TutorialControllerScript := preload("res://src/presentation/bunker/tutorial_controller.gd")
@@ -39,6 +40,7 @@ var signal_bus: Node = null
 var sim_server: Node = null
 var war_table: Node3D = null
 var tactile_console: Node3D = null
+var nation_selector: Node3D = null
 var recon_dossier: CanvasLayer = null
 var main_menu: CanvasLayer = null
 var tutorial_controller: CanvasLayer = null
@@ -151,6 +153,20 @@ func initialize_bunker(p_sim_db: Node = null, p_cmd_bus: Node = null, p_sig_bus:
 	if tactile_console._iads_lever_pivot == null:
 		tactile_console._ready()
 	tactile_console.setup(sim_server, command_bus, signal_bus, radio_synth)
+
+	# 6b. Instantiate Diegetic 3D Superpower Nation Selector Pedestal
+	nation_selector = NationSelectorConsoleScript.new()
+	nation_selector.name = "NationSelectorConsole3D"
+	nation_selector.position = Vector3(1.35, 0.0, 0.35)
+	nation_selector.rotation_degrees = Vector3(0.0, -35.0, 0.0)
+	add_child(nation_selector)
+	nation_selector.setup(sim_db)
+	nation_selector.nation_selected.connect(func(slug: String, data: Dictionary):
+		if sim_server != null and sim_server.world_state != null:
+			sim_server.world_state.active_theater_slug = data.get("theater_slug", "strait_theater")
+		if radio_synth != null:
+			radio_synth.play_tactical_posture_actuate()
+	)
 
 	# 7. Instantiate AI Commanders (OpForCommander + TheaterDirector Storyteller)
 	opfor_commander = OpForCommanderScript.new()

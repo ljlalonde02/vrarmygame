@@ -205,7 +205,17 @@ func _on_bunker_game_over(reason: String, _captured: bool) -> void:
 	)
 
 
+## Plays a recognizable two-tone journalistic crisis alert chime (e.g. GNN / BBC alert chime: 587 Hz -> 880 Hz)
+func play_news_broadcast_chime() -> void:
+	synth_triggers_count += 1
+	if audio_muted:
+		return
+	_queue_tone(587.33, 587.33, 0.18, 0.22, false)
+	_queue_tone(880.0, 880.0, 0.26, 0.28, false)
+
+
 func _on_war_news_video_broadcasted(_clip_slug: String, network: String, headline: String, _sub: String, _corr: String, defcon_lvl: int) -> void:
+	play_news_broadcast_chime()
 	var off_id := "FEMALE_AWACS" if (_voice_turn_index % 2 == 0) else "MALE_J3_OPS"
 	_voice_turn_index += 1
 	speak_officer_transmission(

@@ -548,18 +548,20 @@ func _process(delta: float) -> void:
 		_planetary_globe_root.rotation.y += delta * 0.14
 	_apply_shader_zoom_and_pan()
 
-	# US-9.4: Volumetric nuclear shockwave expansion and EMP holographic glitch decay
+	# US-9.4 & US-14.3: Volumetric nuclear shockwave expansion and EMP holographic glitch decay
 	if _nuclear_shockwave_radius > 0.0:
 		_nuclear_shockwave_radius += delta * 0.35
-		_emp_glitch_intensity = maxf(0.0, _emp_glitch_intensity - delta * 0.45)
-		if terrain_material != null:
-			terrain_material.set_shader_parameter("nuclear_det_epicenter_uv", Vector3(_nuclear_epicenter_uv.x, _nuclear_epicenter_uv.y, _nuclear_shockwave_radius))
-			terrain_material.set_shader_parameter("emp_glitch_intensity", _emp_glitch_intensity)
 		if _nuclear_shockwave_radius > 1.4:
 			_nuclear_shockwave_radius = 0.0
 			if terrain_material != null:
 				terrain_material.set_shader_parameter("nuclear_det_epicenter_uv", Vector3(-999.0, -999.0, 0.0))
-				terrain_material.set_shader_parameter("emp_glitch_intensity", 0.0)
+		elif terrain_material != null:
+			terrain_material.set_shader_parameter("nuclear_det_epicenter_uv", Vector3(_nuclear_epicenter_uv.x, _nuclear_epicenter_uv.y, _nuclear_shockwave_radius))
+
+	if _emp_glitch_intensity > 0.0:
+		_emp_glitch_intensity = maxf(0.0, _emp_glitch_intensity - delta * 0.55)
+		if terrain_material != null:
+			terrain_material.set_shader_parameter("emp_glitch_intensity", _emp_glitch_intensity)
 
 
 ## US-9.4: Triggers expanding shockwave ring and EMP distortion on the War Table
@@ -571,6 +573,13 @@ func trigger_nuclear_detonation(epicenter_km: Vector3) -> void:
 	_emp_glitch_intensity = 1.0
 	if terrain_material != null:
 		terrain_material.set_shader_parameter("nuclear_det_epicenter_uv", Vector3(u, v, _nuclear_shockwave_radius))
+		terrain_material.set_shader_parameter("emp_glitch_intensity", _emp_glitch_intensity)
+
+
+## US-14.3: Triggers high-voltage EMP / cyber-warfare electromagnetic glitch & scanline flicker
+func trigger_theater_emp_flicker(intensity: float = 0.85) -> void:
+	_emp_glitch_intensity = clampf(intensity, 0.0, 1.0)
+	if terrain_material != null:
 		terrain_material.set_shader_parameter("emp_glitch_intensity", _emp_glitch_intensity)
 
 
