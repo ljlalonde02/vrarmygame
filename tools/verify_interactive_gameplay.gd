@@ -87,7 +87,8 @@ func _run_interactive_audit() -> void:
 	# Capture Test 1 visual
 	for w in range(2):
 		await process_frame
-	var img1 := root.get_texture().get_image()
+	var tex1 := root.get_texture()
+	var img1 := tex1.get_image() if tex1 != null else null
 	_save_both(img1, "gameplay_01_friendly_vs_enemy_selection.png")
 	test_results["test1_selection"] = {
 		"blue_uid": blue_uid,
@@ -116,8 +117,10 @@ func _run_interactive_audit() -> void:
 		positions_over_time.append(ws.unit_pos[blue_uid])
 		for w in range(2):
 			await process_frame
-		var frame_img := root.get_texture().get_image()
-		frame_img.save_png("%s/play_move_frame_%02d.png" % [TEMP_DIR, frame_idx])
+		var ftex := root.get_texture()
+		var frame_img := ftex.get_image() if ftex != null else null
+		if frame_img != null:
+			frame_img.save_png("%s/play_move_frame_%02d.png" % [TEMP_DIR, frame_idx])
 		if frame_idx == 4:
 			_save_both(frame_img, "gameplay_02_unit_reaction_and_speed.png")
 
@@ -160,8 +163,10 @@ func _run_interactive_audit() -> void:
 			enemy_retaliated = true
 		for w in range(2):
 			await process_frame
-		var frame_img := root.get_texture().get_image()
-		frame_img.save_png("%s/play_enemy_frame_%02d.png" % [TEMP_DIR, frame_idx])
+		var etex := root.get_texture()
+		var frame_img := etex.get_image() if etex != null else null
+		if frame_img != null:
+			frame_img.save_png("%s/play_enemy_frame_%02d.png" % [TEMP_DIR, frame_idx])
 		if frame_idx == 4:
 			_save_both(frame_img, "gameplay_03_enemy_counter_reaction.png")
 
@@ -210,8 +215,10 @@ func _run_interactive_audit() -> void:
 			sim_server.step_tick(0.1)
 		for w in range(2):
 			await process_frame
-		var frame_img := root.get_texture().get_image()
-		frame_img.save_png("%s/play_plat_frame_%02d.png" % [TEMP_DIR, frame_idx])
+		var ptex := root.get_texture()
+		var frame_img := ptex.get_image() if ptex != null else null
+		if frame_img != null:
+			frame_img.save_png("%s/play_plat_frame_%02d.png" % [TEMP_DIR, frame_idx])
 		if frame_idx == 4:
 			_save_both(frame_img, "gameplay_04_helicopter_and_infantry_fidelity.png")
 
@@ -241,6 +248,8 @@ func _run_interactive_audit() -> void:
 
 
 func _save_both(img: Image, filename: String) -> void:
+	if img == null:
+		return
 	var media_path := "%s/%s" % [MEDIA_DIR, filename]
 	var art_path := "%s/%s" % [ARTIFACT_DIR, filename]
 	img.save_png(media_path)
