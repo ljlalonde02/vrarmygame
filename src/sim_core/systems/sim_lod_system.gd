@@ -8,13 +8,15 @@ extends RefCounted
 
 
 static func create_cs_kernel() -> Object:
+	if not Engine.has_singleton("GodotSharp"):
+		return null
+	if ClassDB.class_exists("SimLodKernel"):
+		return ClassDB.instantiate("SimLodKernel")
 	var cs_path := "res://src/sim_core/cs/SimLodKernel.cs"
 	if ResourceLoader.exists(cs_path):
 		var script_res = load(cs_path)
 		if script_res != null and script_res.can_instantiate():
 			return script_res.new()
-	if ClassDB.class_exists("SimLodKernel"):
-		return ClassDB.instantiate("SimLodKernel")
 	return null
 
 
