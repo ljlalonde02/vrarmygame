@@ -95,6 +95,9 @@ static func get_platform_nuance(slug: String) -> Dictionary:
 ## Executes Swarm Intelligence tick across all hierarchical units (Flights, Platoons, Packs, Wolfpacks).
 ## Coordinates target distribution, multi-axis flanking, and bait-and-hook tactics.
 static func step_swarm_intelligence(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: float) -> void:
+	if grid == null or (state.tick_id % 3) != 0:
+		return
+
 	var n_units := state.unit_count
 	var u_act := state.unit_active
 	var u_ech := state.unit_echelon
@@ -126,24 +129,22 @@ static func step_swarm_intelligence(state: WorldState, sim_db: Node, grid: Spati
 		var enemy_fac: int = WorldState.FACTION_RED if fac == WorldState.FACTION_BLUE else WorldState.FACTION_BLUE
 		var lead_pos: Vector3 = u_pos[lead_uid]
 
-		# 1. Swarm Sensor Fusion: Find all hostile targets detected by ANY swarm member within 85 km
+		# 1. Swarm Sensor Fusion: Query hostile targets near lead element (up to 8 targets)
+		var found_cnt := grid.query_enemy_units_into_scratch(enemy_fac, lead_pos.x, lead_pos.z, 75.0)
+		if found_cnt == 0:
+			continue
+
+		var s_uids := grid.scratch_uids
 		var target_scratch: Array[int] = []
-		for m_uid in members:
-			var m_pos: Vector3 = u_pos[m_uid]
-			var found_cnt := grid.query_enemy_units_into_scratch(enemy_fac, m_pos.x, m_pos.z, 75.0)
-			var s_uids := grid.scratch_uids
-			for s_i in range(found_cnt):
-				var h_uid: int = s_uids[s_i]
-				if u_act[h_uid] == 1 and not target_scratch.has(h_uid):
-					target_scratch.append(h_uid)
+		var max_t := mini(found_cnt, 8)
+		for s_i in range(max_t):
+			var h_uid: int = s_uids[s_i]
+			if u_act[h_uid] == 1:
+				target_scratch.append(h_uid)
 
 		if target_scratch.is_empty():
 			continue # No shared targets, swarm maintains cruising formation
 
-		# Sort targets by distance to swarm center
-		target_scratch.sort_custom(func(a: int, b: int):
-			return lead_pos.distance_squared_to(u_pos[a]) < lead_pos.distance_squared_to(u_pos[b])
-		)
 
 		# 2. Deconflict Targets & Assign Multi-Axis Flanking Vectors
 		var num_targets := target_scratch.size()

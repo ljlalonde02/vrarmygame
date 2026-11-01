@@ -98,6 +98,8 @@ var _tv_news_anim_time: float = 0.0
 var _tv_channel_index: int = 0
 var _zoom_echelon_label: Label = null
 var _time_status_btn: Button = null
+var _hud_throttle_timer: float = 0.0
+
 
 
 func _ready() -> void:
@@ -1668,8 +1670,14 @@ func _process(delta: float) -> void:
 		if _zoom_echelon_label != null:
 			_zoom_echelon_label.text = "ZOOM: %.2fx [%s]" % [war_table.zoom_scale, ech_str]
 
+	_hud_throttle_timer += delta
+	if _hud_throttle_timer < 0.10:
+		return
+	_hud_throttle_timer = 0.0
+
 	if subordinate_staff != null and _staff_sitrep_label != null:
 		_staff_sitrep_label.text = subordinate_staff.last_sitrep_text
+
 
 	if sim_server != null and _top_ledger_label != null:
 		var st: WorldState = sim_server.world_state

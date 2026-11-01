@@ -51,7 +51,9 @@ var _worker_task_id: int = -1
 var _fow_texture: ImageTexture = null
 var _infra_texture: ImageTexture = null
 var _fow_update_counter: int = 0
+var _last_cached_destroyed_count: int = -1
 var _last_news_video_sim_sec: float = -999.0
+
 
 var sim_db_ref: Node = null
 var command_bus_ref: Node = null
@@ -525,12 +527,12 @@ func _process(delta: float) -> void:
 
 	_tick_accumulator += delta * world_state.time_scale
 	var is_mobile_vr := OS.has_feature("android")
-	var max_steps_per_frame := 1 if is_mobile_vr else 6
+	var max_steps_per_frame := 1 if is_mobile_vr else 2
 	var step_dt := BASE_TICK_DT
 	if world_state.time_scale > 15.0:
 		step_dt = clampf(BASE_TICK_DT * (world_state.time_scale / 12.0), BASE_TICK_DT, 15.0)
-	if is_mobile_vr and _tick_accumulator > step_dt * 1.5:
-		_tick_accumulator = step_dt
+	if _tick_accumulator > step_dt * 1.5:
+		_tick_accumulator = step_dt * 1.5
 	var steps := 0
 	while _tick_accumulator >= step_dt and steps < max_steps_per_frame:
 		_tick_accumulator -= step_dt
@@ -569,34 +571,45 @@ func step_tick(dt: float = BASE_TICK_DT) -> void:
 	SimLodSystemScript.update_sim_lod_tiers(world_state, cs_kernel)
 	KinematicsSystem.step(world_state, sim_db_ref, dt)
 	spatial_grid.rebuild(world_state)
-	if not is_mobile_vr or (world_state.tick_id % 2) == 0:
-		ElectronicWarfareSystem.step(world_state, sim_db_ref, spatial_grid)
-		SensorLoSSystem.step(world_state, sim_db_ref, spatial_grid, cs_kernel)
+	ElectronicWarfareSystem.step(world_state, sim_db_ref, spatial_grid)
+	SensorLoSSystem.step(world_state, sim_db_ref, spatial_grid, cs_kernel)
 	UnitTacticalAISystemScript.step(world_state, sim_db_ref, spatial_grid, dt)
 	SwarmIntelligenceSystemScript.step_swarm_intelligence(world_state, sim_db_ref, spatial_grid, dt)
-	if not is_mobile_vr or (world_state.tick_id % 3) == 1:
-		LogisticsSystemScript.step(world_state, sim_db_ref, spatial_grid, dt)
-		TerrainInfrastructureSystemScript.step(world_state, sim_db_ref, dt)
+
+	# Stagger secondary non-realtime subsystems across ticks to maintain rock-solid 60+ FPS
+	var t_mod10 := world_state.tick_id % 10
+	if t_mod10 == 1 or t_mod10 == 6:
+		LogisticsSystemScript.step(world_state, sim_db_ref, spatial_grid, dt * 5.0)
+	if t_mod10 == 3:
+		TerrainInfrastructureSystemScript.step(world_state, sim_db_ref, dt * 10.0)
 	SalvoCombatSystem.step(world_state, sim_db_ref, spatial_grid, dt)
 	SimLodSystemScript.step_macro_echelons(world_state, cs_kernel, dt)
 	StrategicMddSystemScript.step(world_state, sim_db_ref, cs_kernel, dt)
-	CivilianTrafficConvoySystemScript.step(world_state, sim_db_ref, dt)
-	SubterraneanTunnelSystemScript.step(world_state, sim_db_ref, dt)
+	if (world_state.tick_id % 5) == 2:
+		CivilianTrafficConvoySystemScript.step(world_state, sim_db_ref, dt * 5.0)
+	if (world_state.tick_id % 5) == 4:
+		SubterraneanTunnelSystemScript.step(world_state, sim_db_ref, dt * 5.0)
 	CemaElectronicWarfareSystemScript.step(world_state, dt)
-	CombatEngineeringAirborneSystemScript.step(world_state, dt)
-	HomefrontEconomySystemScript.step(world_state, dt)
-	NuclearSubmarineSystemScript.step(world_state, sim_db_ref, dt)
-	if not is_mobile_vr or (world_state.tick_id % 4) == 2:
-		CivilianDensitySystemScript.step(world_state, cs_kernel, dt)
-	GlobalOrbatSystemScript.step_global_orbat(world_state, dt)
-	BudgetTechSystemScript.step(world_state, sim_db_ref, dt)
+	if (world_state.tick_id % 3) == 0:
+		CombatEngineeringAirborneSystemScript.step(world_state, dt * 3.0)
+	if t_mod10 == 5:
+		HomefrontEconomySystemScript.step(world_state, dt * 10.0)
+	if (world_state.tick_id % 3) == 1:
+		NuclearSubmarineSystemScript.step(world_state, sim_db_ref, dt * 3.0)
+	if t_mod10 == 2:
+		CivilianDensitySystemScript.step(world_state, cs_kernel, dt * 10.0)
+	if t_mod10 == 8:
+		GlobalOrbatSystemScript.step_global_orbat(world_state, dt * 10.0)
+	if t_mod10 == 7:
+		BudgetTechSystemScript.step(world_state, sim_db_ref, dt * 10.0)
 	if defcon_escalation_system != null:
 		defcon_escalation_system.step(world_state, dt)
 	CoordinatedStrikeSystemScript.step_combined_arms_synergy(world_state, sim_db_ref, spatial_grid, dt)
-	DiplomacySystemScript.step(world_state, sim_db_ref, dt)
-	red_phone_hotline_system.step(world_state, sim_db_ref, dt)
+	if t_mod10 == 9:
+		DiplomacySystemScript.step(world_state, sim_db_ref, dt * 10.0)
+		red_phone_hotline_system.step(world_state, sim_db_ref, dt * 10.0)
 	_last_news_video_sim_sec = WarNewsVideoSystemScript.evaluate_and_broadcast_events(world_state, sim_db_ref, prev_news_metrics, _last_news_video_sim_sec)
-	if not is_mobile_vr and (world_state.tick_id % 15) == 0:
+	if not is_mobile_vr and (world_state.tick_id % 25) == 0:
 		WarNewsVideoSystemScript.poll_live_gemini_json(world_state, sim_db_ref)
 	EchelonClusterSystem.step(world_state)
 
@@ -605,12 +618,13 @@ func step_tick(dt: float = BASE_TICK_DT) -> void:
 	if not is_mobile_vr or (world_state.tick_id % 10) == 0:
 		replay_recorder.record_keyframe(world_state)
 
-	# 4. Periodically update global FoW/Threat texture (every 5 ticks on PC, every 30 ticks on standalone VR)
+	# 4. Periodically update global FoW/Threat texture (every 20 ticks on PC, every 30 ticks on standalone VR)
 	_fow_update_counter += 1
-	var fow_interval := 30 if is_mobile_vr else 5
+	var fow_interval := 30 if is_mobile_vr else 20
 	if _fow_update_counter >= fow_interval and not use_worker_thread:
 		_fow_update_counter = 0
 		_update_fow_global_texture()
+
 
 
 func scrub_replay_ratio(ratio: float) -> void:
@@ -1355,7 +1369,7 @@ func cleanup() -> void:
 func _update_fow_global_texture() -> void:
 	if sim_db_ref == null:
 		return
-	var fow_res := 64 if OS.has_feature("android") else 128
+	var fow_res := 64
 	var img := SensorLoSSystem.build_fow_threat_image(world_state, sim_db_ref, fow_res)
 	if _fow_texture == null:
 		_fow_texture = ImageTexture.create_from_image(img)
@@ -1363,13 +1377,16 @@ func _update_fow_global_texture() -> void:
 		_fow_texture.update(img)
 	RenderingServer.global_shader_parameter_set("fow_threat_map", _fow_texture)
 
-	if _infra_texture == null or world_state.active_destroyed_cells_count > 0 or not OS.has_feature("android"):
+	var cur_destr: int = world_state.active_destroyed_cells_count
+	if _infra_texture == null or cur_destr != _last_cached_destroyed_count:
+		_last_cached_destroyed_count = cur_destr
 		var infra_img := TerrainInfrastructureSystemScript.build_infra_image(world_state)
 		if _infra_texture == null:
 			_infra_texture = ImageTexture.create_from_image(infra_img)
 		else:
 			_infra_texture.update(infra_img)
 		RenderingServer.global_shader_parameter_set("terrain_infra_map", _infra_texture)
+
 
 
 ## Spawns Army Group scale reinforcements across the 2,000x2,000km theater up to `target_unit_count` (e.g., 5,000–12,000+ units)

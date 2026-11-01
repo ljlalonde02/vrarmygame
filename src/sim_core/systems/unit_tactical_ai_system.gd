@@ -47,6 +47,10 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 			if state.unit_player_override_timer[uid] <= 0.0 and uid < state.unit_delegated_ai.size():
 				state.unit_delegated_ai[uid] = 1
 
+		# 5 Hz tactical decision rate: alternate even and odd UIDs across ticks (halves compute overhead)
+		if tick > 0 and ((uid + tick) & 1) != 0:
+			continue
+
 		var lod_tier: int = u_lod[uid] if has_lod else WorldState.LOD_TIER_0_MICRO
 		if lod_tier == WorldState.LOD_TIER_2_MACRO and ((tick + uid) & 3) != 0:
 			continue
@@ -69,28 +73,31 @@ static func step(state: WorldState, sim_db: Node, grid: SpatialHashGrid, dt: flo
 		var threat: float = 0.0
 		var closest_mun_pos := Vector3.ZERO
 		var has_incoming_missile := false
-		var m_cnt := grid.query_enemy_munitions_into_scratch(enemy_fac, pos.x, pos.z, 28.0)
-		var s_mids := grid.scratch_mids
-		for m_idx in range(m_cnt):
-			var mid: int = s_mids[m_idx]
-			if state.mun_active[mid] == 1:
-				var m_pos: Vector3 = state.mun_pos[mid]
-				var dx := pos.x - m_pos.x
-				var dz := pos.z - m_pos.z
-				var d_sq := dx * dx + dz * dz
-				if state.mun_target_unit_id[mid] == uid or d_sq < 196.0:
-					var d_km := sqrt(d_sq)
-					threat = maxf(threat, clampf(1.0 - (d_km / 28.0), 0.35, 1.0))
-					closest_mun_pos = m_pos
-					has_incoming_missile = true
-					break
+		var n_enemy_muns := grid.active_red_muns if enemy_fac == WorldState.FACTION_RED else grid.active_blue_muns
+		if n_enemy_muns > 0:
+			var m_cnt := grid.query_enemy_munitions_into_scratch(enemy_fac, pos.x, pos.z, 28.0)
+			var s_mids := grid.scratch_mids
+			for m_idx in range(m_cnt):
+				var mid: int = s_mids[m_idx]
+				if state.mun_active[mid] == 1:
+					var m_pos: Vector3 = state.mun_pos[mid]
+					var dx := pos.x - m_pos.x
+					var dz := pos.z - m_pos.z
+					var d_sq := dx * dx + dz * dz
+					if state.mun_target_unit_id[mid] == uid or d_sq < 196.0:
+						var d_km := sqrt(d_sq)
+						threat = maxf(threat, clampf(1.0 - (d_km / 28.0), 0.35, 1.0))
+						closest_mun_pos = m_pos
+						has_incoming_missile = true
+						break
 
 		var hp_ratio := state.unit_hp[uid] / maxf(1.0, state.unit_max_hp[uid])
 		if hp_ratio < 0.45:
 			threat = maxf(threat, 0.75)
 
-		# Zero-allocation scan of hostile units within 70 km
-		var u_cnt := grid.query_enemy_units_into_scratch(enemy_fac, pos.x, pos.z, 70.0)
+		# Zero-allocation scan of hostile units (Air/SAM scan 70 km, ground units scan 25 km)
+		var scan_r: float = 70.0 if (dom_id == 1 or (flg & (flag_sam | flag_fighter)) != 0) else 25.0
+		var u_cnt := grid.query_enemy_units_into_scratch(enemy_fac, pos.x, pos.z, scan_r)
 		var s_uids := grid.scratch_uids
 		var nearest_enemy_uid: int = -1
 		var nearest_enemy_d_sq: float = 4900.0
