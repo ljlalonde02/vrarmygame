@@ -1311,9 +1311,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func _get_active_selection_list() -> Array[int]:
 	if not selected_unit_ids.is_empty():
 		return selected_unit_ids
+	var res: Array[int] = []
 	if selected_unit_id >= 0:
-		return [selected_unit_id]
-	return []
+		res.append(selected_unit_id)
+	return res
 
 
 func set_sim_time_scale(new_scale: float) -> void:
@@ -1350,8 +1351,12 @@ func trigger_live_ai_tv_report() -> void:
 func _perform_box_selection(screen_rect: Rect2, additive: bool = false) -> void:
 	if camera == null or war_table == null or sim_server == null:
 		return
+	if not camera.is_inside_tree() or not war_table.is_inside_tree():
+		return
 	var st: WorldState = sim_server.world_state
-	var newly_selected: Array[int] = selected_unit_ids.duplicate() if additive else []
+	var newly_selected: Array[int] = []
+	if additive:
+		newly_selected.append_array(selected_unit_ids)
 	for uid in range(st.unit_count):
 		if st.unit_active[uid] == 0 or st.unit_faction[uid] != WorldState.FACTION_BLUE or st.unit_echelon[uid] != WorldState.ECHELON_COMPANY:
 			continue

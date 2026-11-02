@@ -110,10 +110,11 @@ func enqueue_set_tactical_posture(unit_ids: Array, posture: int) -> void:
 ## Called exclusively by `SimServer` at the start of each 10 Hz simulation tick.
 func drain_commands(current_tick_id: int) -> Array[Dictionary]:
 	_mutex.lock()
+	var drained: Array[Dictionary] = []
 	if _pending_commands.is_empty():
 		_mutex.unlock()
-		return []
-	var drained: Array[Dictionary] = _pending_commands.duplicate(true)
+		return drained
+	drained.append_array(_pending_commands)
 	_pending_commands.clear()
 	for cmd in drained:
 		var log_entry := cmd.duplicate(true)
@@ -125,7 +126,8 @@ func drain_commands(current_tick_id: int) -> Array[Dictionary]:
 
 func get_replay_log() -> Array[Dictionary]:
 	_mutex.lock()
-	var copy := _replay_log.duplicate(true)
+	var copy: Array[Dictionary] = []
+	copy.append_array(_replay_log)
 	_mutex.unlock()
 	return copy
 
